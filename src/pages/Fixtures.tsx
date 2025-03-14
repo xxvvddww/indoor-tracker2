@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -97,18 +98,37 @@ const Fixtures = () => {
   const totalPages = Math.max(1, Math.ceil(sortedDates.length / itemsPerPage));
 
   const sortDivisions = (divisionNames: string[]): string[] => {
-    const sortOrder: Record<string, number> = {
-      "Division 1": 1,
-      "Division 2": 2,
-      "Division 3": 3,
-      "No Division": 999
+    // First, separate "Div X" and other divisions
+    const divisionGroups: Record<string, string[]> = {
+      numbered: [],
+      other: []
     };
-    
-    return divisionNames.sort((a, b) => {
-      const orderA = sortOrder[a] || (a.startsWith("Division") ? parseInt(a.replace("Division", "").trim()) : 500);
-      const orderB = sortOrder[b] || (b.startsWith("Division") ? parseInt(b.replace("Division", "").trim()) : 500);
-      return orderA - orderB;
+
+    divisionNames.forEach(div => {
+      if (div.startsWith("Div") || div.startsWith("Division")) {
+        divisionGroups.numbered.push(div);
+      } else {
+        divisionGroups.other.push(div);
+      }
     });
+
+    // Sort numbered divisions
+    divisionGroups.numbered.sort((a, b) => {
+      // Extract division number
+      const getNumber = (name: string) => {
+        if (name.startsWith("Division")) {
+          return parseInt(name.replace("Division", "").trim());
+        } else if (name.startsWith("Div")) {
+          return parseInt(name.replace("Div", "").trim());
+        }
+        return 999; // Fallback
+      };
+      
+      return getNumber(a) - getNumber(b);
+    });
+
+    // Sort other divisions and concatenate results
+    return [...divisionGroups.numbered, ...divisionGroups.other.sort()];
   };
 
   const getFixturesByDivision = (dateFixtures: Fixture[]) => {
@@ -155,55 +175,41 @@ const Fixtures = () => {
     window.scrollTo(0, 0);
   };
 
-  const resultColumns = [
-    {
-      key: "HomeTeam",
-      header: "Home",
-      className: "text-left w-1/3",
-      render: (value: string, row: Fixture) => (
-        <span className={cn(
-          "text-[0.65rem] whitespace-nowrap",
-          row.HomeTeamWon && "text-green-500 dark:text-green-400 font-medium"
-        )}>
-          {value || 'TBD'}
-        </span>
-      )
-    },
-    {
-      key: "vs",
-      header: "",
-      className: "w-6 text-center px-0",
-      render: () => <span className="text-[0.65rem] text-muted-foreground">vs</span>
-    },
-    {
-      key: "AwayTeam",
-      header: "Away",
-      className: "text-left w-1/3",
-      render: (value: string, row: Fixture) => (
-        <span className={cn(
-          "text-[0.65rem] whitespace-nowrap",
-          row.AwayTeamWon && "text-green-500 dark:text-green-400 font-medium"
-        )}>
-          {value || 'TBD'}
-        </span>
-      )
-    },
-    {
-      key: "Result",
-      header: "Result",
-      className: "w-16 text-right",
-      render: (value: string, row: Fixture) => (
-        <div className="flex items-center justify-end gap-0.5">
-          <span className="text-[0.65rem] whitespace-nowrap">
-            {row.HomeTeamScore}-{row.AwayTeamScore}
+  const renderFixtureRow = (fixture: Fixture) => {
+    return (
+      <tr key={fixture.Id} className="border-b border-gray-800 last:border-0">
+        <td className="py-1.5 px-1 text-left w-1/3">
+          <span className={cn(
+            "team-name",
+            fixture.HomeTeamWon && "team-winner"
+          )}>
+            {fixture.HomeTeam || 'TBD'}
           </span>
-          <Link to={`/match/${row.Id}`} className="text-primary ml-0.5">
-            <ArrowUpRight className="h-2.5 w-2.5" />
-          </Link>
-        </div>
-      )
-    }
-  ];
+        </td>
+        <td className="py-1.5 px-0 text-center w-6">
+          <span className="vs-text">vs</span>
+        </td>
+        <td className="py-1.5 px-1 text-left w-1/3">
+          <span className={cn(
+            "team-name",
+            fixture.AwayTeamWon && "team-winner"
+          )}>
+            {fixture.AwayTeam || 'TBD'}
+          </span>
+        </td>
+        <td className="py-1.5 px-1 text-right w-16">
+          <div className="flex items-center justify-end gap-0.5">
+            <span className="score-display">
+              {fixture.HomeTeamScore}-{fixture.AwayTeamScore}
+            </span>
+            <Link to={`/match/${fixture.Id}`} className="text-primary ml-0.5">
+              <ArrowUpRight className="h-2.5 w-2.5" />
+            </Link>
+          </div>
+        </td>
+      </tr>
+    );
+  };
 
   return (
     <MainLayout>
@@ -256,9 +262,9 @@ const Fixtures = () => {
                             key={date}
                             open={!!openDateSections[date]}
                             onOpenChange={() => toggleDateSection(date)}
-                            className="border border-gray-800 rounded-md overflow-hidden"
+                            className="date-section"
                           >
-                            <CollapsibleTrigger className="w-full flex justify-between items-center p-1.5 bg-background/50 hover:bg-background/70">
+                            <CollapsibleTrigger className="date-header w-full">
                               <div className="flex items-center">
                                 <Calendar className="h-3 w-3 text-primary mr-1.5" />
                                 <span className="font-semibold text-xs">{date}</span>
@@ -272,32 +278,32 @@ const Fixtures = () => {
                                 {sortedDivisions.map(division => {
                                   const divisionKey = `${date}-${division}`;
                                   const isOpen = openDivisionSections[divisionKey] !== false;
+                                  const divisionText = division.startsWith("Division") 
+                                    ? `Div ${division.replace("Division", "").trim()}`
+                                    : division;
                                   
                                   return (
                                     <Collapsible 
                                       key={divisionKey}
                                       open={isOpen}
                                       onOpenChange={() => toggleDivisionSection(divisionKey)}
-                                      className="border border-gray-800/60 rounded mx-1 overflow-hidden"
+                                      className="division-section"
                                     >
-                                      <CollapsibleTrigger className="w-full flex justify-between items-center p-1 bg-gray-900/40 hover:bg-gray-900/60">
+                                      <CollapsibleTrigger className="division-header w-full">
                                         <div className="flex items-center">
                                           <Shield className="h-2.5 w-2.5 text-primary mr-1" />
-                                          <span className="font-medium text-[0.7rem]">{division}</span>
+                                          <span className="font-medium text-[0.7rem]">{divisionText}</span>
                                         </div>
                                         <Badge variant="outline" className="h-3.5 text-[0.6rem] py-0 px-1.5">
                                           {fixturesByDivision[division].length}
                                         </Badge>
                                       </CollapsibleTrigger>
                                       <CollapsibleContent>
-                                        <ResponsiveTable
-                                          data={fixturesByDivision[division]}
-                                          columns={resultColumns}
-                                          keyField="Id"
-                                          resultsMode={true}
-                                          darkMode={true}
-                                          hideHeader={true}
-                                        />
+                                        <table className="results-table">
+                                          <tbody>
+                                            {fixturesByDivision[division].map(fixture => renderFixtureRow(fixture))}
+                                          </tbody>
+                                        </table>
                                       </CollapsibleContent>
                                     </Collapsible>
                                   );
