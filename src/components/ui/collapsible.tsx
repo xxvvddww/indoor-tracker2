@@ -18,7 +18,7 @@ const CollapsibleTrigger = React.forwardRef<
   <CollapsiblePrimitive.Trigger
     ref={ref}
     className={cn(
-      "group flex w-full items-center justify-between px-4 py-2 text-left font-medium transition-all hover:bg-secondary/10 rounded-md",
+      "group flex w-full items-center justify-between transition-all hover:bg-secondary/10 rounded-md",
       className
     )}
     {...props}
@@ -46,7 +46,7 @@ const CollapsibleContent = React.forwardRef<
     )}
     {...props}
   >
-    <div className="p-4 pt-0">{children}</div>
+    <div className={cn("pt-0", className)}>{children}</div>
   </CollapsiblePrimitive.Content>
 ))
 CollapsibleContent.displayName = CollapsiblePrimitive.Content.displayName

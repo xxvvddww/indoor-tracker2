@@ -88,7 +88,7 @@ export function ResponsiveTable({
                 >
                   {column.render 
                     ? column.render(row[column.key], row) 
-                    : row[column.key]}
+                    : <div className="whitespace-nowrap overflow-hidden text-ellipsis">{row[column.key]}</div>}
                 </TableCell>
               ))}
             </TableRow>

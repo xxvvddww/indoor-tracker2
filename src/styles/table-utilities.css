@@ -41,4 +41,21 @@
   .results-table tr:last-child {
     @apply border-b-0;
   }
+  
+  .single-line-cell {
+    @apply whitespace-nowrap overflow-hidden text-ellipsis;
+    max-width: 120px;
+  }
+  
+  .single-line-results td {
+    @apply whitespace-nowrap overflow-hidden;
+  }
+  
+  .division-section {
+    @apply border-t border-gray-800/50 mt-0.5 pt-0.5 first:border-t-0 first:mt-0 first:pt-0;
+  }
+  
+  .division-header {
+    @apply text-[0.65rem] font-medium text-muted-foreground px-2 py-0.5 bg-background/70;
+  }
 }
