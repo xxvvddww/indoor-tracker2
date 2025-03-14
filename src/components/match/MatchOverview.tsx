@@ -30,14 +30,6 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
     }
   }, [displayInfo, matchData]);
 
-  // Show message if we have match data but no meaningful display information
-  const hasNoUsefulInfo = matchData && 
-    (!displayInfo.teams || displayInfo.teams.length === 0) && 
-    !displayInfo.date && 
-    !displayInfo.venue && 
-    !displayInfo.winner && 
-    !displayInfo.manOfMatch;
-
   if (!matchData) {
     return (
       <div className="flex flex-col items-center justify-center p-8 bg-muted/50 rounded-md space-y-2 text-center">
@@ -61,27 +53,44 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
           <div className="space-y-4">
             {/* Match date and venue */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {displayInfo.date && (
+              {displayInfo.date ? (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
                   <span className="text-sm">{displayInfo.date}</span>
                 </div>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm">Date not available</span>
+                </div>
               )}
               
-              {displayInfo.venue && (
+              {displayInfo.venue ? (
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary" />
                   <span className="text-sm">{displayInfo.venue}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-sm">Venue not available</span>
                 </div>
               )}
             </div>
             
             {/* Match result */}
-            {displayInfo.winner && (
+            {displayInfo.winner ? (
               <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
                 <Trophy className="h-4 w-4 text-amber-500" />
                 <p className="text-sm">
                   <span className="font-medium">Winner:</span> {displayInfo.winner}
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
+                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  No result information available
                 </p>
               </div>
             )}

@@ -14,27 +14,23 @@ export const extractTeamsAndWinner = (data: MatchDetails, displayData: Displayab
   // Extract teams first
   const teamsData = extractTeams(data, displayData);
   
-  if (teamsData.length === 0) {
+  if (!teamsData || teamsData.length === 0) {
     console.log("No teams data could be extracted from any source");
     
-    // Use fallback if available from Configuration
-    if (data.Configuration && data.Configuration.Team1Id && data.Configuration.Team2Id) {
-      console.log("Using Configuration for fallback team data");
-      
-      // Add fallback teams from configuration
-      displayData.teams = [
-        {
-          id: data.Configuration.Team1Id,
-          name: `Team 1 (ID: ${data.Configuration.Team1Id})`,
-        },
-        {
-          id: data.Configuration.Team2Id,
-          name: `Team 2 (ID: ${data.Configuration.Team2Id})`,
-        }
-      ];
-      
-      console.log("Added fallback teams from Configuration:", displayData.teams);
-    }
+    // Create fallback teams even if no team data is found
+    // This ensures we always have at least placeholder teams to display
+    displayData.teams = [
+      {
+        id: "team1",
+        name: "Team 1",
+      },
+      {
+        id: "team2",
+        name: "Team 2",
+      }
+    ];
+    
+    console.log("Added fallback teams:", displayData.teams);
     
     // If we have configuration data, try to set a default status
     determineStatusFromConfig(data, displayData);

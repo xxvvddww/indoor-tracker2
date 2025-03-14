@@ -26,8 +26,12 @@ export const extractPlayerStats = (matchData: MatchDetails, displayInfo: Display
     }
   });
   
-  // Call the specialized extractor service
-  extractPlayerStatsFromMatch(matchData, displayInfo);
+  try {
+    // Call the specialized extractor service
+    extractPlayerStatsFromMatch(matchData, displayInfo);
+  } catch (error) {
+    console.error("Error extracting player stats:", error);
+  }
   
   // Add fallback data if no players were found
   let totalPlayers = 0;
