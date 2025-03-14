@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTeams, fetchFixtures, fetchPlayerStats, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
@@ -16,55 +15,47 @@ const Teams = () => {
   const [sortColumn, setSortColumn] = useState('Name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Fetch teams data
   const { data: teams, isLoading: teamsLoading, error: teamsError } = useQuery({
     queryKey: ['teams', DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID],
     queryFn: () => fetchTeams(DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID),
   });
 
-  // Fetch fixtures data to calculate team statistics
   const { data: fixtures, isLoading: fixturesLoading, error: fixturesError } = useQuery({
     queryKey: ['fixtures', DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID],
     queryFn: () => fetchFixtures(DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID),
   });
 
-  // Fetch player stats to determine players per team
   const { data: players, isLoading: playersLoading } = useQuery({
     queryKey: ['playerStats', DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID],
     queryFn: () => fetchPlayerStats(DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID),
   });
 
-  // Team statistics calculation
   const teamStats = useMemo(() => {
     if (!teams || !fixtures || teams.length === 0) return [];
 
     return teams.map(team => {
       try {
-        // Filter fixtures for this team
         const teamFixtures = fixtures.filter(
           fixture => fixture.HomeTeamId === team.Id || fixture.AwayTeamId === team.Id
         );
 
-        // Calculate basic stats
         const totalMatches = teamFixtures.length;
         const completedMatches = teamFixtures.filter(fixture => 
           fixture.CompletionStatus === 'Completed'
         ).length;
 
-        // Wins, losses, and draws
         let wins = 0;
         let losses = 0;
         let draws = 0;
         let skinsWon = 0;
         let lastFiveResults: string[] = [];
 
-        // Track completed matches for last 5
         const completedFixtures = teamFixtures
           .filter(fixture => fixture.CompletionStatus === 'Completed')
           .sort((a, b) => {
             const dateA = new Date(a.Date || '');
             const dateB = new Date(b.Date || '');
-            return dateB.getTime() - dateA.getTime(); // Sort descending
+            return dateB.getTime() - dateA.getTime();
           });
 
         completedFixtures.forEach(fixture => {
@@ -72,14 +63,12 @@ const Teams = () => {
           const homeScore = parseInt(fixture.HomeTeamScore || '0');
           const awayScore = parseInt(fixture.AwayTeamScore || '0');
 
-          // Determine match result
           if (homeScore === awayScore) {
             draws++;
             lastFiveResults.push('D');
           } else if ((isHomeTeam && homeScore > awayScore) || (!isHomeTeam && awayScore > homeScore)) {
             wins++;
             lastFiveResults.push('W');
-            // Assuming a skin is won for each win
             skinsWon++;
           } else {
             losses++;
@@ -87,15 +76,12 @@ const Teams = () => {
           }
         });
 
-        // Get the most recent 5 results (already sorted)
         lastFiveResults = lastFiveResults.slice(0, 5);
 
-        // Calculate win percentage
         const winPercentage = completedMatches > 0 
           ? ((wins / completedMatches) * 100).toFixed(1) 
           : '0.0';
 
-        // Count players for this team
         const teamPlayers = players ? players.filter(
           player => player.TeamName === team.Name
         ).length : 0;
@@ -114,7 +100,6 @@ const Teams = () => {
         };
       } catch (error) {
         console.error(`Error calculating stats for team ${team.Name}:`, error);
-        // Return team with default values if calculation fails
         return {
           ...team,
           totalMatches: 0,
@@ -131,7 +116,6 @@ const Teams = () => {
     });
   }, [teams, fixtures, players]);
 
-  // Filtering teams based on search query
   const filteredTeams = useMemo(() => {
     if (!teamStats || teamStats.length === 0) return [];
     
@@ -141,7 +125,6 @@ const Teams = () => {
     );
   }, [teamStats, searchQuery]);
 
-  // Sorting teams
   const sortedTeams = useMemo(() => {
     if (!filteredTeams || filteredTeams.length === 0) return [];
 
@@ -183,7 +166,6 @@ const Teams = () => {
     });
   }, [filteredTeams, sortColumn, sortDirection]);
 
-  // Toggle sort direction
   const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -193,7 +175,6 @@ const Teams = () => {
     }
   };
 
-  // Render sort indicator
   const renderSortIcon = (column: string) => {
     if (sortColumn !== column) return null;
     return sortDirection === 'asc' 
@@ -201,24 +182,21 @@ const Teams = () => {
       : <ChevronDown className="h-4 w-4 ml-1 inline" />;
   };
 
-  // Render result badge with improved styling
   const renderResultBadge = (result: string) => {
     switch (result) {
       case 'W':
-        return <Badge variant="default" className="bg-green-500 min-w-8 h-8 flex items-center justify-center text-base font-semibold">W</Badge>;
+        return <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">W</div>;
       case 'L':
-        return <Badge variant="outline" className="text-red-500 border-red-500 min-w-8 h-8 flex items-center justify-center text-base font-semibold">L</Badge>;
+        return <div className="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 font-semibold">L</div>;
       case 'D':
-        return <Badge variant="secondary" className="min-w-8 h-8 flex items-center justify-center text-base font-semibold">D</Badge>;
+        return <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold">D</div>;
       default:
-        return <Badge variant="outline" className="min-w-8 h-8 flex items-center justify-center opacity-50">-</Badge>;
+        return <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">-</div>;
     }
   };
 
-  // Check if data is still loading
   const isLoading = teamsLoading || fixturesLoading || playersLoading;
 
-  // Generate mock data for demonstration when API fails
   const mockTeams = [
     { Id: "1", Name: "Marlboro Men", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 5, losses: 2, draws: 1, winPercentage: "62.5", playerCount: 12, skinsWon: 15, lastFiveResults: ["W", "W", "L", "W", "D"] },
     { Id: "2", Name: "Tri-Hards", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 6, losses: 1, draws: 1, winPercentage: "75.0", playerCount: 14, skinsWon: 18, lastFiveResults: ["W", "W", "W", "L", "W"] },
@@ -226,15 +204,12 @@ const Teams = () => {
     { Id: "4", Name: "Cricket Masters", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 7, losses: 1, draws: 0, winPercentage: "87.5", playerCount: 15, skinsWon: 21, lastFiveResults: ["W", "W", "W", "W", "L"] },
   ];
 
-  // Use fixture data directly if teams API fails but fixtures API succeeds
   const useFixturesForTeams = teamsError && !fixturesLoading && fixtures && fixtures.length > 0;
 
-  // Determine which data to display
   const displayTeams = useFixturesForTeams 
-    ? teamStats // Use the stats calculated from fixtures
+    ? teamStats
     : (teamsError ? mockTeams : sortedTeams);
     
-  // Calculate statistics for display
   const totalTeams = useFixturesForTeams 
     ? teamStats.length 
     : (teamsError ? mockTeams.length : (teams?.length || 0));
@@ -263,7 +238,6 @@ const Teams = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Quick Stats Cards */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center space-x-2">
