@@ -39,7 +39,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="w-64 bg-background border-r border-secondary hidden md:block">
         <div className="p-4 border-b border-secondary flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="font-bold text-xl">Seamers Indoor</h1>
+            <h1 className="font-bold text-xl animate-pulse-glow bg-gradient-to-r from-cyan-600 to-purple-800 bg-clip-text text-transparent">Seamers Indoor</h1>
           </div>
           <ThemeToggle />
         </div>
@@ -64,7 +64,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="md:hidden fixed top-0 left-0 right-0 bg-background border-b border-secondary z-20">
         <div className="flex items-center justify-between p-2">
           <div className="flex items-center gap-2">
-            <h1 className="font-bold text-base">Seamers Indoor</h1>
+            <h1 className="font-bold text-base animate-pulse-glow bg-gradient-to-r from-cyan-600 to-purple-800 bg-clip-text text-transparent">Seamers Indoor</h1>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
