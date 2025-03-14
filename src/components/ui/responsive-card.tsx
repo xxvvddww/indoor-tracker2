@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface ResponsiveCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ResponsiveCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: React.ReactNode;
   description?: React.ReactNode;
   footer?: React.ReactNode;
@@ -41,7 +41,7 @@ const ResponsiveCard = React.forwardRef<HTMLDivElement, ResponsiveCardProps>(
         {...props}
       >
         {(title || description) && (
-          <CardHeader className="p-4 md:p-6">
+          <CardHeader className="p-3 md:p-4">
             {title && typeof title === "string" ? (
               <CardTitle className="heading-responsive">{title}</CardTitle>
             ) : (
@@ -56,13 +56,13 @@ const ResponsiveCard = React.forwardRef<HTMLDivElement, ResponsiveCardProps>(
         )}
         
         {children && (
-          <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+          <CardContent className="p-3 pt-0 md:p-4 md:pt-0">
             {children}
           </CardContent>
         )}
         
         {footer && (
-          <CardFooter className="p-4 pt-0 md:p-6 md:pt-0">
+          <CardFooter className="p-3 pt-0 md:p-4 md:pt-0">
             {footer}
           </CardFooter>
         )}
