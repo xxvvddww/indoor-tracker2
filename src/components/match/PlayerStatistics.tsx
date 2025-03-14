@@ -51,9 +51,10 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     Object.values(displayInfo.playerStats).forEach(team => {
       team.players.forEach(player => {
         if (!player.Name.includes("No player statistics") && player.Name !== "Unknown Player") {
-          // We're not adding team names in the combined view as requested
+          // Add team name to each player
           allPlayers.push({
-            ...player
+            ...player,
+            TeamName: team.name
           });
         }
       });
@@ -102,9 +103,11 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       )
     },
     { key: "RS", header: "Runs", hideOnMobile: false },
+    { key: "OB", header: "Overs", hideOnMobile: true },
     { key: "RC", header: "R Con", hideOnMobile: false },
-    { key: "Wkts", header: "W", hideOnMobile: false },
-    { key: "SR", header: "SR", hideOnMobile: false },
+    { key: "Wkts", header: "Wickets", hideOnMobile: false },
+    { key: "SR", header: "S/R", hideOnMobile: true },
+    { key: "Econ", header: "Econ", hideOnMobile: true },
     { key: "C", header: "Contrib", hideOnMobile: false }
   ];
 
@@ -137,7 +140,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   };
 
   return (
-    <div className="space-y-4 px-0">
+    <div className="space-y-4">
       <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
       
       {/* Show teams with player stats */}
@@ -157,6 +160,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
             <Collapsible key={team.id} open={isOpen} onOpenChange={() => toggleTeam(team.id)} className="border rounded-md overflow-hidden mb-4 bg-muted/10">
               <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
                 <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-medium">
                     {team.name}
                     {displayInfo.winnerId === team.id && (
@@ -175,13 +179,13 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
               
               <CollapsibleContent>
                 {hasTeamPlayers ? (
-                  <div className="p-1">
+                  <div className="p-2">
                     <ResponsiveTable 
                       data={teamStats.players} 
                       columns={playerColumns}
                       superCompact={isMobile}
                       ultraCompact={false}
-                      className="mt-0"
+                      className="mt-1"
                       resultsMode
                     />
                   </div>
@@ -201,6 +205,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         <Collapsible open={combinedSectionOpen} onOpenChange={toggleCombined} className="border rounded-md overflow-hidden mb-4 bg-muted/10">
           <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
             <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-medium">Combined Player Statistics</h3>
             </div>
             {combinedSectionOpen ? (
@@ -211,13 +216,13 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
           </CollapsibleTrigger>
           
           <CollapsibleContent>
-            <div className="p-1">
+            <div className="p-2">
               <ResponsiveTable 
                 data={combinedPlayers} 
-                columns={playerColumns.filter(col => col.key !== 'TeamName')}
+                columns={playerColumns}
                 superCompact={isMobile}
                 ultraCompact={false}
-                className="mt-0"
+                className="mt-1"
                 resultsMode
               />
             </div>
