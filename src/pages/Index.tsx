@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -18,7 +19,8 @@ import {
   Info,
   AlertCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Filter
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -127,6 +129,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeStatsTab, setActiveStatsTab] = useState<"batting" | "bowling">("batting");
   const [expandedSection, setExpandedSection] = useState<string | null>("topPlayers");
+  const [activeDivision, setActiveDivision] = useState<string>("all");
   const seasonId = getCurrentSeasonId();
   const isMobile = useIsMobile();
 
@@ -164,11 +167,43 @@ const Index = () => {
     .filter(fixture => fixture.Date === mostRecentDate && fixture.CompletionStatus === "Completed")
     .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
   
-  const topBatsmen = [...players]
+  // Group fixtures by division
+  const fixturesByDivision = recentFixtures.reduce((acc, fixture) => {
+    const division = fixture.DivisionName || 'Other';
+    if (!acc[division]) {
+      acc[division] = [];
+    }
+    acc[division].push(fixture);
+    return acc;
+  }, {} as Record<string, Fixture[]>);
+
+  // Order divisions
+  const orderedDivisions = Object.keys(fixturesByDivision).sort((a, b) => {
+    // Put "Div 1", "Div 2", "Div 3" at the top in that order
+    const divOrder = { "Div 1": 1, "Div 2": 2, "Div 3": 3 };
+    const orderA = divOrder[a] || 99;
+    const orderB = divOrder[b] || 99;
+    return orderA - orderB;
+  });
+  
+  const getFilteredPlayers = () => {
+    let filteredPlayers = [...players];
+    
+    // Filter by division if needed
+    if (activeDivision !== "all") {
+      filteredPlayers = filteredPlayers.filter(player => 
+        player.DivisionName === activeDivision
+      );
+    }
+    
+    return filteredPlayers;
+  };
+  
+  const topBatsmen = getFilteredPlayers()
     .sort((a, b) => parseInt(b.RunsScored) - parseInt(a.RunsScored))
     .slice(0, 5);
     
-  const topBowlers = [...players]
+  const topBowlers = getFilteredPlayers()
     .sort((a, b) => parseInt(b.Wickets) - parseInt(a.Wickets))
     .slice(0, 5);
     
@@ -207,14 +242,37 @@ const Index = () => {
   const mostRunsPlayer = topBatsmen.length > 0 ? topBatsmen[0] : null;
   const mostWicketsPlayer = topBowlers.length > 0 ? topBowlers[0] : null;
 
+  // Get all unique divisions for the filter
+  const allDivisions = Array.from(new Set(players.map(p => p.DivisionName).filter(Boolean)));
+  
   const recentResultsColumns = [
     {
       key: "teams",
       header: "Match",
       render: (value: any, row: Fixture) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-xs">{row.HomeTeam} vs {row.AwayTeam}</span>
-          {row.DivisionName && <span className="text-xxs text-muted-foreground">{row.DivisionName}</span>}
+        <div className={cn(
+          "flex flex-col",
+          row.HomeTeamWon && "text-green-600 dark:text-green-400 font-medium"
+        )}>
+          <span className="text-xs">{row.HomeTeam}</span>
+        </div>
+      ),
+    },
+    {
+      key: "vs",
+      header: "vs",
+      render: () => <span className="text-xs text-muted-foreground">vs</span>,
+      className: "w-6 text-center",
+    },
+    {
+      key: "away",
+      header: "Away",
+      render: (value: any, row: Fixture) => (
+        <div className={cn(
+          "flex flex-col",
+          row.AwayTeamWon && "text-green-600 dark:text-green-400 font-medium"
+        )}>
+          <span className="text-xs">{row.AwayTeam}</span>
         </div>
       ),
     },
@@ -373,39 +431,55 @@ const Index = () => {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="px-0 pb-2">
-                    {recentFixtures.length > 0 ? (
+                    {orderedDivisions.length > 0 ? (
                       <div className="space-y-2">
-                        {compactMode ? (
-                          <ResponsiveTable
-                            data={recentFixtures}
-                            columns={recentResultsColumns}
-                            keyField="Id"
-                            superCompact={true}
-                            darkMode={true}
-                            className="px-2"
-                          />
-                        ) : (
-                          <div className="px-4 space-y-3">
-                            {recentFixtures.map((fixture) => (
-                              <div key={fixture.Id} className="bg-background/30 p-3 rounded-md border">
-                                <p className="text-xs text-muted-foreground">
-                                  {fixture.DivisionName && <span>{fixture.DivisionName}</span>}
-                                </p>
-                                <div className="flex justify-between items-center mt-1">
-                                  <p className="font-medium">
-                                    {fixture.HomeTeam} vs {fixture.AwayTeam}
-                                  </p>
-                                  <Link to={`/match/${fixture.Id}`} className="text-primary">
-                                    <ArrowUpRight className="h-4 w-4" />
-                                  </Link>
-                                </div>
-                                <p className="text-sm mt-1 font-medium">
-                                  {fixture.ScoreDescription || `${fixture.HomeTeamScore} - ${fixture.AwayTeamScore}`}
-                                </p>
+                        {orderedDivisions.map(division => (
+                          <div key={division} className="space-y-2">
+                            <h3 className="text-sm font-semibold px-4 py-1 bg-muted/50">
+                              {division}
+                            </h3>
+                            {compactMode ? (
+                              <ResponsiveTable
+                                data={fixturesByDivision[division]}
+                                columns={recentResultsColumns}
+                                keyField="Id"
+                                superCompact={true}
+                                darkMode={true}
+                                className="px-2"
+                              />
+                            ) : (
+                              <div className="px-4 space-y-3">
+                                {fixturesByDivision[division].map((fixture) => (
+                                  <div key={fixture.Id} className="bg-background/30 p-3 rounded-md border">
+                                    <div className="flex justify-between items-center mt-1">
+                                      <p className={cn(
+                                        "font-medium",
+                                        fixture.HomeTeamWon && "text-green-600 dark:text-green-400"
+                                      )}>
+                                        {fixture.HomeTeam}
+                                      </p>
+                                      <p className="text-muted-foreground mx-2">vs</p>
+                                      <p className={cn(
+                                        "font-medium",
+                                        fixture.AwayTeamWon && "text-green-600 dark:text-green-400"
+                                      )}>
+                                        {fixture.AwayTeam}
+                                      </p>
+                                      <div className="flex items-center ml-4">
+                                        <p className="text-sm font-medium">
+                                          {fixture.ScoreDescription || `${fixture.HomeTeamScore} - ${fixture.AwayTeamScore}`}
+                                        </p>
+                                        <Link to={`/match/${fixture.Id}`} className="text-primary ml-2">
+                                          <ArrowUpRight className="h-4 w-4" />
+                                        </Link>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            )}
                           </div>
-                        )}
+                        ))}
                         <div className="text-center mt-3">
                           <Link 
                             to="/fixtures" 
@@ -443,10 +517,24 @@ const Index = () => {
                       onValueChange={(value) => setActiveStatsTab(value as "batting" | "bowling")}
                       className="w-full"
                     >
-                      <TabsList className="w-full grid grid-cols-2 mb-4">
+                      <TabsList className="w-full grid grid-cols-2 mb-2">
                         <TabsTrigger value="batting">Batting</TabsTrigger>
                         <TabsTrigger value="bowling">Bowling</TabsTrigger>
                       </TabsList>
+                      
+                      <div className="flex items-center gap-2 mb-4">
+                        <Filter className="h-4 w-4 text-muted-foreground" />
+                        <select 
+                          className="text-sm bg-transparent border rounded p-1"
+                          value={activeDivision}
+                          onChange={(e) => setActiveDivision(e.target.value)}
+                        >
+                          <option value="all">All Divisions</option>
+                          {allDivisions.map(div => (
+                            <option key={div} value={div}>{div}</option>
+                          ))}
+                        </select>
+                      </div>
                       
                       <TabsContent value="batting" className="mt-0">
                         <div className="space-y-2">
@@ -455,10 +543,13 @@ const Index = () => {
                               "flex items-center justify-between p-3 rounded-lg",
                               index === 0 ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800" :
                               index === 1 ? "bg-slate-50 dark:bg-slate-900/20 border border-slate-200 dark:border-slate-800" :
+                              index === 2 ? "bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800" :
                               "bg-background border"
                             )}>
                               <div className="flex items-center">
                                 {index === 0 && <Trophy className="h-4 w-4 text-amber-500 mr-1" />}
+                                {index === 1 && <Trophy className="h-4 w-4 text-slate-400 mr-1" />}
+                                {index === 2 && <Trophy className="h-4 w-4 text-orange-600 mr-1" />}
                                 <div>
                                   <p className="font-medium">{player.UserName}</p>
                                   <p className="text-xs text-muted-foreground">{player.TeamName}</p>
@@ -488,10 +579,13 @@ const Index = () => {
                               "flex items-center justify-between p-3 rounded-lg",
                               index === 0 ? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800" :
                               index === 1 ? "bg-slate-50 dark:bg-slate-900/20 border border-slate-200 dark:border-slate-800" :
+                              index === 2 ? "bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800" :
                               "bg-background border"
                             )}>
                               <div className="flex items-center">
                                 {index === 0 && <Trophy className="h-4 w-4 text-emerald-500 mr-1" />}
+                                {index === 1 && <Trophy className="h-4 w-4 text-slate-400 mr-1" />}
+                                {index === 2 && <Trophy className="h-4 w-4 text-orange-600 mr-1" />}
                                 <div>
                                   <p className="font-medium">{player.UserName}</p>
                                   <p className="text-xs text-muted-foreground">{player.TeamName}</p>
