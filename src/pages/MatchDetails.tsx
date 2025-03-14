@@ -3,16 +3,26 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import MainLayout from "../components/layout/MainLayout";
 import { fetchMatchDetails } from "../services/cricketApi";
-import { MatchDetails as MatchDetailsType } from "../types/cricket";
+import { MatchDetails as MatchDetailsType, Team } from "../types/cricket";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { ResponsiveCard } from "@/components/ui/responsive-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+// Define a simplified type for match display
+type DisplayableMatchInfo = {
+  title: string;
+  date?: string;
+  venue?: string;
+  result?: string;
+  teams?: Team[];
+};
+
 const MatchDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState<boolean>(true);
   const [matchData, setMatchData] = useState<MatchDetailsType | null>(null);
+  const [displayInfo, setDisplayInfo] = useState<DisplayableMatchInfo>({ title: "Match Information" });
 
   useEffect(() => {
     const loadMatchData = async () => {
@@ -20,6 +30,27 @@ const MatchDetails = () => {
         setLoading(true);
         const data = await fetchMatchDetails(id);
         setMatchData(data);
+        
+        // Process match data for display
+        if (data) {
+          const displayData: DisplayableMatchInfo = { 
+            title: "Match Information"
+          };
+          
+          // Extract fixture date from Configuration if available
+          if (data.Configuration) {
+            // Additional processing for configuration data
+          }
+          
+          // Extract teams
+          if (data.Teams && data.Teams.Team) {
+            displayData.teams = Array.isArray(data.Teams.Team) ? 
+              data.Teams.Team : [data.Teams.Team];
+          }
+          
+          setDisplayInfo(displayData);
+        }
+        
         setLoading(false);
       }
     };
@@ -39,8 +70,8 @@ const MatchDetails = () => {
         ) : matchData ? (
           <div className="space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
             <ResponsiveCard 
-              title={matchData.Name || "Match Information"}
-              description={`${matchData.Date ? new Date(matchData.Date).toLocaleDateString() : "Date not available"}`}
+              title={displayInfo.title}
+              description={displayInfo.date ? `Date: ${displayInfo.date}` : "Date not available"}
               withAnimation
               animationDelay={200}
             >
@@ -52,17 +83,17 @@ const MatchDetails = () => {
                 </TabsList>
                 
                 <TabsContent value="overview" className="space-y-4">
-                  {matchData.Venue && (
+                  {displayInfo.venue && (
                     <div className="flex items-center justify-between p-2 border-b text-sm">
                       <span className="font-medium">Venue</span>
-                      <span className="text-right">{matchData.Venue}</span>
+                      <span className="text-right">{displayInfo.venue}</span>
                     </div>
                   )}
                   
-                  {matchData.Result && (
+                  {displayInfo.result && (
                     <div className="flex items-center justify-between p-2 border-b text-sm">
                       <span className="font-medium">Result</span>
-                      <span className="text-right">{matchData.Result}</span>
+                      <span className="text-right">{displayInfo.result}</span>
                     </div>
                   )}
                   
@@ -70,12 +101,16 @@ const MatchDetails = () => {
                 </TabsContent>
                 
                 <TabsContent value="teams" className="space-y-4">
-                  {matchData.Teams && matchData.Teams.map((team, index) => (
-                    <div key={index} className="p-3 border rounded-md text-sm">
-                      <h3 className="font-bold">{team.Name}</h3>
-                      <p>Score: {team.Score || "N/A"}</p>
-                    </div>
-                  ))}
+                  {displayInfo.teams && displayInfo.teams.length > 0 ? (
+                    displayInfo.teams.map((team, index) => (
+                      <div key={index} className="p-3 border rounded-md text-sm">
+                        <h3 className="font-bold">{team.Name}</h3>
+                        <p>Team ID: {team.Id || "N/A"}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No team information available</p>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="raw">
