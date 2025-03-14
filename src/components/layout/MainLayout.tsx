@@ -28,6 +28,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     { path: "/settings", label: "Settings", icon: Settings },
   ];
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(prev => !prev);
+  };
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
@@ -64,7 +68,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
           <button 
             className="p-1 rounded-md hover:bg-secondary/50 transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={toggleMobileMenu}
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
@@ -76,19 +80,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
       </div>
 
-      {/* Mobile menu with improved animation */}
+      {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div 
-          className="md:hidden fixed top-12 left-0 right-0 bottom-0 bg-background z-10 overflow-y-auto animate-fade-in"
-        >
+        <div className="md:hidden fixed top-12 left-0 right-0 bottom-0 bg-background z-10 overflow-y-auto">
           <nav className="p-2">
             <ul className="space-y-1">
-              {navItems.map((item, index) => (
-                <li 
-                  key={item.path} 
-                  style={{ animationDelay: `${index * 50}ms` }}
-                  className="animate-slide-in-right"
-                >
+              {navItems.map((item) => (
+                <li key={item.path}>
                   <Link 
                     to={item.path} 
                     className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive(item.path)}`}
