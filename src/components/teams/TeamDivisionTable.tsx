@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Shield, ChevronUp, ChevronDown } from 'lucide-react';
+import { Shield, ChevronDown, ChevronUp } from 'lucide-react';
 import { Team } from '@/types/cricket';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -38,10 +38,11 @@ const TeamDivisionTable = ({
     <Collapsible 
       open={isOpen}
       onOpenChange={handleToggle}
-      className="border-2 border-gray-400 dark:border-gray-600 rounded-lg overflow-hidden my-5"
+      className="border-2 border-gray-400 dark:border-gray-600 rounded-lg overflow-hidden my-4"
     >
       <CollapsibleTrigger 
         className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}
+        showArrow={false}
       >
         <div className="flex items-center gap-2 font-medium text-sm">
           <Shield className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
@@ -87,20 +88,18 @@ const TeamDivisionTable = ({
                     {team.completedMatches || team.Games || 0}
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
-                    {team.Wins || (team as any).wins || 0}
+                    {team.Wins || 0}
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
-                    {team.Losses || (team as any).losses || 0}
+                    {team.Losses || 0}
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
-                    {team.Draws || (team as any).draws || 0}
+                    {team.Draws || 0}
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
                     {team.WinPercentage 
                       ? (typeof team.WinPercentage === 'string' ? parseInt(team.WinPercentage) : Math.round(team.WinPercentage)) 
-                      : (team as any).winPercentage 
-                        ? Math.round(parseFloat((team as any).winPercentage))
-                        : 0}%
+                      : 0}%
                   </TableCell>
                 </TableRow>
               ))}

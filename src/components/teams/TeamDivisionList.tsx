@@ -36,7 +36,7 @@ const TeamDivisionList = ({
         </CardHeader>
       )}
       <CardContent className={compactMode ? 'p-0' : ''}>
-        <div className={`space-y-${compactMode ? '1' : '6'}`}>
+        <div className="space-y-4">
           {sortedDivisions.map(([division, divisionTeams]) => (
             <TeamDivisionTable
               key={division}
