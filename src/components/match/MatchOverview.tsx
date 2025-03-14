@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
 import MatchWinner from './MatchWinner';
@@ -15,6 +15,10 @@ interface MatchOverviewProps {
 }
 
 export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, matchData }) => {
+  useEffect(() => {
+    console.log("MatchOverview rendering with displayInfo:", displayInfo);
+  }, [displayInfo]);
+
   return (
     <ResponsiveContainer spacing="md">
       {/* This component extracts data from matchData and updates displayInfo */}
