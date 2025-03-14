@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -5,9 +6,14 @@ import { Fixture, Player } from "../types/cricket";
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import { ArrowUpRight, Calendar, Star, Award } from "lucide-react";
+import { ArrowUpRight, Calendar, Star, Award, Users, Shield, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
+import { ResponsiveCard } from "@/components/ui/responsive-card";
+import { Card, CardContent } from "@/components/ui/card";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 
 const formatDate = (dateString: string) => {
   try {
@@ -34,6 +40,25 @@ const formatDate = (dateString: string) => {
   }
 };
 
+const formatCompactDate = (dateString: string) => {
+  try {
+    if (!dateString || dateString.trim() === '') {
+      return 'N/A';
+    }
+    
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+    
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  } catch (error) {
+    return dateString || 'N/A';
+  }
+};
+
 const isToday = (dateString: string) => {
   const today = new Date();
   const date = new Date(dateString);
@@ -55,6 +80,7 @@ const Index = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const seasonId = getCurrentSeasonId();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const loadData = async () => {
@@ -102,17 +128,14 @@ const Index = () => {
   const renderEmptyState = () => {
     if (fixtures.length === 0 && players.length === 0 && !loading) {
       return (
-        <div className="bg-card rounded-lg border shadow-sm p-6 text-center">
-          <Award className="mx-auto h-12 w-12 text-primary/50" />
-          <h2 className="mt-4 text-xl font-medium">No Cricket Data Available</h2>
-          <p className="mt-2 text-muted-foreground">
+        <div className={`bg-card rounded-lg border shadow-sm ${isMobile ? 'p-3' : 'p-6'} text-center`}>
+          <Award className={`mx-auto ${isMobile ? 'h-8 w-8' : 'h-12 w-12'} text-primary/50`} />
+          <h2 className={`mt-2 ${isMobile ? 'text-lg' : 'text-xl'} font-medium`}>No Cricket Data Available</h2>
+          <p className={`mt-2 ${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
             There are no fixtures or statistics available for the current season.
           </p>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Try updating the season ID in Settings or check your API connection.
-          </p>
-          <div className="mt-6">
-            <Link to="/settings" className="text-primary hover:underline">
+          <div className="mt-4">
+            <Link to="/settings" className="text-primary hover:underline text-sm">
               Go to Settings
             </Link>
           </div>
@@ -122,19 +145,23 @@ const Index = () => {
     return null;
   };
 
+  const compactMode = isMobile;
+
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <ResponsiveContainer spacing={compactMode ? 'xs' : 'md'}>
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Season ID: {seasonId}</span>
-          </div>
+          <h1 className={`${compactMode ? 'text-xl' : 'text-3xl'} font-bold tracking-tight`}>Dashboard</h1>
+          {!compactMode && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Season ID: {seasonId}</span>
+            </div>
+          )}
         </div>
         
         {loading ? (
-          <div className="flex justify-center items-center h-96">
-            <LoadingSpinner size={8} />
+          <div className={`flex justify-center items-center ${compactMode ? 'h-36' : 'h-96'}`}>
+            <LoadingSpinner size={compactMode ? 6 : 8} />
           </div>
         ) : error ? (
           <div className="bg-destructive/10 p-4 rounded-md text-destructive">
@@ -142,175 +169,207 @@ const Index = () => {
           </div>
         ) : renderEmptyState() || (
           <>
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="bg-card rounded-lg border shadow-sm">
-                <div className="p-4 flex justify-between items-center border-b">
-                  <h2 className="font-semibold text-lg flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>Upcoming Fixtures</span>
-                  </h2>
-                  <Link to="/fixtures" className="text-sm text-primary flex items-center">
-                    View All <ArrowUpRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </div>
-                <div className="p-2">
-                  {upcomingFixtures.length > 0 ? (
-                    <div className="space-y-2">
-                      {upcomingFixtures.map((fixture) => (
-                        <div key={fixture.Id} className="bg-background p-3 rounded-md">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                {isToday(fixture.Date) ? "Today" : formatDate(fixture.Date)} • {fixture.DivisionName}
-                              </p>
-                              <p className="font-medium mt-1">
-                                {fixture.HomeTeam} vs {fixture.AwayTeam}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {fixture.Venue} • {fixture.StartTime}
-                              </p>
-                            </div>
-                            <Link to={`/match/${fixture.Id}`} className="text-primary mt-1">
-                              <ArrowUpRight className="h-4 w-4" />
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
+            {/* Stats summary cards */}
+            <div className={`grid grid-cols-3 gap-${compactMode ? '1' : '4'}`}>
+              <Card className={compactMode ? 'p-0' : ''}>
+                <CardContent className={compactMode ? 'p-2 pt-2' : 'pt-6'}>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className={`${compactMode ? 'h-7 w-7' : 'h-10 w-10'} text-primary p-1 border rounded-full`} />
+                    <div>
+                      <p className={`${compactMode ? 'text-xxs' : 'text-sm'} text-muted-foreground`}>Fixtures</p>
+                      <h3 className={`${compactMode ? 'text-lg' : 'text-2xl'} font-bold`}>
+                        {fixtures.length}
+                      </h3>
                     </div>
-                  ) : (
-                    <div className="py-8 text-center text-muted-foreground">
-                      No upcoming fixtures found
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className={compactMode ? 'p-0' : ''}>
+                <CardContent className={compactMode ? 'p-2 pt-2' : 'pt-6'}>
+                  <div className="flex items-center space-x-2">
+                    <Users className={`${compactMode ? 'h-7 w-7' : 'h-10 w-10'} text-primary p-1 border rounded-full`} />
+                    <div>
+                      <p className={`${compactMode ? 'text-xxs' : 'text-sm'} text-muted-foreground`}>Players</p>
+                      <h3 className={`${compactMode ? 'text-lg' : 'text-2xl'} font-bold`}>
+                        {players.length}
+                      </h3>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-card rounded-lg border shadow-sm">
-                <div className="p-4 flex justify-between items-center border-b">
-                  <h2 className="font-semibold text-lg flex items-center gap-2">
-                    <Award className="h-4 w-4" />
-                    <span>Recent Results</span>
-                  </h2>
-                  <Link to="/fixtures" className="text-sm text-primary flex items-center">
-                    View All <ArrowUpRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </div>
-                <div className="p-2">
-                  {recentFixtures.length > 0 ? (
-                    <div className="space-y-2">
-                      {recentFixtures.map((fixture) => (
-                        <div key={fixture.Id} className="bg-background p-3 rounded-md">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                {formatDate(fixture.Date)} • {fixture.DivisionName}
-                              </p>
-                              <p className="font-medium mt-1">
-                                {fixture.HomeTeam} vs {fixture.AwayTeam}
-                              </p>
-                              <p className="text-sm mt-1">
-                                {fixture.ScoreDescription}
-                              </p>
-                            </div>
-                            <Link to={`/match/${fixture.Id}`} className="text-primary mt-1">
-                              <ArrowUpRight className="h-4 w-4" />
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className={compactMode ? 'p-0' : ''}>
+                <CardContent className={compactMode ? 'p-2 pt-2' : 'pt-6'}>
+                  <div className="flex items-center space-x-2">
+                    <Trophy className={`${compactMode ? 'h-7 w-7' : 'h-10 w-10'} text-primary p-1 border rounded-full`} />
+                    <div>
+                      <p className={`${compactMode ? 'text-xxs' : 'text-sm'} text-muted-foreground truncate`}>
+                        {compactMode ? "Completed" : "Completed Matches"}
+                      </p>
+                      <h3 className={`${compactMode ? 'text-lg' : 'text-2xl'} font-bold`}>
+                        {fixtures.filter(f => f.CompletionStatus === "Completed").length}
+                      </h3>
                     </div>
-                  ) : (
-                    <div className="py-8 text-center text-muted-foreground">
-                      No recent results found
-                    </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            <div className="bg-card rounded-lg border shadow-sm">
-              <div className="p-4 border-b">
-                <h2 className="font-semibold text-lg flex items-center gap-2">
-                  <Star className="h-4 w-4" />
-                  <span>Player Statistics</span>
-                </h2>
-              </div>
-              <Tabs defaultValue="batting" className="p-4">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="batting">Top Batsmen</TabsTrigger>
-                  <TabsTrigger value="bowling">Top Bowlers</TabsTrigger>
+            {/* Fixtures section */}
+            <ResponsiveCard
+              className={compactMode ? 'shadow-none border-0 p-0' : ''}
+              title={
+                <div className="flex justify-between items-center w-full">
+                  <div className="flex items-center gap-1">
+                    <Calendar className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
+                    <span className={compactMode ? 'text-sm font-medium' : 'text-lg font-semibold'}>
+                      Upcoming Fixtures
+                    </span>
+                  </div>
+                  {!compactMode && (
+                    <Link to="/fixtures" className="text-sm text-primary flex items-center">
+                      View All <ArrowUpRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  )}
+                </div>
+              }
+            >
+              {upcomingFixtures.length > 0 ? (
+                <div className={`space-y-${compactMode ? '1' : '2'}`}>
+                  {upcomingFixtures.map((fixture) => (
+                    <div key={fixture.Id} className={`bg-background ${compactMode ? 'p-2' : 'p-3'} rounded-md`}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className={`${compactMode ? 'text-xxs' : 'text-xs'} text-muted-foreground`}>
+                            {isToday(fixture.Date) ? "Today" : (compactMode ? formatCompactDate(fixture.Date) : formatDate(fixture.Date))} 
+                            {fixture.DivisionName && <span> • {fixture.DivisionName}</span>}
+                          </p>
+                          <p className={`font-medium ${compactMode ? 'text-xs mt-0.5' : 'mt-1'}`}>
+                            {fixture.HomeTeam} vs {fixture.AwayTeam}
+                          </p>
+                          {!compactMode && fixture.Venue && fixture.StartTime && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {fixture.Venue} • {fixture.StartTime}
+                            </p>
+                          )}
+                        </div>
+                        <Link to={`/match/${fixture.Id}`} className="text-primary">
+                          <ArrowUpRight className={`${compactMode ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={`${compactMode ? 'py-4 text-xs' : 'py-8 text-sm'} text-center text-muted-foreground`}>
+                  No upcoming fixtures found
+                </div>
+              )}
+            </ResponsiveCard>
+
+            {/* Recent Results */}
+            <ResponsiveCard
+              className={compactMode ? 'shadow-none border-0 p-0' : ''}
+              title={
+                <div className="flex justify-between items-center w-full">
+                  <div className="flex items-center gap-1">
+                    <Award className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
+                    <span className={compactMode ? 'text-sm font-medium' : 'text-lg font-semibold'}>
+                      Recent Results
+                    </span>
+                  </div>
+                  {!compactMode && (
+                    <Link to="/fixtures" className="text-sm text-primary flex items-center">
+                      View All <ArrowUpRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  )}
+                </div>
+              }
+            >
+              {recentFixtures.length > 0 ? (
+                <div className={`space-y-${compactMode ? '1' : '2'}`}>
+                  {recentFixtures.map((fixture) => (
+                    <div key={fixture.Id} className={`bg-background ${compactMode ? 'p-2' : 'p-3'} rounded-md`}>
+                      <div className="flex justify-between items-start">
+                        <div className="w-full">
+                          <p className={`${compactMode ? 'text-xxs' : 'text-xs'} text-muted-foreground`}>
+                            {compactMode ? formatCompactDate(fixture.Date) : formatDate(fixture.Date)}
+                            {fixture.DivisionName && <span> • {fixture.DivisionName}</span>}
+                          </p>
+                          <p className={`font-medium ${compactMode ? 'text-xs mt-0.5' : 'mt-1'}`}>
+                            {fixture.HomeTeam} vs {fixture.AwayTeam}
+                          </p>
+                          <p className={`${compactMode ? 'text-xs' : 'text-sm'} ${compactMode ? 'mt-0.5' : 'mt-1'}`}>
+                            {fixture.ScoreDescription || `${fixture.HomeTeamScore} - ${fixture.AwayTeamScore}`}
+                          </p>
+                        </div>
+                        <Link to={`/match/${fixture.Id}`} className="text-primary ml-1 shrink-0">
+                          <ArrowUpRight className={`${compactMode ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={`${compactMode ? 'py-4 text-xs' : 'py-8 text-sm'} text-center text-muted-foreground`}>
+                  No recent results found
+                </div>
+              )}
+            </ResponsiveCard>
+
+            {/* Player Stats */}
+            <ResponsiveCard
+              className={compactMode ? 'shadow-none border-0 p-0' : ''}
+              title={
+                <div className="flex items-center gap-1">
+                  <Star className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
+                  <span className={compactMode ? 'text-sm font-medium' : 'text-lg font-semibold'}>
+                    Player Statistics
+                  </span>
+                </div>
+              }
+            >
+              <Tabs defaultValue="batting" className={compactMode ? 'px-0' : 'px-0'}>
+                <TabsList className={`${compactMode ? 'h-8 mb-2' : 'mb-4'}`}>
+                  <TabsTrigger value="batting" className={compactMode ? 'text-xs px-2 h-7' : ''}>Top Batsmen</TabsTrigger>
+                  <TabsTrigger value="bowling" className={compactMode ? 'text-xs px-2 h-7' : ''}>Top Bowlers</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="batting">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Player</TableHead>
-                        <TableHead>Team</TableHead>
-                        <TableHead>Division</TableHead>
-                        <TableHead className="text-right">Runs</TableHead>
-                        <TableHead className="text-right">Games</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {topBatsmen.length > 0 ? (
-                        topBatsmen.map((player) => (
-                          <TableRow key={player.Id}>
-                            <TableCell className="font-medium">{player.UserName}</TableCell>
-                            <TableCell>{player.TeamName}</TableCell>
-                            <TableCell>{player.DivisionName}</TableCell>
-                            <TableCell className="text-right">{player.RunsScored}</TableCell>
-                            <TableCell className="text-right">{player.Games}</TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                            No batting statistics available
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                  <ResponsiveTable 
+                    keyField="Id"
+                    superCompact={compactMode}
+                    data={topBatsmen}
+                    columns={[
+                      { key: "UserName", header: "Player", className: compactMode ? "w-[80px]" : "" },
+                      { key: "TeamName", header: "Team", hideOnMobile: compactMode },
+                      { key: "DivisionName", header: "Division", hideOnMobile: !compactMode },
+                      { key: "RunsScored", header: "Runs", className: "text-right" },
+                      { key: "Games", header: "Games", className: "text-right", hideOnMobile: compactMode }
+                    ]}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="bowling">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Player</TableHead>
-                        <TableHead>Team</TableHead>
-                        <TableHead>Division</TableHead>
-                        <TableHead className="text-right">Wickets</TableHead>
-                        <TableHead className="text-right">Overs</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {topBowlers.length > 0 ? (
-                        topBowlers.map((player) => (
-                          <TableRow key={player.Id}>
-                            <TableCell className="font-medium">{player.UserName}</TableCell>
-                            <TableCell>{player.TeamName}</TableCell>
-                            <TableCell>{player.DivisionName}</TableCell>
-                            <TableCell className="text-right">{player.Wickets}</TableCell>
-                            <TableCell className="text-right">{player.Overs}</TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                            No bowling statistics available
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                  <ResponsiveTable 
+                    keyField="Id"
+                    superCompact={compactMode}
+                    data={topBowlers}
+                    columns={[
+                      { key: "UserName", header: "Player", className: compactMode ? "w-[80px]" : "" },
+                      { key: "TeamName", header: "Team", hideOnMobile: compactMode },
+                      { key: "DivisionName", header: "Division", hideOnMobile: !compactMode },
+                      { key: "Wickets", header: "Wickets", className: "text-right" },
+                      { key: "Overs", header: "Overs", className: "text-right", hideOnMobile: compactMode }
+                    ]}
+                  />
                 </TabsContent>
               </Tabs>
-            </div>
+            </ResponsiveCard>
           </>
         )}
-      </div>
+      </ResponsiveContainer>
     </MainLayout>
   );
 };

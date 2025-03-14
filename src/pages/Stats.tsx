@@ -13,6 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ResponsiveCard } from "@/components/ui/responsive-card";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 
 const Stats = () => {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -23,6 +27,7 @@ const Stats = () => {
   const [sortBy, setSortBy] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [teamFilter, setTeamFilter] = useState<string>("all");
+  const isMobile = useIsMobile();
   
   // Get unique teams for filter dropdown
   const teams = [...new Set(players.map(player => player.TeamName))].sort();
@@ -149,11 +154,13 @@ const Stats = () => {
     return sortDirection === "asc" ? <ArrowUp className="ml-1 h-3 w-3 inline" /> : <ArrowDown className="ml-1 h-3 w-3 inline" />;
   };
 
+  const compactMode = isMobile;
+
   if (loading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-64">
-          <LoadingSpinner size={12} />
+          <LoadingSpinner size={compactMode ? 8 : 12} />
         </div>
       </MainLayout>
     );
@@ -162,37 +169,37 @@ const Stats = () => {
   if (error) {
     return (
       <MainLayout>
-        <div className="space-y-6">
-          <h1 className="text-3xl font-bold tracking-tight">Player Statistics</h1>
-          <div className="bg-card rounded-lg border shadow-sm p-6 text-center">
+        <ResponsiveContainer spacing={compactMode ? 'xs' : 'md'}>
+          <h1 className={`${compactMode ? 'text-xl' : 'text-3xl'} font-bold tracking-tight`}>Player Statistics</h1>
+          <div className={`bg-card rounded-lg border shadow-sm ${compactMode ? 'p-3' : 'p-6'} text-center`}>
             <p className="text-red-500">{error}</p>
           </div>
-        </div>
+        </ResponsiveContainer>
       </MainLayout>
     );
   }
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Player Statistics</h1>
+      <ResponsiveContainer spacing={compactMode ? 'xs' : 'md'}>
+        <h1 className={`${compactMode ? 'text-xl' : 'text-3xl'} font-bold tracking-tight`}>Player Statistics</h1>
         
         {/* Search and Filter Bar */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-1/3">
+        <div className="flex flex-col gap-2">
+          <div className="relative w-full">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search players or teams..."
+              placeholder={compactMode ? "Search..." : "Search players or teams..."}
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           
-          <div className="flex gap-2 w-full md:w-auto">
+          <div className="flex gap-2 w-full">
             <Select value={teamFilter} onValueChange={setTeamFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className={`w-full ${compactMode ? 'text-xs h-8' : ''}`}>
                 <SelectValue placeholder="Filter by team" />
               </SelectTrigger>
               <SelectContent>
@@ -207,250 +214,168 @@ const Stats = () => {
           </div>
         </div>
         
-        <Card className="border shadow-sm">
-          <div className="border-b">
-            <Tabs 
-              defaultValue="all" 
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="w-full justify-start px-6 pt-4">
-                <TabsTrigger value="all" className="px-4">All Players</TabsTrigger>
-                <TabsTrigger value="batsmen" className="px-4">Batsmen</TabsTrigger>
-                <TabsTrigger value="bowlers" className="px-4">Bowlers</TabsTrigger>
-              </TabsList>
-              
-              <div className="p-0">
-                <ScrollArea className="h-[calc(100vh-260px)]">
-                  <TabsContent value="all" className="mt-0 pt-2">
-                    <Table>
-                      <TableHeader className="bg-muted/50 sticky top-0">
-                        <TableRow>
-                          <TableHead 
-                            className="cursor-pointer"
-                            onClick={() => handleSort("UserName")}
-                          >
-                            Player {renderSortIcon("UserName")}
-                          </TableHead>
-                          <TableHead 
-                            className="cursor-pointer"
-                            onClick={() => handleSort("TeamName")}
-                          >
-                            Team {renderSortIcon("TeamName")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("Games")}
-                          >
-                            Games {renderSortIcon("Games")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("RunsScored")}
-                          >
-                            Runs {renderSortIcon("RunsScored")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("battingAverage")}
-                          >
-                            Avg {renderSortIcon("battingAverage")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("strikeRate")}
-                          >
-                            S/R {renderSortIcon("strikeRate")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("Wickets")}
-                          >
-                            Wickets {renderSortIcon("Wickets")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("bowlingAverage")}
-                          >
-                            Bowling Avg {renderSortIcon("bowlingAverage")}
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {sortedPlayers.length > 0 ? (
-                          sortedPlayers.map((player) => (
-                            <TableRow key={player.Id}>
-                              <TableCell className="font-medium">{player.UserName}</TableCell>
-                              <TableCell>{player.TeamName}</TableCell>
-                              <TableCell className="text-center">{player.Games}</TableCell>
-                              <TableCell className="text-center">{player.RunsScored}</TableCell>
-                              <TableCell className="text-center">{calculateBattingAverage(player)}</TableCell>
-                              <TableCell className="text-center">{calculateStrikeRate(player)}</TableCell>
-                              <TableCell className="text-center">{player.Wickets}</TableCell>
-                              <TableCell className="text-center">{calculateBowlingAverage(player)}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={8} className="text-center py-6">
-                              No players found. Try adjusting your search or filters.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
+        <ResponsiveCard 
+          className={compactMode ? 'shadow-none border-0 p-0' : ''}
+        >
+          <Tabs 
+            defaultValue="all" 
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className={`w-full justify-start ${compactMode ? 'mb-2 h-8' : 'px-6 pt-4'}`}>
+              <TabsTrigger value="all" className={compactMode ? 'text-xs h-7 px-2' : 'px-4'}>All Players</TabsTrigger>
+              <TabsTrigger value="batsmen" className={compactMode ? 'text-xs h-7 px-2' : 'px-4'}>Batsmen</TabsTrigger>
+              <TabsTrigger value="bowlers" className={compactMode ? 'text-xs h-7 px-2' : 'px-4'}>Bowlers</TabsTrigger>
+            </TabsList>
+            
+            <div className="p-0">
+              <ScrollArea className={compactMode ? 'h-[calc(100vh-160px)]' : 'h-[calc(100vh-260px)]'}>
+                <TabsContent value="all" className="mt-0 pt-0">
+                  <ResponsiveTable
+                    keyField="Id"
+                    superCompact={compactMode}
+                    data={sortedPlayers}
+                    columns={[
+                      { 
+                        key: "UserName", 
+                        header: "Player",
+                        className: compactMode ? "w-[100px]" : "",
+                        render: (value) => (
+                          <span className="font-medium">{value}</span>
+                        )
+                      },
+                      { 
+                        key: "TeamName", 
+                        header: "Team",
+                        hideOnMobile: compactMode 
+                      },
+                      { 
+                        key: "Games", 
+                        header: compactMode ? "G" : "Games",
+                        className: "text-center" 
+                      },
+                      { 
+                        key: "RunsScored", 
+                        header: compactMode ? "R" : "Runs",
+                        className: "text-center" 
+                      },
+                      { 
+                        key: "battingAverage", 
+                        header: compactMode ? "Avg" : "Batting Avg",
+                        className: "text-center",
+                        render: (_, row) => calculateBattingAverage(row)
+                      },
+                      { 
+                        key: "Wickets", 
+                        header: compactMode ? "W" : "Wickets",
+                        className: "text-center" 
+                      },
+                      { 
+                        key: "bowlingAverage", 
+                        header: compactMode ? "B/Avg" : "Bowling Avg",
+                        className: "text-center",
+                        hideOnMobile: compactMode,
+                        render: (_, row) => calculateBowlingAverage(row)
+                      }
+                    ]}
+                  />
+                </TabsContent>
 
-                  <TabsContent value="batsmen" className="mt-0 pt-2">
-                    <Table>
-                      <TableHeader className="bg-muted/50 sticky top-0">
-                        <TableRow>
-                          <TableHead 
-                            className="cursor-pointer"
-                            onClick={() => handleSort("UserName")}
-                          >
-                            Player {renderSortIcon("UserName")}
-                          </TableHead>
-                          <TableHead 
-                            className="cursor-pointer"
-                            onClick={() => handleSort("TeamName")}
-                          >
-                            Team {renderSortIcon("TeamName")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("Games")}
-                          >
-                            Games {renderSortIcon("Games")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("RunsScored")}
-                          >
-                            Runs {renderSortIcon("RunsScored")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("battingAverage")}
-                          >
-                            Avg {renderSortIcon("battingAverage")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("strikeRate")}
-                          >
-                            S/R {renderSortIcon("strikeRate")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("BallsFaced")}
-                          >
-                            Balls Faced {renderSortIcon("BallsFaced")}
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {sortedPlayers.length > 0 ? (
-                          sortedPlayers.map((player) => (
-                            <TableRow key={player.Id}>
-                              <TableCell className="font-medium">{player.UserName}</TableCell>
-                              <TableCell>{player.TeamName}</TableCell>
-                              <TableCell className="text-center">{player.Games}</TableCell>
-                              <TableCell className="text-center">{player.RunsScored}</TableCell>
-                              <TableCell className="text-center">{calculateBattingAverage(player)}</TableCell>
-                              <TableCell className="text-center">{calculateStrikeRate(player)}</TableCell>
-                              <TableCell className="text-center">{player.BallsFaced}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={7} className="text-center py-6">
-                              No batsmen found. Try adjusting your search or filters.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
+                <TabsContent value="batsmen" className="mt-0 pt-0">
+                  <ResponsiveTable
+                    keyField="Id"
+                    superCompact={compactMode}
+                    data={sortedPlayers}
+                    columns={[
+                      { 
+                        key: "UserName", 
+                        header: "Player",
+                        className: compactMode ? "w-[100px]" : "",
+                        render: (value) => (
+                          <span className="font-medium">{value}</span>
+                        )
+                      },
+                      { 
+                        key: "TeamName", 
+                        header: "Team",
+                        hideOnMobile: compactMode 
+                      },
+                      { 
+                        key: "Games", 
+                        header: compactMode ? "G" : "Games",
+                        className: "text-center" 
+                      },
+                      { 
+                        key: "RunsScored", 
+                        header: compactMode ? "R" : "Runs",
+                        className: "text-center" 
+                      },
+                      { 
+                        key: "battingAverage", 
+                        header: compactMode ? "Avg" : "Batting Avg",
+                        className: "text-center",
+                        render: (_, row) => calculateBattingAverage(row)
+                      },
+                      { 
+                        key: "strikeRate", 
+                        header: compactMode ? "S/R" : "Strike Rate",
+                        className: "text-center",
+                        hideOnMobile: compactMode,
+                        render: (_, row) => calculateStrikeRate(row)
+                      }
+                    ]}
+                  />
+                </TabsContent>
 
-                  <TabsContent value="bowlers" className="mt-0 pt-2">
-                    <Table>
-                      <TableHeader className="bg-muted/50 sticky top-0">
-                        <TableRow>
-                          <TableHead 
-                            className="cursor-pointer"
-                            onClick={() => handleSort("UserName")}
-                          >
-                            Player {renderSortIcon("UserName")}
-                          </TableHead>
-                          <TableHead 
-                            className="cursor-pointer"
-                            onClick={() => handleSort("TeamName")}
-                          >
-                            Team {renderSortIcon("TeamName")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("Games")}
-                          >
-                            Games {renderSortIcon("Games")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("Overs")}
-                          >
-                            Overs {renderSortIcon("Overs")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("Wickets")}
-                          >
-                            Wickets {renderSortIcon("Wickets")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("RunsConceded")}
-                          >
-                            Runs Conceded {renderSortIcon("RunsConceded")}
-                          </TableHead>
-                          <TableHead 
-                            className="text-center cursor-pointer"
-                            onClick={() => handleSort("bowlingAverage")}
-                          >
-                            Bowling Avg {renderSortIcon("bowlingAverage")}
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {sortedPlayers.length > 0 ? (
-                          sortedPlayers.map((player) => (
-                            <TableRow key={player.Id}>
-                              <TableCell className="font-medium">{player.UserName}</TableCell>
-                              <TableCell>{player.TeamName}</TableCell>
-                              <TableCell className="text-center">{player.Games}</TableCell>
-                              <TableCell className="text-center">{player.Overs}</TableCell>
-                              <TableCell className="text-center">{player.Wickets}</TableCell>
-                              <TableCell className="text-center">{player.RunsConceded}</TableCell>
-                              <TableCell className="text-center">{calculateBowlingAverage(player)}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={7} className="text-center py-6">
-                              No bowlers found. Try adjusting your search or filters.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
-                </ScrollArea>
-              </div>
-            </Tabs>
-          </div>
-        </Card>
-      </div>
+                <TabsContent value="bowlers" className="mt-0 pt-0">
+                  <ResponsiveTable
+                    keyField="Id"
+                    superCompact={compactMode}
+                    data={sortedPlayers}
+                    columns={[
+                      { 
+                        key: "UserName", 
+                        header: "Player",
+                        className: compactMode ? "w-[100px]" : "",
+                        render: (value) => (
+                          <span className="font-medium">{value}</span>
+                        )
+                      },
+                      { 
+                        key: "TeamName", 
+                        header: "Team",
+                        hideOnMobile: compactMode 
+                      },
+                      { 
+                        key: "Games", 
+                        header: compactMode ? "G" : "Games",
+                        className: "text-center" 
+                      },
+                      { 
+                        key: "Overs", 
+                        header: compactMode ? "O" : "Overs",
+                        className: "text-center" 
+                      },
+                      { 
+                        key: "Wickets", 
+                        header: compactMode ? "W" : "Wickets",
+                        className: "text-center" 
+                      },
+                      { 
+                        key: "bowlingAverage", 
+                        header: compactMode ? "Avg" : "Bowling Avg",
+                        className: "text-center",
+                        render: (_, row) => calculateBowlingAverage(row)
+                      }
+                    ]}
+                  />
+                </TabsContent>
+              </ScrollArea>
+            </div>
+          </Tabs>
+        </ResponsiveCard>
+      </ResponsiveContainer>
     </MainLayout>
   );
 };
