@@ -6,20 +6,26 @@ import { Player } from "../types/cricket";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import { Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Filter, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Stats = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("all");
+  const [sortBy, setSortBy] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [teamFilter, setTeamFilter] = useState<string>("");
   
-  const playersPerPage = 15;
+  // Get unique teams for filter dropdown
+  const teams = [...new Set(players.map(player => player.TeamName))].sort();
 
   useEffect(() => {
     const loadPlayerStats = async () => {
@@ -39,63 +45,104 @@ const Stats = () => {
     loadPlayerStats();
   }, []);
 
-  // Filter players by search term and active tab
+  // Filter players by search term, active tab, and team filter
   const filteredPlayers = players.filter(player => {
     const matchesSearch = 
       player.UserName.toLowerCase().includes(searchTerm.toLowerCase()) || 
       player.TeamName.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (activeTab === "all") return matchesSearch;
-    if (activeTab === "batsmen") return matchesSearch && parseInt(player.RunsScored) > 0;
-    if (activeTab === "bowlers") return matchesSearch && parseInt(player.Wickets) > 0;
+    const matchesTeam = teamFilter ? player.TeamName === teamFilter : true;
     
-    return matchesSearch;
+    if (activeTab === "all") return matchesSearch && matchesTeam;
+    if (activeTab === "batsmen") return matchesSearch && matchesTeam && parseInt(player.RunsScored) > 0;
+    if (activeTab === "bowlers") return matchesSearch && matchesTeam && parseInt(player.Wickets) > 0;
+    
+    return matchesSearch && matchesTeam;
   });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredPlayers.length / playersPerPage);
-  const paginatedPlayers = filteredPlayers.slice(
-    (currentPage - 1) * playersPerPage,
-    currentPage * playersPerPage
-  );
+  // Sort filtered players
+  const sortedPlayers = sortBy 
+    ? [...filteredPlayers].sort((a, b) => {
+        let valueA, valueB;
+        
+        // Handle special calculated fields
+        if (sortBy === "battingAverage") {
+          valueA = calculateBattingAverage(a);
+          valueB = calculateBattingAverage(b);
+        } else if (sortBy === "strikeRate") {
+          valueA = calculateStrikeRate(a);
+          valueB = calculateStrikeRate(b);
+        } else if (sortBy === "bowlingAverage") {
+          valueA = calculateBowlingAverage(a);
+          valueB = calculateBowlingAverage(b);
+        } else {
+          // For direct player properties
+          valueA = a[sortBy as keyof Player];
+          valueB = b[sortBy as keyof Player];
+  
+          // Convert string numbers to actual numbers for sorting
+          if (!isNaN(Number(valueA)) && !isNaN(Number(valueB))) {
+            valueA = Number(valueA);
+            valueB = Number(valueB);
+          }
+        }
+        
+        // Handle non-numeric/special values
+        if (valueA === "-" || valueA === "∞" || valueA === "N/A") valueA = sortDirection === "asc" ? Infinity : -Infinity;
+        if (valueB === "-" || valueB === "∞" || valueB === "N/A") valueB = sortDirection === "asc" ? Infinity : -Infinity;
+        
+        return sortDirection === "asc" 
+          ? valueA < valueB ? -1 : valueA > valueB ? 1 : 0
+          : valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+      }) 
+    : filteredPlayers;
 
-  // Table sort helpers
-  const sortByRuns = (playersToSort: Player[]) => {
-    return [...playersToSort].sort((a, b) => parseInt(b.RunsScored) - parseInt(a.RunsScored));
+  // Sorting handler
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      // Toggle sort direction if clicking the same column
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // Default to descending for new column
+      setSortBy(column);
+      setSortDirection("desc");
+    }
   };
 
-  const sortByWickets = (playersToSort: Player[]) => {
-    return [...playersToSort].sort((a, b) => parseInt(b.Wickets) - parseInt(a.Wickets));
+  // Render sort indicator
+  const renderSortIcon = (column: string) => {
+    if (sortBy !== column) return null;
+    return sortDirection === "asc" ? <ArrowUp className="ml-1 h-3 w-3 inline" /> : <ArrowDown className="ml-1 h-3 w-3 inline" />;
   };
 
   // Calculate batting average (runs / times out)
-  const getBattingAverage = (player: Player) => {
+  const calculateBattingAverage = (player: Player) => {
     const runsScored = parseInt(player.RunsScored);
     const timesOut = parseInt(player.TimesOut);
     
-    if (timesOut === 0) return runsScored > 0 ? "∞" : "0.00";
+    if (timesOut === 0) return runsScored > 0 ? "∞" : "-";
     
     const average = runsScored / timesOut;
     return average.toFixed(2);
   };
 
   // Calculate bowling average (runs conceded / wickets)
-  const getBowlingAverage = (player: Player) => {
+  const calculateBowlingAverage = (player: Player) => {
     const runsConceded = parseInt(player.RunsConceded);
     const wickets = parseInt(player.Wickets);
     
-    if (wickets === 0) return "N/A";
+    if (wickets === 0) return "-";
     
     const average = runsConceded / wickets;
     return average.toFixed(2);
   };
 
   // Calculate batting strike rate (runs / balls faced * 100)
-  const getStrikeRate = (player: Player) => {
+  const calculateStrikeRate = (player: Player) => {
     const runsScored = parseInt(player.RunsScored);
     const ballsFaced = parseInt(player.BallsFaced);
     
-    if (ballsFaced === 0) return "0.00";
+    if (ballsFaced === 0) return "-";
     
     const strikeRate = (runsScored / ballsFaced) * 100;
     return strikeRate.toFixed(2);
@@ -129,15 +176,42 @@ const Stats = () => {
       <div className="space-y-6">
         <h1 className="text-3xl font-bold tracking-tight">Player Statistics</h1>
         
+        {/* Search and Filter Bar */}
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full md:w-1/3">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search players or teams..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex gap-2 w-full md:w-auto">
+            <Select value={teamFilter} onValueChange={setTeamFilter}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Filter by team" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Teams</SelectItem>
+                {teams.map((team) => (
+                  <SelectItem key={team} value={team}>
+                    {team}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
         <Card className="border shadow-sm">
           <div className="border-b">
             <Tabs 
               defaultValue="all" 
               value={activeTab}
-              onValueChange={(value) => {
-                setActiveTab(value);
-                setCurrentPage(1); // Reset to first page on tab change
-              }}
+              onValueChange={setActiveTab}
               className="w-full"
             >
               <TabsList className="w-full justify-start px-6 pt-4">
@@ -147,33 +221,73 @@ const Stats = () => {
               </TabsList>
               
               <div className="p-0">
-                <div className="overflow-x-auto">
+                <ScrollArea className="h-[calc(100vh-260px)]">
                   <TabsContent value="all" className="mt-0 pt-2">
                     <Table>
-                      <TableHeader className="bg-muted/50">
+                      <TableHeader className="bg-muted/50 sticky top-0">
                         <TableRow>
-                          <TableHead>Player</TableHead>
-                          <TableHead>Team</TableHead>
-                          <TableHead className="text-center">Games</TableHead>
-                          <TableHead className="text-center">Runs</TableHead>
-                          <TableHead className="text-center">Avg</TableHead>
-                          <TableHead className="text-center">S/R</TableHead>
-                          <TableHead className="text-center">Wickets</TableHead>
-                          <TableHead className="text-center">Bowling Avg</TableHead>
+                          <TableHead 
+                            className="cursor-pointer"
+                            onClick={() => handleSort("UserName")}
+                          >
+                            Player {renderSortIcon("UserName")}
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer"
+                            onClick={() => handleSort("TeamName")}
+                          >
+                            Team {renderSortIcon("TeamName")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("Games")}
+                          >
+                            Games {renderSortIcon("Games")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("RunsScored")}
+                          >
+                            Runs {renderSortIcon("RunsScored")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("battingAverage")}
+                          >
+                            Avg {renderSortIcon("battingAverage")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("strikeRate")}
+                          >
+                            S/R {renderSortIcon("strikeRate")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("Wickets")}
+                          >
+                            Wickets {renderSortIcon("Wickets")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("bowlingAverage")}
+                          >
+                            Bowling Avg {renderSortIcon("bowlingAverage")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {paginatedPlayers.length > 0 ? (
-                          paginatedPlayers.map((player) => (
+                        {sortedPlayers.length > 0 ? (
+                          sortedPlayers.map((player) => (
                             <TableRow key={player.Id}>
                               <TableCell className="font-medium">{player.UserName}</TableCell>
                               <TableCell>{player.TeamName}</TableCell>
                               <TableCell className="text-center">{player.Games}</TableCell>
                               <TableCell className="text-center">{player.RunsScored}</TableCell>
-                              <TableCell className="text-center">{getBattingAverage(player)}</TableCell>
-                              <TableCell className="text-center">{getStrikeRate(player)}</TableCell>
+                              <TableCell className="text-center">{calculateBattingAverage(player)}</TableCell>
+                              <TableCell className="text-center">{calculateStrikeRate(player)}</TableCell>
                               <TableCell className="text-center">{player.Wickets}</TableCell>
-                              <TableCell className="text-center">{getBowlingAverage(player)}</TableCell>
+                              <TableCell className="text-center">{calculateBowlingAverage(player)}</TableCell>
                             </TableRow>
                           ))
                         ) : (
@@ -189,27 +303,62 @@ const Stats = () => {
 
                   <TabsContent value="batsmen" className="mt-0 pt-2">
                     <Table>
-                      <TableHeader className="bg-muted/50">
+                      <TableHeader className="bg-muted/50 sticky top-0">
                         <TableRow>
-                          <TableHead>Player</TableHead>
-                          <TableHead>Team</TableHead>
-                          <TableHead className="text-center">Games</TableHead>
-                          <TableHead className="text-center">Runs</TableHead>
-                          <TableHead className="text-center">Avg</TableHead>
-                          <TableHead className="text-center">S/R</TableHead>
-                          <TableHead className="text-center">Balls Faced</TableHead>
+                          <TableHead 
+                            className="cursor-pointer"
+                            onClick={() => handleSort("UserName")}
+                          >
+                            Player {renderSortIcon("UserName")}
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer"
+                            onClick={() => handleSort("TeamName")}
+                          >
+                            Team {renderSortIcon("TeamName")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("Games")}
+                          >
+                            Games {renderSortIcon("Games")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("RunsScored")}
+                          >
+                            Runs {renderSortIcon("RunsScored")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("battingAverage")}
+                          >
+                            Avg {renderSortIcon("battingAverage")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("strikeRate")}
+                          >
+                            S/R {renderSortIcon("strikeRate")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("BallsFaced")}
+                          >
+                            Balls Faced {renderSortIcon("BallsFaced")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {sortByRuns(paginatedPlayers).length > 0 ? (
-                          sortByRuns(paginatedPlayers).map((player) => (
+                        {sortedPlayers.length > 0 ? (
+                          sortedPlayers.map((player) => (
                             <TableRow key={player.Id}>
                               <TableCell className="font-medium">{player.UserName}</TableCell>
                               <TableCell>{player.TeamName}</TableCell>
                               <TableCell className="text-center">{player.Games}</TableCell>
                               <TableCell className="text-center">{player.RunsScored}</TableCell>
-                              <TableCell className="text-center">{getBattingAverage(player)}</TableCell>
-                              <TableCell className="text-center">{getStrikeRate(player)}</TableCell>
+                              <TableCell className="text-center">{calculateBattingAverage(player)}</TableCell>
+                              <TableCell className="text-center">{calculateStrikeRate(player)}</TableCell>
                               <TableCell className="text-center">{player.BallsFaced}</TableCell>
                             </TableRow>
                           ))
@@ -226,20 +375,55 @@ const Stats = () => {
 
                   <TabsContent value="bowlers" className="mt-0 pt-2">
                     <Table>
-                      <TableHeader className="bg-muted/50">
+                      <TableHeader className="bg-muted/50 sticky top-0">
                         <TableRow>
-                          <TableHead>Player</TableHead>
-                          <TableHead>Team</TableHead>
-                          <TableHead className="text-center">Games</TableHead>
-                          <TableHead className="text-center">Overs</TableHead>
-                          <TableHead className="text-center">Wickets</TableHead>
-                          <TableHead className="text-center">Runs Conceded</TableHead>
-                          <TableHead className="text-center">Bowling Avg</TableHead>
+                          <TableHead 
+                            className="cursor-pointer"
+                            onClick={() => handleSort("UserName")}
+                          >
+                            Player {renderSortIcon("UserName")}
+                          </TableHead>
+                          <TableHead 
+                            className="cursor-pointer"
+                            onClick={() => handleSort("TeamName")}
+                          >
+                            Team {renderSortIcon("TeamName")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("Games")}
+                          >
+                            Games {renderSortIcon("Games")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("Overs")}
+                          >
+                            Overs {renderSortIcon("Overs")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("Wickets")}
+                          >
+                            Wickets {renderSortIcon("Wickets")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("RunsConceded")}
+                          >
+                            Runs Conceded {renderSortIcon("RunsConceded")}
+                          </TableHead>
+                          <TableHead 
+                            className="text-center cursor-pointer"
+                            onClick={() => handleSort("bowlingAverage")}
+                          >
+                            Bowling Avg {renderSortIcon("bowlingAverage")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {sortByWickets(paginatedPlayers).length > 0 ? (
-                          sortByWickets(paginatedPlayers).map((player) => (
+                        {sortedPlayers.length > 0 ? (
+                          sortedPlayers.map((player) => (
                             <TableRow key={player.Id}>
                               <TableCell className="font-medium">{player.UserName}</TableCell>
                               <TableCell>{player.TeamName}</TableCell>
@@ -247,7 +431,7 @@ const Stats = () => {
                               <TableCell className="text-center">{player.Overs}</TableCell>
                               <TableCell className="text-center">{player.Wickets}</TableCell>
                               <TableCell className="text-center">{player.RunsConceded}</TableCell>
-                              <TableCell className="text-center">{getBowlingAverage(player)}</TableCell>
+                              <TableCell className="text-center">{calculateBowlingAverage(player)}</TableCell>
                             </TableRow>
                           ))
                         ) : (
@@ -260,61 +444,10 @@ const Stats = () => {
                       </TableBody>
                     </Table>
                   </TabsContent>
-                </div>
+                </ScrollArea>
               </div>
             </Tabs>
           </div>
-          
-          <CardContent className="p-4 flex flex-col gap-4">
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search players or teams..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1); // Reset to first page on search
-                }}
-              />
-            </div>
-          
-            {filteredPlayers.length > playersPerPage && (
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                  
-                  {[...Array(Math.min(totalPages, 5))].map((_, i) => {
-                    // For simplicity, show first 5 pages or all if less than 5
-                    const pageNumber = i + 1;
-                    return (
-                      <PaginationItem key={pageNumber}>
-                        <PaginationLink
-                          isActive={currentPage === pageNumber}
-                          onClick={() => setCurrentPage(pageNumber)}
-                        >
-                          {pageNumber}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  })}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </CardContent>
         </Card>
       </div>
     </MainLayout>
