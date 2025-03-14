@@ -102,9 +102,9 @@ const Fixtures = () => {
     loadFixtures();
   }, []);
 
-  // Filter fixtures
-  const filterFixtures = (fixtures: Fixture[]) => {
-    console.log("Filtering fixtures, current count:", fixtures.length);
+  // Filter fixtures by search term only
+  const filterFixturesBySearchTerm = (fixtures: Fixture[]) => {
+    if (!searchTerm) return fixtures;
     
     return fixtures.filter((fixture) => {
       // Convert all fields to strings before checking (to avoid undefined errors)
@@ -113,62 +113,56 @@ const Fixtures = () => {
       const divisionName = fixture.DivisionName || "";
       const venue = fixture.Venue || "";
       
-      const searchMatch = 
-        homeTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      return homeTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
         awayTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
         divisionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         venue.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      if (activeTab === 'all') return searchMatch;
-      if (activeTab === 'upcoming') return isFutureDate(fixture.Date) && searchMatch;
-      if (activeTab === 'completed') {
-        return !isFutureDate(fixture.Date) && 
-               fixture.CompletionStatus === "Completed" && 
-               searchMatch;
-      }
-      return searchMatch;
     });
   };
   
-  const filteredFixtures = filterFixtures(fixtures);
-  console.log("Filtered fixtures count:", filteredFixtures.length);
+  // Get filtered fixtures based on active tab and search term
+  const getFilteredFixtures = () => {
+    const searchFiltered = filterFixturesBySearchTerm(fixtures);
+    
+    if (activeTab === 'all') return searchFiltered;
+    if (activeTab === 'upcoming') return searchFiltered.filter(fixture => isFutureDate(fixture.Date));
+    if (activeTab === 'completed') {
+      return searchFiltered.filter(fixture => 
+        !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed"
+      );
+    }
+    
+    return searchFiltered;
+  };
+  
+  const filteredFixtures = getFilteredFixtures();
   
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredFixtures.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedFixtures = filteredFixtures.slice(startIndex, startIndex + itemsPerPage);
-  console.log("Paginated fixtures count:", paginatedFixtures.length);
   
-  // FIX: Prepare the fixtures for display and ensure they don't disappear
-  const displayFixtures = paginatedFixtures;
-  // For "all" tab, we need to separately prepare upcoming and completed fixtures from displayFixtures
-  const upcomingFixtures = activeTab === 'all' 
-    ? displayFixtures.filter(fixture => isFutureDate(fixture.Date))
-    : displayFixtures;
-    
-  const completedFixtures = activeTab === 'all' 
-    ? displayFixtures.filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
-    : [];
-
-  console.log("Upcoming fixtures:", upcomingFixtures.length);
-  console.log("Completed fixtures:", completedFixtures.length);
+  // For "all" tab specifically, we need both upcoming and completed fixtures
+  const upcomingFixtures = fixtures.filter(fixture => 
+    isFutureDate(fixture.Date) && 
+    filterFixturesBySearchTerm([fixture]).length > 0
+  );
+  
+  const completedFixtures = fixtures.filter(fixture => 
+    !isFutureDate(fixture.Date) && 
+    fixture.CompletionStatus === "Completed" &&
+    filterFixturesBySearchTerm([fixture]).length > 0
+  );
+  
+  // For pagination in the "all" tab
+  const displayUpcomingFixtures = upcomingFixtures.slice(0, 5);
+  const displayCompletedFixtures = completedFixtures.slice(0, 5);
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo(0, 0);
   };
-
-  // DEBUG: Add more logging to see when/why fixtures disappear
-  useEffect(() => {
-    console.log("Tab changed or filters updated:", {
-      activeTab, 
-      filteredCount: filteredFixtures.length,
-      displayCount: displayFixtures.length,
-      upcomingCount: upcomingFixtures.length, 
-      completedCount: completedFixtures.length
-    });
-  }, [activeTab, filteredFixtures.length, displayFixtures.length, upcomingFixtures.length, completedFixtures.length]);
 
   return (
     <MainLayout>
@@ -192,6 +186,7 @@ const Fixtures = () => {
         <Tabs defaultValue="all" className="w-full" onValueChange={(value) => {
           setActiveTab(value);
           setCurrentPage(1); // Reset to first page when changing tabs
+          console.log("Changed to tab:", value);
         }}>
           <TabsList className="mb-4">
             <TabsTrigger value="all">All Fixtures</TabsTrigger>
@@ -207,19 +202,10 @@ const Fixtures = () => {
             <div className="bg-destructive/10 p-4 rounded-md text-destructive">
               {error}
             </div>
-          ) : filteredFixtures.length === 0 ? (
-            <div className="bg-card rounded-lg border shadow-sm p-6 text-center">
-              <Calendar className="mx-auto h-12 w-12 text-primary/50" />
-              <h2 className="mt-4 text-xl font-medium">No Fixtures Found</h2>
-              <p className="mt-2 text-muted-foreground">
-                {searchTerm ? "No fixtures match your search criteria." : "There are no fixtures available for the current season."}
-              </p>
-            </div>
           ) : (
             <>
               <TabsContent value="all" className="space-y-8">
-                {/* FIX: Don't check length here, as that's what's causing the disappearing content */}
-                {/* Upcoming Fixtures - Always show section if we're in "All" tab */}
+                {/* Upcoming Fixtures Section */}
                 <div className="bg-card rounded-lg border shadow-sm">
                   <div className="p-4 flex justify-between items-center border-b">
                     <h2 className="font-semibold text-lg flex items-center gap-2">
@@ -230,7 +216,7 @@ const Fixtures = () => {
                   
                   <ScrollArea className="h-full max-h-[400px]">
                     <div className="p-4">
-                      {upcomingFixtures.length > 0 ? (
+                      {displayUpcomingFixtures.length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -243,7 +229,7 @@ const Fixtures = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {upcomingFixtures.map((fixture) => (
+                            {displayUpcomingFixtures.map((fixture) => (
                               <TableRow key={fixture.Id} className="hover:bg-muted/50">
                                 <TableCell>
                                   <div className="font-medium">
@@ -281,7 +267,7 @@ const Fixtures = () => {
                   </ScrollArea>
                 </div>
                 
-                {/* Completed Fixtures / Results - Always show section if we're in "All" tab */}
+                {/* Completed Fixtures / Results */}
                 <div className="bg-card rounded-lg border shadow-sm">
                   <div className="p-4 flex justify-between items-center border-b">
                     <h2 className="font-semibold text-lg flex items-center gap-2">
@@ -292,7 +278,7 @@ const Fixtures = () => {
                   
                   <ScrollArea className="h-full max-h-[400px]">
                     <div className="p-4">
-                      {completedFixtures.length > 0 ? (
+                      {displayCompletedFixtures.length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -304,7 +290,7 @@ const Fixtures = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {completedFixtures.map((fixture) => (
+                            {displayCompletedFixtures.map((fixture) => (
                               <TableRow key={fixture.Id} className="hover:bg-muted/50">
                                 <TableCell>
                                   <div className="font-medium">
@@ -465,7 +451,7 @@ const Fixtures = () => {
           )}
         </Tabs>
         
-        {!loading && filteredFixtures.length > 0 && totalPages > 1 && (
+        {!loading && filteredFixtures.length > 0 && totalPages > 1 && activeTab !== 'all' && (
           <Pagination className="mt-6">
             <PaginationContent>
               <PaginationItem>
