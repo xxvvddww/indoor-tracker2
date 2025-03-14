@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Users, Search, TrendingUp, Award, Calendar, User, Shield, ChevronUp, ChevronDown } from 'lucide-react';
 import { Team, Fixture } from '../types/cricket';
+import LoadingSpinner from '../components/ui/loading-spinner';
 
 const Teams = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,97 +24,121 @@ const Teams = () => {
   });
 
   // Fetch fixtures data to calculate team statistics
-  const { data: fixtures, isLoading: fixturesLoading } = useQuery({
+  const { data: fixtures, isLoading: fixturesLoading, error: fixturesError } = useQuery({
     queryKey: ['fixtures', DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID],
     queryFn: () => fetchFixtures(DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID),
   });
 
   // Team statistics calculation
   const teamStats = useMemo(() => {
-    if (!teams || !fixtures) return [];
+    if (!teams || !fixtures || teams.length === 0) return [];
 
     return teams.map(team => {
-      // Filter fixtures for this team
-      const teamFixtures = fixtures.filter(
-        fixture => fixture.HomeTeamId === team.Id || fixture.AwayTeamId === team.Id
-      );
+      try {
+        // Filter fixtures for this team
+        const teamFixtures = fixtures.filter(
+          fixture => fixture.HomeTeamId === team.Id || fixture.AwayTeamId === team.Id
+        );
 
-      // Calculate basic stats
-      const totalMatches = teamFixtures.length;
-      const completedMatches = teamFixtures.filter(fixture => 
-        fixture.CompletionStatus === 'Completed'
-      ).length;
+        // Calculate basic stats
+        const totalMatches = teamFixtures.length;
+        const completedMatches = teamFixtures.filter(fixture => 
+          fixture.CompletionStatus === 'Completed'
+        ).length;
 
-      // Wins, losses, and draws
-      let wins = 0;
-      let losses = 0;
-      let draws = 0;
-      let runsScored = 0;
-      let runsConceded = 0;
-      let lastFiveResults: string[] = [];
+        // Wins, losses, and draws
+        let wins = 0;
+        let losses = 0;
+        let draws = 0;
+        let runsScored = 0;
+        let runsConceded = 0;
+        let lastFiveResults: string[] = [];
 
-      teamFixtures.forEach(fixture => {
-        if (fixture.CompletionStatus === 'Completed') {
-          const isHomeTeam = fixture.HomeTeamId === team.Id;
-          const homeScore = parseInt(fixture.HomeTeamScore || '0');
-          const awayScore = parseInt(fixture.AwayTeamScore || '0');
+        teamFixtures.forEach(fixture => {
+          if (fixture.CompletionStatus === 'Completed') {
+            const isHomeTeam = fixture.HomeTeamId === team.Id;
+            const homeScore = parseInt(fixture.HomeTeamScore || '0');
+            const awayScore = parseInt(fixture.AwayTeamScore || '0');
 
-          // Add runs
-          if (isHomeTeam) {
-            runsScored += homeScore;
-            runsConceded += awayScore;
-          } else {
-            runsScored += awayScore;
-            runsConceded += homeScore;
+            // Add runs
+            if (isHomeTeam) {
+              runsScored += homeScore;
+              runsConceded += awayScore;
+            } else {
+              runsScored += awayScore;
+              runsConceded += homeScore;
+            }
+
+            // Determine match result
+            if (homeScore === awayScore) {
+              draws++;
+              lastFiveResults.push('D');
+            } else if ((isHomeTeam && homeScore > awayScore) || (!isHomeTeam && awayScore > homeScore)) {
+              wins++;
+              lastFiveResults.push('W');
+            } else {
+              losses++;
+              lastFiveResults.push('L');
+            }
           }
+        });
 
-          // Determine match result
-          if (homeScore === awayScore) {
-            draws++;
-            lastFiveResults.push('D');
-          } else if ((isHomeTeam && homeScore > awayScore) || (!isHomeTeam && awayScore > homeScore)) {
-            wins++;
-            lastFiveResults.push('W');
-          } else {
-            losses++;
-            lastFiveResults.push('L');
-          }
-        }
-      });
+        // Get the most recent 5 results (reversed to show newest last)
+        lastFiveResults = lastFiveResults.slice(-5).reverse();
 
-      // Get the most recent 5 results (reversed to show newest last)
-      lastFiveResults = lastFiveResults.slice(-5).reverse();
+        // Calculate win percentage
+        const winPercentage = completedMatches > 0 
+          ? ((wins / completedMatches) * 100).toFixed(1) 
+          : '0.0';
 
-      // Calculate win percentage
-      const winPercentage = completedMatches > 0 
-        ? ((wins / completedMatches) * 100).toFixed(1) 
-        : '0.0';
+        // Calculate run rate
+        const runRate = completedMatches > 0 
+          ? (runsScored / completedMatches).toFixed(1) 
+          : '0.0';
 
-      // Calculate run rate
-      const runRate = completedMatches > 0 
-        ? (runsScored / completedMatches).toFixed(1) 
-        : '0.0';
+        // Calculate net run rate safely
+        const netRunRate = completedMatches > 0 
+          ? ((runsScored - runsConceded) / completedMatches).toFixed(2)
+          : '0.00';
 
-      return {
-        ...team,
-        totalMatches,
-        completedMatches,
-        wins,
-        losses,
-        draws,
-        winPercentage,
-        runsScored,
-        runsConceded,
-        runRate,
-        lastFiveResults,
-        netRunRate: ((runsScored - runsConceded) / completedMatches).toFixed(2)
-      };
+        return {
+          ...team,
+          totalMatches,
+          completedMatches,
+          wins,
+          losses,
+          draws,
+          winPercentage,
+          runsScored,
+          runsConceded,
+          runRate,
+          lastFiveResults,
+          netRunRate
+        };
+      } catch (error) {
+        console.error(`Error calculating stats for team ${team.Name}:`, error);
+        // Return team with default values if calculation fails
+        return {
+          ...team,
+          totalMatches: 0,
+          completedMatches: 0,
+          wins: 0,
+          losses: 0,
+          draws: 0,
+          winPercentage: '0.0',
+          runsScored: 0,
+          runsConceded: 0,
+          runRate: '0.0',
+          lastFiveResults: [],
+          netRunRate: '0.00'
+        };
+      }
     });
   }, [teams, fixtures]);
 
   // Filtering teams based on search query
   const filteredTeams = useMemo(() => {
-    if (!teamStats) return [];
+    if (!teamStats || teamStats.length === 0) return [];
     
     return teamStats.filter(team => 
       team.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -123,7 +148,7 @@ const Teams = () => {
 
   // Sorting teams
   const sortedTeams = useMemo(() => {
-    if (!filteredTeams) return [];
+    if (!filteredTeams || filteredTeams.length === 0) return [];
 
     return [...filteredTeams].sort((a, b) => {
       let comparison = 0;
@@ -201,6 +226,28 @@ const Teams = () => {
   // Check if data is still loading
   const isLoading = teamsLoading || fixturesLoading;
 
+  // Mock data for demonstration when API fails
+  const mockTeams = [
+    { Id: "1", Name: "Marlboro Men", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 5, losses: 2, draws: 1, winPercentage: "62.5", runsScored: 450, runsConceded: 380, runRate: "56.3", netRunRate: "8.75", lastFiveResults: ["W", "W", "L", "W", "D"] },
+    { Id: "2", Name: "Tri-Hards", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 6, losses: 1, draws: 1, winPercentage: "75.0", runsScored: 520, runsConceded: 410, runRate: "65.0", netRunRate: "13.75", lastFiveResults: ["W", "W", "W", "L", "W"] },
+    { Id: "3", Name: "Thunder Spirits", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 4, losses: 3, draws: 1, winPercentage: "50.0", runsScored: 480, runsConceded: 470, runRate: "60.0", netRunRate: "1.25", lastFiveResults: ["L", "W", "W", "L", "W"] },
+    { Id: "4", Name: "Cricket Masters", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 7, losses: 1, draws: 0, winPercentage: "87.5", runsScored: 560, runsConceded: 430, runRate: "70.0", netRunRate: "16.25", lastFiveResults: ["W", "W", "W", "W", "L"] },
+  ];
+
+  // Use mock data if API returns error
+  const displayTeams = teamsError ? mockTeams : sortedTeams;
+  const totalTeams = teamsError ? mockTeams.length : (teams?.length || 0);
+  const uniqueDivisions = teamsError ? 
+    new Set(mockTeams.map(t => t.DivisionName).filter(Boolean)).size : 
+    (teams?.length ? new Set(teams.map(t => t.DivisionName).filter(Boolean)).size : 0);
+  const totalMatches = fixturesError ? 
+    mockTeams.reduce((sum, team) => sum + team.totalMatches, 0) / 2 : 
+    (fixtures?.length || 0);
+  
+  const avgRunRate = teamsError ? 
+    (mockTeams.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / mockTeams.length).toFixed(2) :
+    (teamStats?.length ? (teamStats.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / teamStats.length).toFixed(2) : "0.00");
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -227,7 +274,7 @@ const Teams = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Total Teams</p>
                   <h3 className="text-2xl font-bold">
-                    {isLoading ? "..." : teamStats?.length || 0}
+                    {isLoading ? <LoadingSpinner size={4} /> : totalTeams}
                   </h3>
                 </div>
               </div>
@@ -241,7 +288,7 @@ const Teams = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Divisions</p>
                   <h3 className="text-2xl font-bold">
-                    {isLoading ? "..." : new Set(teamStats?.map(t => t.DivisionName).filter(Boolean)).size || 0}
+                    {isLoading ? <LoadingSpinner size={4} /> : uniqueDivisions}
                   </h3>
                 </div>
               </div>
@@ -255,7 +302,7 @@ const Teams = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Total Matches</p>
                   <h3 className="text-2xl font-bold">
-                    {isLoading ? "..." : fixtures?.length || 0}
+                    {isLoading ? <LoadingSpinner size={4} /> : totalMatches}
                   </h3>
                 </div>
               </div>
@@ -269,12 +316,7 @@ const Teams = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Avg. Run Rate</p>
                   <h3 className="text-2xl font-bold">
-                    {isLoading 
-                      ? "..." 
-                      : teamStats?.length 
-                        ? (teamStats.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / teamStats.length).toFixed(2)
-                        : "0.00"
-                    }
+                    {isLoading ? <LoadingSpinner size={4} /> : avgRunRate}
                   </h3>
                 </div>
               </div>
@@ -284,36 +326,41 @@ const Teams = () => {
         
         {isLoading && (
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-center p-8">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <CardContent className="pt-6 py-12">
+              <div className="flex flex-col items-center justify-center p-8 gap-4">
+                <LoadingSpinner size={8} />
+                <p className="text-muted-foreground">Loading team data...</p>
               </div>
             </CardContent>
           </Card>
         )}
         
-        {teamsError && (
-          <Card className="border-destructive">
+        {teamsError && !isLoading && (
+          <Card className="border-yellow-500">
             <CardHeader>
-              <CardTitle className="text-destructive">Error</CardTitle>
-              <CardDescription>Failed to load teams data</CardDescription>
+              <CardTitle className="text-yellow-600">API Error</CardTitle>
+              <CardDescription>Using sample data for demonstration</CardDescription>
             </CardHeader>
             <CardContent>
-              <p>There was an error loading the teams. Please try again later.</p>
+              <p className="mb-4">There was an error loading the teams data from the API. We're showing sample data for demonstration purposes.</p>
+              <p className="text-sm text-muted-foreground">Error details: {teamsError instanceof Error ? teamsError.message : 'Unknown error'}</p>
             </CardContent>
           </Card>
         )}
         
-        {!isLoading && !teamsError && teamStats && teamStats.length === 0 && (
+        {!isLoading && !teamsError && teams && teams.length === 0 && (
           <Card>
             <CardHeader>
               <CardTitle>No Teams Found</CardTitle>
               <CardDescription>There are no teams available for the current season</CardDescription>
             </CardHeader>
+            <CardContent>
+              <p>No team data was returned by the API for the current season. Please check back later or try a different season.</p>
+            </CardContent>
           </Card>
         )}
         
-        {!isLoading && !teamsError && teamStats && teamStats.length > 0 && (
+        {displayTeams && displayTeams.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -321,7 +368,9 @@ const Teams = () => {
                 <span>Team Rankings</span>
               </CardTitle>
               <CardDescription>
-                Team performance statistics for the current season
+                {teamsError ? 
+                  "Sample data for demonstration purposes" : 
+                  "Team performance statistics for the current season"}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -389,7 +438,7 @@ const Teams = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedTeams.map((team) => (
+                    {displayTeams.map((team) => (
                       <TableRow key={team.Id}>
                         <TableCell className="font-medium">{team.Name}</TableCell>
                         <TableCell>{team.DivisionName || '-'}</TableCell>
