@@ -185,13 +185,13 @@ const Teams = () => {
   const renderResultBadge = (result: string) => {
     switch (result) {
       case 'W':
-        return <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">W</div>;
+        return <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold text-xs">W</div>;
       case 'L':
-        return <div className="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 font-semibold">L</div>;
+        return <div className="w-6 h-6 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 font-semibold text-xs">L</div>;
       case 'D':
-        return <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold">D</div>;
+        return <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold text-xs">D</div>;
       default:
-        return <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">-</div>;
+        return <div className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 text-xs">-</div>;
     }
   };
 
@@ -393,7 +393,7 @@ const Teams = () => {
                         <TableCell className="text-center">{team.winPercentage}%</TableCell>
                         <TableCell className="text-center">{team.skinsWon}</TableCell>
                         <TableCell>
-                          <div className="flex justify-center gap-1.5">
+                          <div className="flex justify-center gap-1">
                             {team.lastFiveResults && team.lastFiveResults.length > 0 ? (
                               team.lastFiveResults.map((result, idx) => (
                                 <span key={idx}>{renderResultBadge(result)}</span>
