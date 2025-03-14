@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -97,16 +98,37 @@ const Fixtures = () => {
   const totalPages = Math.max(1, Math.ceil(sortedDates.length / itemsPerPage));
 
   const sortDivisions = (divisionNames: string[]): string[] => {
-    const sortOrder: Record<string, number> = {
+    // Define a specific order for divisions
+    const divisionOrder: { [key: string]: number } = {
       "Division 1": 1,
       "Division 2": 2,
       "Division 3": 3,
-      "No Division": 999
+      "No Division": 999 // Always last
     };
     
     return divisionNames.sort((a, b) => {
-      const orderA = sortOrder[a] || (a.startsWith("Division") ? parseInt(a.replace("Division", "").trim()) : 500);
-      const orderB = sortOrder[b] || (b.startsWith("Division") ? parseInt(b.replace("Division", "").trim()) : 500);
+      // Get the order for division a
+      let orderA = divisionOrder[a];
+      if (orderA === undefined) {
+        // Handle numbered divisions not explicitly defined
+        if (a.match(/^Division \d+$/)) {
+          orderA = parseInt(a.replace("Division", "").trim(), 10);
+        } else {
+          orderA = 500; // Middle priority for other named divisions
+        }
+      }
+      
+      // Get the order for division b
+      let orderB = divisionOrder[b];
+      if (orderB === undefined) {
+        // Handle numbered divisions not explicitly defined
+        if (b.match(/^Division \d+$/)) {
+          orderB = parseInt(b.replace("Division", "").trim(), 10);
+        } else {
+          orderB = 500; // Middle priority for other named divisions
+        }
+      }
+      
       return orderA - orderB;
     });
   };
@@ -383,3 +405,4 @@ const Fixtures = () => {
 };
 
 export default Fixtures;
+
