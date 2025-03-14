@@ -19,6 +19,7 @@ interface ResponsiveTableProps {
   keyField?: string;
   superCompact?: boolean;
   darkMode?: boolean;
+  ultraCompact?: boolean;
 }
 
 export function ResponsiveTable({
@@ -29,6 +30,7 @@ export function ResponsiveTable({
   keyField = "id",
   superCompact = false,
   darkMode = false,
+  ultraCompact = false,
 }: ResponsiveTableProps) {
   const isMobile = useIsMobile();
   const compactMode = isMobile || superCompact;
@@ -47,14 +49,14 @@ export function ResponsiveTable({
   };
 
   return (
-    <div className={`${compactMode ? "super-compact-table overflow-x-auto -mx-1" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
-      <Table className={compactMode ? "text-xxs border-collapse" : ""}>
+    <div className={`${compactMode ? "super-compact-table overflow-x-auto -mx-1" : ""} ${ultraCompact ? "ultra-compact-table" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
+      <Table className={compactMode ? `text-xxs border-collapse ${ultraCompact ? "min-w-full" : ""}` : ""}>
         <TableHeader>
-          <TableRow className={compactMode ? "h-6" : ""}>
+          <TableRow className={`${compactMode ? "h-5" : ""} ${ultraCompact ? "h-4" : ""}`}>
             {visibleColumns.map((column) => (
               <TableHead 
                 key={column.key} 
-                className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${column.className || ""}`}
+                className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${column.className || ""}`}
               >
                 {column.header}
               </TableHead>
@@ -65,12 +67,12 @@ export function ResponsiveTable({
           {data.map((row, rowIndex) => (
             <TableRow 
               key={getRowKey(row, rowIndex)} 
-              className={`${compactMode ? "h-6" : ""} ${getRowClass(row, rowIndex)}`}
+              className={`${compactMode ? "h-5" : ""} ${ultraCompact ? "h-4" : ""} ${getRowClass(row, rowIndex)}`}
             >
               {visibleColumns.map((column) => (
                 <TableCell 
                   key={`${getRowKey(row, rowIndex)}-${column.key}`} 
-                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${column.className || ""}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${column.className || ""}`}
                 >
                   {column.render 
                     ? column.render(row[column.key], row) 

@@ -17,4 +17,9 @@
     font-size: 0.65rem;
     line-height: 1rem;
   }
+  
+  .text-xxxs {
+    font-size: 0.6rem;
+    line-height: 0.9rem;
+  }
 }

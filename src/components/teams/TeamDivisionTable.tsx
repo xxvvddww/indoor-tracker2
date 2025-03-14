@@ -6,6 +6,7 @@ import { Shield, ChevronDown, ChevronUp } from 'lucide-react';
 import { Team } from '@/types/cricket';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface TeamDivisionTableProps {
   divisionName: string;
@@ -41,62 +42,62 @@ const TeamDivisionTable = ({
       className="border border-gray-700 dark:border-gray-700 rounded-lg overflow-hidden my-4 bg-background/30"
     >
       <CollapsibleTrigger 
-        className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-3'} bg-muted/10 hover:bg-muted/20 transition-colors`}
+        className={`flex items-center justify-between w-full ${compactMode ? 'p-1.5' : 'p-3'} bg-muted/10 hover:bg-muted/20 transition-colors`}
         showArrow={false}
       >
-        <div className="flex items-center gap-2 font-medium text-sm">
-          <Shield className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
+        <div className="flex items-center gap-2 font-medium text-xs">
+          <Shield className={`${compactMode ? 'h-3 w-3' : 'h-5 w-5'} text-primary`} />
           <span>{divisionName}</span>
-          <Badge variant="outline" className={compactMode ? 'text-xxs py-0 px-1' : ''}>{teams.length} Teams</Badge>
+          <Badge variant="outline" className={compactMode ? 'text-[0.6rem] py-0 px-1 h-4' : ''}>{teams.length} Teams</Badge>
         </div>
         {isOpen ? 
-          <ChevronUp className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'}`} /> : 
-          <ChevronDown className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'}`} />}
+          <ChevronUp className={`${compactMode ? 'h-3 w-3' : 'h-5 w-5'}`} /> : 
+          <ChevronDown className={`${compactMode ? 'h-3 w-3' : 'h-5 w-5'}`} />}
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="overflow-x-auto">
-          <Table className={compactMode ? 'text-xxs border-collapse' : ''}>
+          <Table className={compactMode ? 'text-[0.6rem] border-collapse' : ''}>
             <TableHeader className="sticky top-0 bg-card/80">
-              <TableRow className={compactMode ? 'h-7' : ''}>
-                <TableHead className={`${compactMode ? 'w-[100px] py-1 px-1' : 'w-[180px]'}`}>
+              <TableRow className={compactMode ? 'h-5' : ''}>
+                <TableHead className={`${compactMode ? 'w-[100px] py-0.5 px-0.5' : 'w-[180px]'}`}>
                   Team
                 </TableHead>
-                <TableHead className="text-center w-[20px] py-1 px-1">
+                <TableHead className="text-center w-[20px] py-0.5 px-0.5">
                   G
                 </TableHead>
-                <TableHead className="text-center w-[20px] py-1 px-1">
+                <TableHead className="text-center w-[20px] py-0.5 px-0.5">
                   W
                 </TableHead>
-                <TableHead className="text-center w-[20px] py-1 px-1">
+                <TableHead className="text-center w-[20px] py-0.5 px-0.5">
                   L
                 </TableHead>
-                <TableHead className="text-center w-[20px] py-1 px-1">
+                <TableHead className="text-center w-[20px] py-0.5 px-0.5">
                   D
                 </TableHead>
-                <TableHead className="text-center w-[25px] py-1 px-1">
+                <TableHead className="text-center w-[25px] py-0.5 px-0.5">
                   %
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {teams.map((team) => (
-                <TableRow key={team.Id} className={compactMode ? 'h-7' : ''}>
-                  <TableCell className="font-medium truncate py-1 px-1">
+                <TableRow key={team.Id} className={compactMode ? 'h-5' : ''}>
+                  <TableCell className="font-medium truncate py-0.5 px-0.5">
                     {team.Name}
                   </TableCell>
-                  <TableCell className="text-center py-1 px-1">
+                  <TableCell className="text-center py-0.5 px-0.5">
                     {team.completedMatches || team.Games || 0}
                   </TableCell>
-                  <TableCell className="text-center py-1 px-1">
+                  <TableCell className="text-center py-0.5 px-0.5">
                     {team.Wins || 0}
                   </TableCell>
-                  <TableCell className="text-center py-1 px-1">
+                  <TableCell className="text-center py-0.5 px-0.5">
                     {team.Losses || 0}
                   </TableCell>
-                  <TableCell className="text-center py-1 px-1">
+                  <TableCell className="text-center py-0.5 px-0.5">
                     {team.Draws || 0}
                   </TableCell>
-                  <TableCell className="text-center py-1 px-1">
+                  <TableCell className="text-center py-0.5 px-0.5">
                     {team.WinPercentage 
                       ? (typeof team.WinPercentage === 'string' ? parseInt(team.WinPercentage) : Math.round(team.WinPercentage)) 
                       : 0}%

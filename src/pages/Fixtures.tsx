@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -180,10 +179,10 @@ const Fixtures = () => {
       key: "Teams",
       header: "Teams",
       render: (_: any, row: Fixture) => (
-        <div className="font-medium text-xs">
+        <div className="font-medium text-[0.6rem]">
           {row.HomeTeam || 'TBD'} vs {row.AwayTeam || 'TBD'}
           {isToday(row.Date) && 
-            <span className="ml-1 text-primary text-xxs">Today</span>
+            <span className="ml-1 text-primary text-xxxs">Today</span>
           }
         </div>
       )
@@ -191,21 +190,21 @@ const Fixtures = () => {
     {
       key: "StartTime",
       header: "Time",
-      className: "w-12 text-right",
+      className: "w-10 text-right",
       render: (value: string) => (
-        <div className="flex items-center justify-end gap-1">
-          <Clock className="h-3 w-3 text-muted-foreground" />
-          <span className="text-xxs">{value || 'TBD'}</span>
+        <div className="flex items-center justify-end gap-0.5">
+          <Clock className="h-2.5 w-2.5 text-muted-foreground" />
+          <span className="text-[0.6rem]">{value || 'TBD'}</span>
         </div>
       )
     },
     {
       key: "actions",
       header: "",
-      className: "w-6",
+      className: "w-4",
       render: (_: any, row: Fixture) => (
         <Link to={`/match/${row.Id}`} className="text-primary hover:text-primary/80 transition-colors">
-          <ArrowUpRight className="h-3 w-3" />
+          <ArrowUpRight className="h-2.5 w-2.5" />
         </Link>
       )
     }
@@ -217,7 +216,7 @@ const Fixtures = () => {
       header: "Home",
       render: (value: string, row: Fixture) => (
         <span className={cn(
-          "text-xs",
+          "text-[0.6rem]",
           row.HomeTeamWon && "text-green-500 dark:text-green-400 font-medium"
         )}>
           {value || 'TBD'}
@@ -227,15 +226,15 @@ const Fixtures = () => {
     {
       key: "vs",
       header: "",
-      className: "w-6 text-center",
-      render: () => <span className="text-xxs text-muted-foreground">vs</span>
+      className: "w-4 text-center",
+      render: () => <span className="text-[0.6rem] text-muted-foreground">vs</span>
     },
     {
       key: "AwayTeam",
       header: "Away",
       render: (value: string, row: Fixture) => (
         <span className={cn(
-          "text-xs",
+          "text-[0.6rem]",
           row.AwayTeamWon && "text-green-500 dark:text-green-400 font-medium"
         )}>
           {value || 'TBD'}
@@ -245,14 +244,14 @@ const Fixtures = () => {
     {
       key: "ScoreDescription",
       header: "Result",
-      className: "w-16 text-right",
+      className: "w-12 text-right",
       render: (value: string, row: Fixture) => (
-        <div className="flex items-center justify-end gap-1">
-          <span className="text-xxs">
-            {value || `${row.HomeTeamScore} - ${row.AwayTeamScore}`}
+        <div className="flex items-center justify-end gap-0.5">
+          <span className="text-[0.6rem]">
+            {value || `${row.HomeTeamScore}-${row.AwayTeamScore}`}
           </span>
-          <Link to={`/match/${row.Id}`} className="text-primary ml-1">
-            <ArrowUpRight className="h-3 w-3" />
+          <Link to={`/match/${row.Id}`} className="text-primary ml-0.5">
+            <ArrowUpRight className="h-2.5 w-2.5" />
           </Link>
         </div>
       )
@@ -261,10 +260,10 @@ const Fixtures = () => {
 
   return (
     <MainLayout>
-      <ResponsiveContainer className="space-y-3 animate-fade-in">
+      <ResponsiveContainer className="space-y-2 animate-fade-in">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold tracking-tight">Fixtures & Results</h1>
-          <div className="relative w-32 sm:w-64">
+          <h1 className="text-lg font-bold tracking-tight">Fixtures & Results</h1>
+          <div className="relative w-28 sm:w-64">
             <Input
               placeholder="Search..."
               value={searchTerm}
@@ -272,24 +271,24 @@ const Fixtures = () => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pr-8 h-8 text-xs"
+              className="pr-8 h-7 text-xs"
             />
-            <Filter className="absolute right-2 top-2 h-3 w-3 text-muted-foreground" />
+            <Filter className="absolute right-2 top-1.5 h-3 w-3 text-muted-foreground" />
           </div>
         </div>
         
         <Tabs defaultValue="all" className="w-full" onValueChange={handleTabChange}>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
-            <TabsList className="h-8">
-              <TabsTrigger value="all" className="text-xs px-2 py-1">All</TabsTrigger>
-              <TabsTrigger value="upcoming" className="text-xs px-2 py-1">Upcoming</TabsTrigger>
-              <TabsTrigger value="completed" className="text-xs px-2 py-1">Results</TabsTrigger>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 mb-1">
+            <TabsList className="h-7">
+              <TabsTrigger value="all" className="text-[0.65rem] px-2 py-0.5">All</TabsTrigger>
+              <TabsTrigger value="upcoming" className="text-[0.65rem] px-2 py-0.5">Upcoming</TabsTrigger>
+              <TabsTrigger value="completed" className="text-[0.65rem] px-2 py-0.5">Results</TabsTrigger>
             </TabsList>
             
             {activeTab !== 'all' && (
               <div className="flex items-center gap-1 w-full sm:w-auto">
                 <Select value={dateFilter} onValueChange={handleDateFilterChange}>
-                  <SelectTrigger className="w-full sm:w-[120px] h-7 text-xs">
+                  <SelectTrigger className="w-full sm:w-[120px] h-6 text-[0.65rem]">
                     <SelectValue placeholder="Filter date" />
                   </SelectTrigger>
                   <SelectContent>
@@ -304,8 +303,8 @@ const Fixtures = () => {
                 {dateFilter === "custom" && (
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="flex gap-1 h-7 text-xs px-2">
-                        <CalendarIcon className="h-3 w-3" />
+                      <Button variant="outline" className="flex gap-1 h-6 text-[0.65rem] px-2">
+                        <CalendarIcon className="h-2.5 w-2.5" />
                         {selectedDate ? formatDate(selectedDate.toISOString()) : "Pick date"}
                       </Button>
                     </PopoverTrigger>
@@ -333,11 +332,11 @@ const Fixtures = () => {
             </div>
           ) : (
             <>
-              <TabsContent value="all" className="space-y-3 mt-0">
+              <TabsContent value="all" className="space-y-2 mt-0">
                 <Card className="overflow-hidden border border-gray-700 bg-background/30">
-                  <CardHeader className="pb-1 pt-2 px-3">
-                    <CardTitle className="flex items-center gap-1 text-sm">
-                      <Calendar className="h-3.5 w-3.5" />
+                  <CardHeader className="pb-0.5 pt-1.5 px-2">
+                    <CardTitle className="flex items-center gap-1 text-xs">
+                      <Calendar className="h-3 w-3" />
                       Upcoming Fixtures
                     </CardTitle>
                   </CardHeader>
@@ -352,6 +351,7 @@ const Fixtures = () => {
                           columns={upcomingColumns}
                           keyField="Id"
                           superCompact={true}
+                          ultraCompact={true}
                           darkMode={true}
                         />
                       ) : (
@@ -362,9 +362,9 @@ const Fixtures = () => {
                 </Card>
                 
                 <Card className="overflow-hidden border border-gray-700 bg-background/30">
-                  <CardHeader className="pb-1 pt-2 px-3">
-                    <CardTitle className="flex items-center gap-1 text-sm">
-                      <Trophy className="h-3.5 w-3.5" />
+                  <CardHeader className="pb-0.5 pt-1.5 px-2">
+                    <CardTitle className="flex items-center gap-1 text-xs">
+                      <Trophy className="h-3 w-3" />
                       Results
                     </CardTitle>
                   </CardHeader>
@@ -376,6 +376,7 @@ const Fixtures = () => {
                           columns={completedColumns}
                           keyField="Id"
                           superCompact={true}
+                          ultraCompact={true}
                           darkMode={true}
                         />
                       ) : (
@@ -388,9 +389,9 @@ const Fixtures = () => {
               
               <TabsContent value="upcoming" className="mt-0">
                 <Card className="overflow-hidden border border-gray-700 bg-background/30">
-                  <CardHeader className="pb-1 pt-2 px-3">
-                    <CardTitle className="flex items-center gap-1 text-sm">
-                      <Calendar className="h-3.5 w-3.5" />
+                  <CardHeader className="pb-0.5 pt-1.5 px-2">
+                    <CardTitle className="flex items-center gap-1 text-xs">
+                      <Calendar className="h-3 w-3" />
                       Upcoming Fixtures
                     </CardTitle>
                   </CardHeader>
@@ -405,10 +406,11 @@ const Fixtures = () => {
                           columns={upcomingColumns}
                           keyField="Id"
                           superCompact={true}
+                          ultraCompact={true}
                           darkMode={true}
                         />
                       ) : (
-                        <div className="py-4 text-center text-muted-foreground text-sm">
+                        <div className="py-3 text-center text-muted-foreground text-xs">
                           No upcoming fixtures found
                         </div>
                       )}
@@ -419,9 +421,9 @@ const Fixtures = () => {
               
               <TabsContent value="completed" className="mt-0">
                 <Card className="overflow-hidden border border-gray-700 bg-background/30">
-                  <CardHeader className="pb-1 pt-2 px-3">
-                    <CardTitle className="flex items-center gap-1 text-sm">
-                      <Trophy className="h-3.5 w-3.5" />
+                  <CardHeader className="pb-0.5 pt-1.5 px-2">
+                    <CardTitle className="flex items-center gap-1 text-xs">
+                      <Trophy className="h-3 w-3" />
                       Results
                     </CardTitle>
                   </CardHeader>
@@ -433,10 +435,11 @@ const Fixtures = () => {
                           columns={completedColumns}
                           keyField="Id"
                           superCompact={true}
+                          ultraCompact={true}
                           darkMode={true}
                         />
                       ) : (
-                        <div className="py-4 text-center text-muted-foreground text-sm">
+                        <div className="py-3 text-center text-muted-foreground text-xs">
                           No results found
                         </div>
                       )}
@@ -449,12 +452,12 @@ const Fixtures = () => {
         </Tabs>
         
         {!loading && getFixturesForCurrentTab().length > itemsPerPage && activeTab !== 'all' && (
-          <Pagination className="mt-3">
+          <Pagination className="mt-2">
             <PaginationContent className="h-6">
               <PaginationItem>
                 <PaginationPrevious 
                   onClick={() => handlePageChange(currentPage - 1)}
-                  className={`${currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} h-6 w-6 p-0 flex items-center justify-center`} 
+                  className={`${currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} h-5 w-5 p-0 flex items-center justify-center`} 
                 />
               </PaginationItem>
               
@@ -489,7 +492,7 @@ const Fixtures = () => {
                     <PaginationLink
                       isActive={currentPage === pageToShow}
                       onClick={() => handlePageChange(pageToShow)}
-                      className="cursor-pointer h-6 w-6 p-0 flex items-center justify-center text-xs"
+                      className="cursor-pointer h-5 w-5 p-0 flex items-center justify-center text-[0.65rem]"
                     >
                       {pageToShow}
                     </PaginationLink>
@@ -500,7 +503,7 @@ const Fixtures = () => {
               <PaginationItem>
                 <PaginationNext 
                   onClick={() => handlePageChange(currentPage + 1)}
-                  className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} h-6 w-6 p-0 flex items-center justify-center`} 
+                  className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} h-5 w-5 p-0 flex items-center justify-center`} 
                 />
               </PaginationItem>
             </PaginationContent>
