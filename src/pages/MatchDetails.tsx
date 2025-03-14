@@ -8,6 +8,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import { ResponsiveCard } from "@/components/ui/responsive-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Define a simplified type for match display
 type DisplayableMatchInfo = {
@@ -23,6 +24,7 @@ const MatchDetails = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [matchData, setMatchData] = useState<MatchDetailsType | null>(null);
   const [displayInfo, setDisplayInfo] = useState<DisplayableMatchInfo>({ title: "Match Information" });
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const loadMatchData = async () => {
@@ -60,8 +62,8 @@ const MatchDetails = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-4 max-w-full mx-auto">
-        <h1 className="text-xl md:text-2xl font-bold tracking-tight animate-fade-in">Match Details</h1>
+      <div className="space-y-4 w-full mx-auto px-0">
+        <h1 className="text-lg md:text-2xl font-bold tracking-tight animate-fade-in">Match Details</h1>
         
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -74,49 +76,52 @@ const MatchDetails = () => {
               description={displayInfo.date ? `Date: ${displayInfo.date}` : "Date not available"}
               withAnimation
               animationDelay={200}
+              className="overflow-hidden"
             >
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="w-full grid grid-cols-3 mb-4 text-xs sm:text-sm">
+                <TabsList className="w-full grid grid-cols-3 mb-2 text-xxs sm:text-sm">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="teams">Teams</TabsTrigger>
                   <TabsTrigger value="raw">Raw Data</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="overview" className="space-y-4">
+                <TabsContent value="overview" className="space-y-2">
                   {displayInfo.venue && (
-                    <div className="flex items-center justify-between p-2 border-b text-sm">
+                    <div className="flex items-center justify-between p-2 border-b text-xs">
                       <span className="font-medium">Venue</span>
-                      <span className="text-right">{displayInfo.venue}</span>
+                      <span className="text-right text-xxs sm:text-xs max-w-[60%] truncate">{displayInfo.venue}</span>
                     </div>
                   )}
                   
                   {displayInfo.result && (
-                    <div className="flex items-center justify-between p-2 border-b text-sm">
+                    <div className="flex items-center justify-between p-2 border-b text-xs">
                       <span className="font-medium">Result</span>
-                      <span className="text-right">{displayInfo.result}</span>
+                      <span className="text-right text-xxs sm:text-xs max-w-[60%] truncate">{displayInfo.result}</span>
                     </div>
                   )}
                   
                   {/* Add more match details as needed */}
                 </TabsContent>
                 
-                <TabsContent value="teams" className="space-y-4">
+                <TabsContent value="teams" className="space-y-2">
                   {displayInfo.teams && displayInfo.teams.length > 0 ? (
-                    displayInfo.teams.map((team, index) => (
-                      <div key={index} className="p-3 border rounded-md text-sm">
-                        <h3 className="font-bold">{team.Name}</h3>
-                        <p>Team ID: {team.Id || "N/A"}</p>
-                      </div>
-                    ))
+                    <div className="mobile-container">
+                      {displayInfo.teams.map((team, index) => (
+                        <div key={index} className="p-2 border rounded-md text-xs mb-2">
+                          <h3 className="font-bold truncate">{team.Name}</h3>
+                          <p className="text-xxs sm:text-xs">Team ID: {team.Id || "N/A"}</p>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No team information available</p>
+                    <p className="text-xs text-muted-foreground">No team information available</p>
                   )}
                 </TabsContent>
                 
                 <TabsContent value="raw">
-                  <ScrollArea className="h-[300px] rounded-md border text-xs">
-                    <div className="p-3">
-                      <pre className="whitespace-pre-wrap break-words">
+                  <ScrollArea className={`${isMobile ? 'h-[200px]' : 'h-[300px]'} rounded-md border`}>
+                    <div className="p-2">
+                      <pre className="whitespace-pre-wrap break-words text-xxs sm:text-xs">
                         {JSON.stringify(matchData, null, 2)}
                       </pre>
                     </div>
@@ -127,7 +132,7 @@ const MatchDetails = () => {
           </div>
         ) : (
           <ResponsiveCard withAnimation animationDelay={100}>
-            <p>No match data available</p>
+            <p className="text-xs sm:text-sm">No match data available</p>
           </ResponsiveCard>
         )}
       </div>
