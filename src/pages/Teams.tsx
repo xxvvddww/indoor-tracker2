@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTeams, fetchFixtures, fetchPlayerStats, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
 import MainLayout from "../components/layout/MainLayout";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, Search, Trophy, Shield, ChevronUp, ChevronDown, ChevronRight } from 'lucide-react';
+import { Users, Search, Trophy, Shield, ChevronUp, ChevronDown } from 'lucide-react';
 import { Team, Fixture, Player } from '../types/cricket';
 import LoadingSpinner from '../components/ui/loading-spinner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -199,42 +199,40 @@ const Teams = () => {
 
   React.useEffect(() => {
     if (Object.keys(teamsByDivision).length > 0) {
-      const initialOpenState: Record<string, boolean> = {};
-      Object.keys(teamsByDivision).forEach(division => {
-        initialOpenState[division] = true;
-      });
-      setOpenDivisions(initialOpenState);
+      if (Object.keys(openDivisions).length === 0) {
+        const initialOpenState: Record<string, boolean> = {};
+        Object.keys(teamsByDivision).forEach(division => {
+          initialOpenState[division] = true;
+        });
+        setOpenDivisions(initialOpenState);
+      }
     }
   }, [teamsByDivision]);
 
-  const toggleDivision = (division: string) => {
+  const toggleDivision = useCallback((division: string) => {
     setOpenDivisions(prev => ({
       ...prev,
       [division]: !prev[division]
     }));
-  };
+  }, []);
 
-  const handleSort = (column: string) => {
-    const currentOpenState = { ...openDivisions };
-    
+  const handleSort = useCallback((column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortColumn(column);
       setSortDirection('asc');
     }
-    
-    setOpenDivisions(currentOpenState);
-  };
+  }, [sortColumn, sortDirection]);
 
-  const renderSortIcon = (column: string) => {
+  const renderSortIcon = useCallback((column: string) => {
     if (sortColumn !== column) return null;
     return sortDirection === 'asc' 
       ? <ChevronUp className="h-4 w-4 ml-1 inline" /> 
       : <ChevronDown className="h-4 w-4 ml-1 inline" />;
-  };
+  }, [sortColumn, sortDirection]);
 
-  const renderResultBadge = (result: string) => {
+  const renderResultBadge = useCallback((result: string) => {
     const size = isMobile ? "w-4 h-4" : "w-6 h-6";
     const fontSize = isMobile ? "text-[9px]" : "text-xs";
     
@@ -248,7 +246,7 @@ const Teams = () => {
       default:
         return <div className={`${size} rounded-full border border-gray-200 flex items-center justify-center text-gray-400 ${fontSize}`}>-</div>;
     }
-  };
+  }, [isMobile]);
 
   const isLoading = teamsLoading || fixturesLoading || playersLoading;
 
@@ -275,9 +273,9 @@ const Teams = () => {
         ? new Set(mockTeams.map(t => t.DivisionName).filter(Boolean)).size 
         : (teams?.length ? new Set(teams.map(t => t.DivisionName).filter(Boolean)).size : 0));
 
-  const getCompactLayout = () => {
+  const getCompactLayout = useCallback(() => {
     return isMobile;
-  };
+  }, [isMobile]);
 
   const compactMode = getCompactLayout();
 
@@ -398,11 +396,13 @@ const Teams = () => {
                 {sortedDivisions.map(([division, divisionTeams]) => (
                   <Collapsible 
                     key={division}
-                    open={openDivisions[division]}
+                    open={openDivisions[division] || false}
                     onOpenChange={() => toggleDivision(division)}
                     className={`${compactMode ? 'border-0' : 'border'} rounded-lg overflow-hidden`}
                   >
-                    <CollapsibleTrigger className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}>
+                    <CollapsibleTrigger 
+                      className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}
+                    >
                       <div className="flex items-center gap-2 font-medium text-sm">
                         <Shield className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
                         <span>{division}</span>

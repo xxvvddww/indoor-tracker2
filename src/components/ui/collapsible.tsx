@@ -12,8 +12,9 @@ const CollapsibleTrigger = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.Trigger> & {
     showArrow?: boolean
     customIcon?: React.ReactNode
+    preserveState?: boolean
   }
->(({ className, children, showArrow = true, customIcon, ...props }, ref) => (
+>(({ className, children, showArrow = true, customIcon, preserveState = false, ...props }, ref) => (
   <CollapsiblePrimitive.Trigger
     ref={ref}
     className={cn(
