@@ -9,6 +9,7 @@ interface Column {
   hideOnMobile?: boolean;
   render?: (value: any, row: any) => React.ReactNode;
   className?: string;
+  align?: "left" | "right" | "center";
 }
 
 interface ResponsiveTableProps {
@@ -52,14 +53,13 @@ export function ResponsiveTable({
     return rowClassName;
   };
 
-  let tableClassName = "";
+  let tableClassName = "w-full ";
   if (compactMode) tableClassName += "text-xxs border-collapse ";
   if (ultraCompact) tableClassName += "ultra-compact-table ";
   if (resultsMode) tableClassName += "results-table ";
-  if (ultraCompact) tableClassName += "min-w-full ";
 
   return (
-    <div className={`${compactMode ? "super-compact-table overflow-x-auto w-full" : ""} ${resultsMode ? "-mx-0 px-0" : "-mx-1"} ${ultraCompact ? "ultra-compact-table" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
+    <div className={`${compactMode ? "super-compact-table overflow-x-auto w-full" : ""} ${resultsMode ? "-mx-0 px-0" : "-mx-0"} ${ultraCompact ? "ultra-compact-table" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
       <Table className={tableClassName}>
         {!hideHeader && (
           <TableHeader>
@@ -67,7 +67,7 @@ export function ResponsiveTable({
               {visibleColumns.map((column) => (
                 <TableHead 
                   key={column.key} 
-                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-0 px-1 text-[0.65rem]" : ""} ${column.className || ""}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-0 px-1 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                 >
                   {column.header}
                 </TableHead>
@@ -79,12 +79,12 @@ export function ResponsiveTable({
           {data.map((row, rowIndex) => (
             <TableRow 
               key={getRowKey(row, rowIndex)} 
-              className={`${compactMode ? "h-5" : ""} ${ultraCompact ? "h-4" : ""} ${resultsMode ? "h-8" : ""} ${getRowClass(row, rowIndex)}`}
+              className={`${compactMode ? "h-5" : ""} ${ultraCompact ? "h-4" : ""} ${resultsMode ? "h-6" : ""} ${getRowClass(row, rowIndex)}`}
             >
               {visibleColumns.map((column) => (
                 <TableCell 
                   key={`${getRowKey(row, rowIndex)}-${column.key}`} 
-                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1 px-1 text-[0.65rem]" : ""} ${column.className || ""}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1 px-1 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                 >
                   {column.render 
                     ? column.render(row[column.key], row) 
