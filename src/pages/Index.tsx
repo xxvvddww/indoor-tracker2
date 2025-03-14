@@ -18,8 +18,7 @@ import {
   Info,
   AlertCircle,
   ChevronDown,
-  ChevronUp,
-  Filter
+  ChevronUp
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -512,7 +511,7 @@ const Index = () => {
                       onValueChange={(value) => setActiveStatsTab(value as "batting" | "bowling")}
                       className="w-full"
                     >
-                      <TabsList className="w-full grid grid-cols-2 mb-2 bg-slate-900 dark:bg-slate-800 p-1 rounded-md">
+                      <TabsList className="w-full grid grid-cols-2 mb-4 bg-slate-900 dark:bg-slate-800 p-1 rounded-md">
                         <TabsTrigger 
                           value="batting" 
                           className="data-[state=active]:bg-slate-800 data-[state=active]:dark:bg-slate-700 text-white data-[state=active]:text-white"
@@ -527,26 +526,24 @@ const Index = () => {
                         </TabsTrigger>
                       </TabsList>
                       
-                      <div className="mb-4">
-                        <ToggleGroup 
-                          type="single" 
-                          value={activeDivision}
-                          onValueChange={(value) => {
-                            if (value) setActiveDivision(value);
-                          }}
-                          className="w-full grid grid-cols-3 bg-slate-900 dark:bg-slate-800 p-1 rounded-md"
-                          darkStyle={true}
-                        >
-                          <ToggleGroupItem value="all" darkStyle={true}>
-                            All
+                      <ToggleGroup 
+                        type="single" 
+                        value={activeDivision}
+                        onValueChange={(value) => {
+                          if (value) setActiveDivision(value);
+                        }}
+                        className="w-full grid grid-cols-4 mb-4 bg-slate-900 dark:bg-slate-800 p-1 rounded-md"
+                        darkStyle={true}
+                      >
+                        <ToggleGroupItem value="all" darkStyle={true}>
+                          All
+                        </ToggleGroupItem>
+                        {allDivisions.map(div => (
+                          <ToggleGroupItem key={div} value={div} darkStyle={true}>
+                            {div}
                           </ToggleGroupItem>
-                          {allDivisions.map(div => (
-                            <ToggleGroupItem key={div} value={div} darkStyle={true}>
-                              {div}
-                            </ToggleGroupItem>
-                          ))}
-                        </ToggleGroup>
-                      </div>
+                        ))}
+                      </ToggleGroup>
                       
                       <TabsContent value="batting" className="mt-0">
                         <div className="space-y-2">
@@ -632,3 +629,4 @@ const Index = () => {
 };
 
 export default Index;
+
