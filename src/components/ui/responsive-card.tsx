@@ -45,21 +45,21 @@ const ResponsiveCard = React.forwardRef<HTMLDivElement, ResponsiveCardProps>(
       glass: "bg-opacity-20 backdrop-blur-sm border-opacity-20",
       outline: "bg-transparent border-2",
       glow: "shadow-[0_0_20px_rgba(0,255,170,0.15)]",
-      gradient: "bg-gradient-to-b from-background to-background/80 border-0",
+      gradient: "bg-gradient-to-b from-card/60 to-background border-0",
       modern: "card-modern",
       stats: "card-stats border-0"
     };
 
     const accentStyles = {
       default: "",
-      green: "border-green-500",
-      blue: "border-blue-500",
-      purple: "border-purple-500",
-      amber: "border-amber-500",
-      red: "border-red-500",
-      orange: "border-orange-500",
-      teal: "border-teal-500",
-      cyan: "border-cyan-500"
+      green: "border-green-500/50",
+      blue: "border-blue-500/50",
+      purple: "border-purple-500/50",
+      amber: "border-amber-500/50",
+      red: "border-red-500/50",
+      orange: "border-orange-500/50",
+      teal: "border-teal-500/50",
+      cyan: "border-cyan-500/50"
     };
 
     const accentGradients = {
