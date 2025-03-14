@@ -64,14 +64,14 @@ const MatchDetails = () => {
               animationDelay={200}
               className="overflow-hidden"
             >
-              <Tabs defaultValue="stats" className="w-full">
+              <Tabs defaultValue="overview" className="w-full">
                 <TabsList className="w-full grid grid-cols-3 mb-2 text-xxs sm:text-sm">
-                  <TabsTrigger value="stats">Stats</TabsTrigger>
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="teams">Teams</TabsTrigger>
                   <TabsTrigger value="raw">Raw Data</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="stats" className="space-y-4">
+                <TabsContent value="overview" className="space-y-4">
                   <MatchOverview displayInfo={displayInfo} matchData={matchData} />
                 </TabsContent>
                 
