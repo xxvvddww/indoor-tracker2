@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Users, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -25,8 +25,18 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { key: "Econ", header: "Econ", hideOnMobile: true },
   ];
 
-  console.log("Rendering PlayerStatistics with displayInfo:", displayInfo);
-  console.log("Player stats:", displayInfo.playerStats ? Object.keys(displayInfo.playerStats).length : "none");
+  useEffect(() => {
+    console.log("PlayerStatistics displayInfo updated:", displayInfo);
+    console.log("Player stats:", displayInfo.playerStats ? 
+      Object.keys(displayInfo.playerStats).length : "none");
+    
+    if (displayInfo.playerStats) {
+      Object.keys(displayInfo.playerStats).forEach(teamId => {
+        console.log(`Team ${teamId} players:`, 
+          displayInfo.playerStats![teamId].players.length);
+      });
+    }
+  }, [displayInfo]);
 
   // Display winner badge at the top if available
   const WinnerDisplay = () => {
@@ -43,9 +53,15 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     return null;
   };
 
-  // Check if we have teams but no player stats
-  if (!displayInfo.playerStats || Object.keys(displayInfo.playerStats).length === 0) {
-    console.log("No player statistics available in displayInfo");
+  // Check if we have valid player stats
+  const hasPlayerStats = displayInfo.playerStats && 
+    Object.keys(displayInfo.playerStats).length > 0 &&
+    Object.values(displayInfo.playerStats).some(
+      team => team.players && team.players.length > 0
+    );
+
+  if (!hasPlayerStats) {
+    console.log("No valid player statistics available");
     
     // If we have teams data but no player stats, still show the teams
     if (displayInfo.teams && displayInfo.teams.length > 0) {
@@ -80,40 +96,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       <div className="text-center py-4">
         <WinnerDisplay />
         <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
-      </div>
-    );
-  }
-
-  // Check if we have empty player arrays
-  const hasActualPlayers = Object.values(displayInfo.playerStats).some(
-    team => team.players && team.players.length > 0
-  );
-
-  if (!hasActualPlayers) {
-    console.log("No actual players in any team");
-    return (
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
-        
-        {/* Always show winner at top */}
-        <WinnerDisplay />
-        
-        {Object.keys(displayInfo.playerStats).map((teamId) => (
-          <div key={teamId} className="space-y-2 mb-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-medium">
-                {displayInfo.playerStats![teamId].name}
-                {displayInfo.winnerId === teamId && (
-                  <Badge variant="outline" className="ml-2 bg-amber-500/20 text-amber-400 border-amber-500">
-                    Winner
-                  </Badge>
-                )}
-              </h3>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">No player data available for this team</p>
-          </div>
-        ))}
       </div>
     );
   }

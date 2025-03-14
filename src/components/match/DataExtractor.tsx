@@ -13,20 +13,32 @@ interface DataExtractorProps {
 
 export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, matchData }) => {
   useEffect(() => {
-    if (!matchData) return;
+    if (!matchData) {
+      console.log("No match data available for extraction");
+      return;
+    }
     
     console.log("DataExtractor processing match data");
     
     // Extract basic match info
     extractBasicInfo(matchData, displayInfo);
+    console.log("Basic info extracted:", { title: displayInfo.title, venue: displayInfo.venue, date: displayInfo.date });
     
     // Extract teams info and determine winner using the correct algorithm
     extractTeamsAndWinner(matchData, displayInfo);
+    console.log("Teams extracted:", displayInfo.teams?.length, "Winner:", displayInfo.winner);
     
     // Extract player stats
     extractPlayerStats(matchData, displayInfo);
+    console.log("Player stats extraction complete");
     
-    console.log("Processed match data:", displayInfo);
+    // Debug what we ended up with
+    if (displayInfo.playerStats) {
+      console.log("Final player stats:", Object.keys(displayInfo.playerStats).length, "teams");
+      Object.keys(displayInfo.playerStats).forEach(teamId => {
+        console.log(`Team ${teamId} has ${displayInfo.playerStats![teamId].players.length} players`);
+      });
+    }
     
   }, [matchData, displayInfo]);
   
