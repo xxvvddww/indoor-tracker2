@@ -18,10 +18,10 @@ import {
 } from "@/components/ui/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const formatDate = (dateString: string) => {
   try {
-    // Check if the date string is valid
     if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
       return "Date unavailable";
     }
@@ -41,7 +41,6 @@ const formatDate = (dateString: string) => {
 
 const isToday = (dateString: string) => {
   try {
-    // Check if the date string is valid
     if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
       return false;
     }
@@ -59,7 +58,6 @@ const isToday = (dateString: string) => {
 
 const isFutureDate = (dateString: string) => {
   try {
-    // Check if the date string is valid
     if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
       return false;
     }
@@ -75,7 +73,7 @@ const isFutureDate = (dateString: string) => {
 };
 
 const Fixtures = () => {
-  const [fixtures, setFixtures] = useState<Fixture[]>([]);
+  const [allFixtures, setAllFixtures] = useState<Fixture[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -90,7 +88,7 @@ const Fixtures = () => {
       try {
         const fixturesData = await fetchFixtures();
         console.log("Fixtures loaded in component:", fixturesData);
-        setFixtures(fixturesData);
+        setAllFixtures(fixturesData);
       } catch (error) {
         console.error("Error loading fixtures:", error);
         setError("Failed to load fixtures. Please try again later.");
@@ -102,66 +100,58 @@ const Fixtures = () => {
     loadFixtures();
   }, []);
 
-  // Filter fixtures by search term only
-  const filterFixturesBySearchTerm = (fixtures: Fixture[]) => {
-    if (!searchTerm) return fixtures;
+  // Filter by search term
+  const filterBySearchTerm = (fixture: Fixture) => {
+    if (!searchTerm) return true;
     
-    return fixtures.filter((fixture) => {
-      // Convert all fields to strings before checking (to avoid undefined errors)
-      const homeTeam = fixture.HomeTeam || "";
-      const awayTeam = fixture.AwayTeam || "";
-      const divisionName = fixture.DivisionName || "";
-      const venue = fixture.Venue || "";
-      
-      return homeTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        awayTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        divisionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        venue.toLowerCase().includes(searchTerm.toLowerCase());
-    });
+    const homeTeam = fixture.HomeTeam || "";
+    const awayTeam = fixture.AwayTeam || "";
+    const divisionName = fixture.DivisionName || "";
+    const venue = fixture.Venue || "";
+    
+    return homeTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      awayTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      divisionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      venue.toLowerCase().includes(searchTerm.toLowerCase());
   };
+
+  // Upcoming fixtures (future dates)
+  const upcomingFixtures = allFixtures
+    .filter(fixture => isFutureDate(fixture.Date))
+    .filter(filterBySearchTerm);
   
-  // Get filtered fixtures based on active tab and search term
-  const getFilteredFixtures = () => {
-    const searchFiltered = filterFixturesBySearchTerm(fixtures);
-    
-    if (activeTab === 'all') return searchFiltered;
-    if (activeTab === 'upcoming') return searchFiltered.filter(fixture => isFutureDate(fixture.Date));
-    if (activeTab === 'completed') {
-      return searchFiltered.filter(fixture => 
-        !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed"
-      );
-    }
-    
-    return searchFiltered;
+  // Completed fixtures (past dates with completion status)
+  const completedFixtures = allFixtures
+    .filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
+    .filter(filterBySearchTerm);
+
+  // For "all" tab, we show a limited number of each type
+  const allTabUpcomingFixtures = upcomingFixtures.slice(0, 5);
+  const allTabCompletedFixtures = completedFixtures.slice(0, 5);
+
+  // For pagination in the dedicated tabs
+  const getFixturesForCurrentTab = () => {
+    if (activeTab === 'upcoming') return upcomingFixtures;
+    if (activeTab === 'completed') return completedFixtures;
+    return [];
   };
-  
-  const filteredFixtures = getFilteredFixtures();
-  
-  // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredFixtures.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedFixtures = filteredFixtures.slice(startIndex, startIndex + itemsPerPage);
-  
-  // For "all" tab specifically, we need both upcoming and completed fixtures
-  const upcomingFixtures = fixtures.filter(fixture => 
-    isFutureDate(fixture.Date) && 
-    filterFixturesBySearchTerm([fixture]).length > 0
-  );
-  
-  const completedFixtures = fixtures.filter(fixture => 
-    !isFutureDate(fixture.Date) && 
-    fixture.CompletionStatus === "Completed" &&
-    filterFixturesBySearchTerm([fixture]).length > 0
-  );
-  
-  // For pagination in the "all" tab
-  const displayUpcomingFixtures = upcomingFixtures.slice(0, 5);
-  const displayCompletedFixtures = completedFixtures.slice(0, 5);
+
+  const paginatedFixtures = getFixturesForCurrentTab()
+    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const totalPages = Math.max(1, Math.ceil(getFixturesForCurrentTab().length / itemsPerPage));
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo(0, 0);
+  };
+
+  // For tabs
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setCurrentPage(1); // Reset to first page when changing tabs
+    console.log("Changed to tab:", value);
   };
 
   return (
@@ -183,11 +173,7 @@ const Fixtures = () => {
           </div>
         </div>
         
-        <Tabs defaultValue="all" className="w-full" onValueChange={(value) => {
-          setActiveTab(value);
-          setCurrentPage(1); // Reset to first page when changing tabs
-          console.log("Changed to tab:", value);
-        }}>
+        <Tabs defaultValue="all" className="w-full" onValueChange={handleTabChange}>
           <TabsList className="mb-4">
             <TabsTrigger value="all">All Fixtures</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
@@ -206,17 +192,16 @@ const Fixtures = () => {
             <>
               <TabsContent value="all" className="space-y-8">
                 {/* Upcoming Fixtures Section */}
-                <div className="bg-card rounded-lg border shadow-sm">
-                  <div className="p-4 flex justify-between items-center border-b">
-                    <h2 className="font-semibold text-lg flex items-center gap-2">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
                       <Calendar className="h-4 w-4" />
-                      <span>Upcoming Fixtures</span>
-                    </h2>
-                  </div>
-                  
-                  <ScrollArea className="h-full max-h-[400px]">
-                    <div className="p-4">
-                      {displayUpcomingFixtures.length > 0 ? (
+                      Upcoming Fixtures
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-full max-h-[400px]">
+                      {allTabUpcomingFixtures.length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -229,7 +214,7 @@ const Fixtures = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {displayUpcomingFixtures.map((fixture) => (
+                            {allTabUpcomingFixtures.map((fixture) => (
                               <TableRow key={fixture.Id} className="hover:bg-muted/50">
                                 <TableCell>
                                   <div className="font-medium">
@@ -263,22 +248,21 @@ const Fixtures = () => {
                           No upcoming fixtures found
                         </div>
                       )}
-                    </div>
-                  </ScrollArea>
-                </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
                 
                 {/* Completed Fixtures / Results */}
-                <div className="bg-card rounded-lg border shadow-sm">
-                  <div className="p-4 flex justify-between items-center border-b">
-                    <h2 className="font-semibold text-lg flex items-center gap-2">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
                       <Trophy className="h-4 w-4" />
-                      <span>Results</span>
-                    </h2>
-                  </div>
-                  
-                  <ScrollArea className="h-full max-h-[400px]">
-                    <div className="p-4">
-                      {displayCompletedFixtures.length > 0 ? (
+                      Results
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-full max-h-[400px]">
+                      {allTabCompletedFixtures.length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -290,7 +274,7 @@ const Fixtures = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {displayCompletedFixtures.map((fixture) => (
+                            {allTabCompletedFixtures.map((fixture) => (
                               <TableRow key={fixture.Id} className="hover:bg-muted/50">
                                 <TableCell>
                                   <div className="font-medium">
@@ -320,22 +304,21 @@ const Fixtures = () => {
                           No completed fixtures found
                         </div>
                       )}
-                    </div>
-                  </ScrollArea>
-                </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
               </TabsContent>
               
               <TabsContent value="upcoming">
-                <div className="bg-card rounded-lg border shadow-sm">
-                  <div className="p-4 flex justify-between items-center border-b">
-                    <h2 className="font-semibold text-lg flex items-center gap-2">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
                       <Calendar className="h-4 w-4" />
-                      <span>Upcoming Fixtures</span>
-                    </h2>
-                  </div>
-                  
-                  <ScrollArea className="h-full max-h-[600px]">
-                    <div className="p-4">
+                      Upcoming Fixtures
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-full max-h-[600px]">
                       {paginatedFixtures.length > 0 ? (
                         <Table>
                           <TableHeader>
@@ -383,22 +366,21 @@ const Fixtures = () => {
                           No upcoming fixtures found
                         </div>
                       )}
-                    </div>
-                  </ScrollArea>
-                </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
               </TabsContent>
               
               <TabsContent value="completed">
-                <div className="bg-card rounded-lg border shadow-sm">
-                  <div className="p-4 flex justify-between items-center border-b">
-                    <h2 className="font-semibold text-lg flex items-center gap-2">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
                       <Trophy className="h-4 w-4" />
-                      <span>Results</span>
-                    </h2>
-                  </div>
-                  
-                  <ScrollArea className="h-full max-h-[600px]">
-                    <div className="p-4">
+                      Results
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-full max-h-[600px]">
                       {paginatedFixtures.length > 0 ? (
                         <Table>
                           <TableHeader>
@@ -443,15 +425,15 @@ const Fixtures = () => {
                           No results found
                         </div>
                       )}
-                    </div>
-                  </ScrollArea>
-                </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
               </TabsContent>
             </>
           )}
         </Tabs>
         
-        {!loading && filteredFixtures.length > 0 && totalPages > 1 && activeTab !== 'all' && (
+        {!loading && getFixturesForCurrentTab().length > itemsPerPage && activeTab !== 'all' && (
           <Pagination className="mt-6">
             <PaginationContent>
               <PaginationItem>
