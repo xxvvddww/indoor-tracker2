@@ -21,4 +21,24 @@
   .ultra-compact-table td {
     @apply py-0 px-0.5;
   }
+  
+  .results-table {
+    @apply text-[0.65rem];
+  }
+  
+  .results-table th {
+    @apply py-0 px-1 font-normal text-muted-foreground;
+  }
+  
+  .results-table td {
+    @apply py-1.5 px-1;
+  }
+  
+  .results-table tr {
+    @apply border-b border-gray-800;
+  }
+  
+  .results-table tr:last-child {
+    @apply border-b-0;
+  }
 }

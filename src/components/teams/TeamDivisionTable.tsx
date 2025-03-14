@@ -55,7 +55,7 @@ const TeamDivisionTable = ({
           <ChevronDown className={`${compactMode ? 'h-3 w-3' : 'h-5 w-5'}`} />}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto px-1">
           <Table className={compactMode ? 'text-[0.6rem] border-collapse' : ''}>
             <TableHeader className="sticky top-0 bg-card/80">
               <TableRow className={compactMode ? 'h-5' : ''}>

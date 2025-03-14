@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -214,9 +215,10 @@ const Fixtures = () => {
     {
       key: "HomeTeam",
       header: "Home",
+      className: "text-left w-1/3",
       render: (value: string, row: Fixture) => (
         <span className={cn(
-          "text-[0.6rem]",
+          "text-[0.65rem]",
           row.HomeTeamWon && "text-green-500 dark:text-green-400 font-medium"
         )}>
           {value || 'TBD'}
@@ -226,15 +228,16 @@ const Fixtures = () => {
     {
       key: "vs",
       header: "",
-      className: "w-4 text-center",
-      render: () => <span className="text-[0.6rem] text-muted-foreground">vs</span>
+      className: "w-6 text-center px-0",
+      render: () => <span className="text-[0.65rem] text-muted-foreground">vs</span>
     },
     {
       key: "AwayTeam",
       header: "Away",
+      className: "text-left w-1/3",
       render: (value: string, row: Fixture) => (
         <span className={cn(
-          "text-[0.6rem]",
+          "text-[0.65rem]",
           row.AwayTeamWon && "text-green-500 dark:text-green-400 font-medium"
         )}>
           {value || 'TBD'}
@@ -242,13 +245,13 @@ const Fixtures = () => {
       )
     },
     {
-      key: "ScoreDescription",
+      key: "Result",
       header: "Result",
-      className: "w-12 text-right",
+      className: "w-16 text-right",
       render: (value: string, row: Fixture) => (
         <div className="flex items-center justify-end gap-0.5">
-          <span className="text-[0.6rem]">
-            {value || `${row.HomeTeamScore}-${row.AwayTeamScore}`}
+          <span className="text-[0.65rem] whitespace-nowrap">
+            {row.HomeTeamScore}-{row.AwayTeamScore}
           </span>
           <Link to={`/match/${row.Id}`} className="text-primary ml-0.5">
             <ArrowUpRight className="h-2.5 w-2.5" />
@@ -376,8 +379,9 @@ const Fixtures = () => {
                           columns={completedColumns}
                           keyField="Id"
                           superCompact={true}
-                          ultraCompact={true}
+                          resultsMode={true}
                           darkMode={true}
+                          hideHeader={true}
                         />
                       ) : (
                         emptyFixturesMessage
@@ -434,9 +438,9 @@ const Fixtures = () => {
                           data={paginatedFixtures}
                           columns={completedColumns}
                           keyField="Id"
-                          superCompact={true}
-                          ultraCompact={true}
+                          resultsMode={true}
                           darkMode={true}
+                          hideHeader={true}
                         />
                       ) : (
                         <div className="py-3 text-center text-muted-foreground text-xs">
