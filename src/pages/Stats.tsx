@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Stats = () => {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -128,22 +129,8 @@ const Stats = () => {
       <div className="space-y-6">
         <h1 className="text-3xl font-bold tracking-tight">Player Statistics</h1>
         
-        <div className="bg-card rounded-lg border shadow-sm">
-          <div className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b">
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search players or teams..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1); // Reset to first page on search
-                }}
-              />
-            </div>
-            
+        <Card className="border shadow-sm">
+          <div className="border-b">
             <Tabs 
               defaultValue="all" 
               value={activeTab}
@@ -151,28 +138,28 @@ const Stats = () => {
                 setActiveTab(value);
                 setCurrentPage(1); // Reset to first page on tab change
               }}
-              className="w-full md:w-auto"
+              className="w-full"
             >
-              <TabsList>
-                <TabsTrigger value="all">All Players</TabsTrigger>
-                <TabsTrigger value="batsmen">Batsmen</TabsTrigger>
-                <TabsTrigger value="bowlers">Bowlers</TabsTrigger>
+              <TabsList className="w-full justify-start px-6 pt-4">
+                <TabsTrigger value="all" className="px-4">All Players</TabsTrigger>
+                <TabsTrigger value="batsmen" className="px-4">Batsmen</TabsTrigger>
+                <TabsTrigger value="bowlers" className="px-4">Bowlers</TabsTrigger>
               </TabsList>
               
               <div className="p-0">
                 <div className="overflow-x-auto">
-                  <TabsContent value="all" className="mt-0">
+                  <TabsContent value="all" className="mt-0 pt-2">
                     <Table>
-                      <TableHeader>
+                      <TableHeader className="bg-muted/50">
                         <TableRow>
                           <TableHead>Player</TableHead>
                           <TableHead>Team</TableHead>
-                          <TableHead className="text-right">Games</TableHead>
-                          <TableHead className="text-right">Runs</TableHead>
-                          <TableHead className="text-right">Avg</TableHead>
-                          <TableHead className="text-right">S/R</TableHead>
-                          <TableHead className="text-right">Wickets</TableHead>
-                          <TableHead className="text-right">Bowling Avg</TableHead>
+                          <TableHead className="text-center">Games</TableHead>
+                          <TableHead className="text-center">Runs</TableHead>
+                          <TableHead className="text-center">Avg</TableHead>
+                          <TableHead className="text-center">S/R</TableHead>
+                          <TableHead className="text-center">Wickets</TableHead>
+                          <TableHead className="text-center">Bowling Avg</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -181,12 +168,12 @@ const Stats = () => {
                             <TableRow key={player.Id}>
                               <TableCell className="font-medium">{player.UserName}</TableCell>
                               <TableCell>{player.TeamName}</TableCell>
-                              <TableCell className="text-right">{player.Games}</TableCell>
-                              <TableCell className="text-right">{player.RunsScored}</TableCell>
-                              <TableCell className="text-right">{getBattingAverage(player)}</TableCell>
-                              <TableCell className="text-right">{getStrikeRate(player)}</TableCell>
-                              <TableCell className="text-right">{player.Wickets}</TableCell>
-                              <TableCell className="text-right">{getBowlingAverage(player)}</TableCell>
+                              <TableCell className="text-center">{player.Games}</TableCell>
+                              <TableCell className="text-center">{player.RunsScored}</TableCell>
+                              <TableCell className="text-center">{getBattingAverage(player)}</TableCell>
+                              <TableCell className="text-center">{getStrikeRate(player)}</TableCell>
+                              <TableCell className="text-center">{player.Wickets}</TableCell>
+                              <TableCell className="text-center">{getBowlingAverage(player)}</TableCell>
                             </TableRow>
                           ))
                         ) : (
@@ -200,17 +187,17 @@ const Stats = () => {
                     </Table>
                   </TabsContent>
 
-                  <TabsContent value="batsmen" className="mt-0">
+                  <TabsContent value="batsmen" className="mt-0 pt-2">
                     <Table>
-                      <TableHeader>
+                      <TableHeader className="bg-muted/50">
                         <TableRow>
                           <TableHead>Player</TableHead>
                           <TableHead>Team</TableHead>
-                          <TableHead className="text-right">Games</TableHead>
-                          <TableHead className="text-right">Runs</TableHead>
-                          <TableHead className="text-right">Avg</TableHead>
-                          <TableHead className="text-right">S/R</TableHead>
-                          <TableHead className="text-right">Balls Faced</TableHead>
+                          <TableHead className="text-center">Games</TableHead>
+                          <TableHead className="text-center">Runs</TableHead>
+                          <TableHead className="text-center">Avg</TableHead>
+                          <TableHead className="text-center">S/R</TableHead>
+                          <TableHead className="text-center">Balls Faced</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -219,11 +206,11 @@ const Stats = () => {
                             <TableRow key={player.Id}>
                               <TableCell className="font-medium">{player.UserName}</TableCell>
                               <TableCell>{player.TeamName}</TableCell>
-                              <TableCell className="text-right">{player.Games}</TableCell>
-                              <TableCell className="text-right">{player.RunsScored}</TableCell>
-                              <TableCell className="text-right">{getBattingAverage(player)}</TableCell>
-                              <TableCell className="text-right">{getStrikeRate(player)}</TableCell>
-                              <TableCell className="text-right">{player.BallsFaced}</TableCell>
+                              <TableCell className="text-center">{player.Games}</TableCell>
+                              <TableCell className="text-center">{player.RunsScored}</TableCell>
+                              <TableCell className="text-center">{getBattingAverage(player)}</TableCell>
+                              <TableCell className="text-center">{getStrikeRate(player)}</TableCell>
+                              <TableCell className="text-center">{player.BallsFaced}</TableCell>
                             </TableRow>
                           ))
                         ) : (
@@ -237,17 +224,17 @@ const Stats = () => {
                     </Table>
                   </TabsContent>
 
-                  <TabsContent value="bowlers" className="mt-0">
+                  <TabsContent value="bowlers" className="mt-0 pt-2">
                     <Table>
-                      <TableHeader>
+                      <TableHeader className="bg-muted/50">
                         <TableRow>
                           <TableHead>Player</TableHead>
                           <TableHead>Team</TableHead>
-                          <TableHead className="text-right">Games</TableHead>
-                          <TableHead className="text-right">Overs</TableHead>
-                          <TableHead className="text-right">Wickets</TableHead>
-                          <TableHead className="text-right">Runs Conceded</TableHead>
-                          <TableHead className="text-right">Bowling Avg</TableHead>
+                          <TableHead className="text-center">Games</TableHead>
+                          <TableHead className="text-center">Overs</TableHead>
+                          <TableHead className="text-center">Wickets</TableHead>
+                          <TableHead className="text-center">Runs Conceded</TableHead>
+                          <TableHead className="text-center">Bowling Avg</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -256,11 +243,11 @@ const Stats = () => {
                             <TableRow key={player.Id}>
                               <TableCell className="font-medium">{player.UserName}</TableCell>
                               <TableCell>{player.TeamName}</TableCell>
-                              <TableCell className="text-right">{player.Games}</TableCell>
-                              <TableCell className="text-right">{player.Overs}</TableCell>
-                              <TableCell className="text-right">{player.Wickets}</TableCell>
-                              <TableCell className="text-right">{player.RunsConceded}</TableCell>
-                              <TableCell className="text-right">{getBowlingAverage(player)}</TableCell>
+                              <TableCell className="text-center">{player.Games}</TableCell>
+                              <TableCell className="text-center">{player.Overs}</TableCell>
+                              <TableCell className="text-center">{player.Wickets}</TableCell>
+                              <TableCell className="text-center">{player.RunsConceded}</TableCell>
+                              <TableCell className="text-center">{getBowlingAverage(player)}</TableCell>
                             </TableRow>
                           ))
                         ) : (
@@ -278,8 +265,22 @@ const Stats = () => {
             </Tabs>
           </div>
           
-          {filteredPlayers.length > playersPerPage && (
-            <div className="border-t p-4">
+          <CardContent className="p-4 flex flex-col gap-4">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search players or teams..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
+              />
+            </div>
+          
+            {filteredPlayers.length > playersPerPage && (
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
@@ -289,26 +290,16 @@ const Stats = () => {
                     />
                   </PaginationItem>
                   
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    // Show pages around current page
-                    let pageToShow;
-                    if (totalPages <= 5) {
-                      pageToShow = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageToShow = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageToShow = totalPages - 4 + i;
-                    } else {
-                      pageToShow = currentPage - 2 + i;
-                    }
-                    
+                  {[...Array(Math.min(totalPages, 5))].map((_, i) => {
+                    // For simplicity, show first 5 pages or all if less than 5
+                    const pageNumber = i + 1;
                     return (
-                      <PaginationItem key={pageToShow}>
+                      <PaginationItem key={pageNumber}>
                         <PaginationLink
-                          isActive={currentPage === pageToShow}
-                          onClick={() => setCurrentPage(pageToShow)}
+                          isActive={currentPage === pageNumber}
+                          onClick={() => setCurrentPage(pageNumber)}
                         >
-                          {pageToShow}
+                          {pageNumber}
                         </PaginationLink>
                       </PaginationItem>
                     );
@@ -322,9 +313,9 @@ const Stats = () => {
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
-            </div>
-          )}
-        </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
