@@ -47,6 +47,15 @@ export interface Team {
   Order?: string;
   Points?: string;
   Skins?: string;
+  Played?: string;
+  Won?: string;
+  Lost?: string;
+  Drawn?: string;
+  RunsFor?: string;
+  RunsAgainst?: string;
+  QuotientRatio?: string;
+  DivisionId?: string;
+  DivisionName?: string;
 }
 
 export interface MatchConfiguration {

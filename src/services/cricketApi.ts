@@ -1,6 +1,5 @@
-
 import axios from 'axios';
-import { Fixture, Player, MatchDetails } from '../types/cricket';
+import { Fixture, Player, MatchDetails, Team } from '../types/cricket';
 import { toast } from 'sonner';
 
 // Config with base URL and parameters
@@ -278,6 +277,80 @@ export const fetchMatchDetails = async (fixtureId: string): Promise<MatchDetails
     console.error("Error fetching match details:", error);
     toast.error("Failed to load match details. Please try again later.");
     return null;
+  }
+};
+
+export const fetchTeams = async (leagueId: string = DEFAULT_LEAGUE_ID, seasonId: string = CURRENT_SEASON_ID): Promise<Team[]> => {
+  try {
+    console.log(`Fetching teams with leagueId: ${leagueId}, seasonId: ${seasonId}`);
+    const response = await axios.get(`${API_BASE_URL}`, {
+      params: {
+        Type: "teams",
+        LeagueId: leagueId,
+        SeasonId: seasonId
+      },
+      responseType: 'text'
+    });
+    
+    console.log('Teams API response received. Length:', response.data.length);
+    const parsed = processXmlResponse(response.data, 'Team');
+    console.log('Parsed teams count:', parsed && parsed.Team ? parsed.Team.length : 0);
+    
+    if (parsed === null) {
+      toast.warning("No teams available for the selected season");
+      return [];
+    }
+    
+    const teams = parsed && parsed.Team ? parsed.Team as Team[] : [];
+    
+    if (teams.length === 0) {
+      toast.info("No teams found for the selected season and league");
+    } else {
+      toast.success(`Loaded ${teams.length} teams`);
+    }
+    
+    return teams;
+  } catch (error) {
+    console.error("Error fetching teams:", error);
+    toast.error("Failed to load teams. Please try again later.");
+    return [];
+  }
+};
+
+export const fetchStandings = async (leagueId: string = DEFAULT_LEAGUE_ID, seasonId: string = CURRENT_SEASON_ID): Promise<Team[]> => {
+  try {
+    console.log(`Fetching standings with leagueId: ${leagueId}, seasonId: ${seasonId}`);
+    const response = await axios.get(`${API_BASE_URL}`, {
+      params: {
+        Type: "ladder",
+        LeagueId: leagueId,
+        SeasonId: seasonId
+      },
+      responseType: 'text'
+    });
+    
+    console.log('Standings API response received. Length:', response.data.length);
+    const parsed = processXmlResponse(response.data, 'Team');
+    console.log('Parsed standings count:', parsed && parsed.Team ? parsed.Team.length : 0);
+    
+    if (parsed === null) {
+      toast.warning("No standings available for the selected season");
+      return [];
+    }
+    
+    const standings = parsed && parsed.Team ? parsed.Team as Team[] : [];
+    
+    if (standings.length === 0) {
+      toast.info("No standings found for the selected season and league");
+    } else {
+      toast.success(`Loaded standings for ${standings.length} teams`);
+    }
+    
+    return standings;
+  } catch (error) {
+    console.error("Error fetching standings:", error);
+    toast.error("Failed to load standings. Please try again later.");
+    return [];
   }
 };
 
