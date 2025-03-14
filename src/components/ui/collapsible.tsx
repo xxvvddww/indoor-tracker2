@@ -23,7 +23,14 @@ const CollapsibleTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    {showArrow && (
+    {showArrow && !props.children?.props?.children?.find?.(child => 
+      child?.type?.displayName === ChevronDown.displayName ||
+      (child?.props?.className && (
+        child?.props?.className?.includes('rotate-180') || 
+        child?.props?.className?.includes('ChevronDown') ||
+        child?.props?.className?.includes('chevron')
+      ))
+    ) && (
       customIcon || <ChevronDown
         className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
         aria-hidden="true"

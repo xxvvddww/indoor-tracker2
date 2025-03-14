@@ -18,6 +18,7 @@ interface ResponsiveTableProps {
   rowClassName?: string | ((row: any, index: number) => string);
   keyField?: string;
   superCompact?: boolean;
+  darkMode?: boolean;
 }
 
 export function ResponsiveTable({
@@ -27,6 +28,7 @@ export function ResponsiveTable({
   rowClassName = "",
   keyField = "id",
   superCompact = false,
+  darkMode = false,
 }: ResponsiveTableProps) {
   const isMobile = useIsMobile();
   const compactMode = isMobile || superCompact;
@@ -45,7 +47,7 @@ export function ResponsiveTable({
   };
 
   return (
-    <div className={`${compactMode ? "super-compact-table overflow-x-auto -mx-2" : ""} ${className}`}>
+    <div className={`${compactMode ? "super-compact-table overflow-x-auto -mx-2" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
       <Table className={compactMode ? "text-xxs" : ""}>
         <TableHeader>
           <TableRow className={compactMode ? "h-8" : ""}>
