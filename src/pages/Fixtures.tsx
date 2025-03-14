@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { fetchFixtures } from '../services/cricketApi';
 import { Fixture } from '../types/cricket';
-import { Calendar, ArrowUpRight, Clock, Trophy, Filter } from "lucide-react";
+import { Calendar, ArrowUpRight, Clock, Trophy, Filter, CalendarIcon } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -21,58 +22,23 @@ import { toast } from 'sonner';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { ResponsiveContainer } from '@/components/ui/responsive-container';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-const formatDate = (dateString: string) => {
-  try {
-    if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
-      return "Date unavailable";
-    }
-    
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-AU', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
-  } catch (error) {
-    console.error("Error formatting date:", dateString, error);
-    return "Date unavailable";
-  }
-};
-
-const isToday = (dateString: string) => {
-  try {
-    if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
-      return false;
-    }
-    
-    const today = new Date();
-    const date = new Date(dateString);
-    return date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
-  } catch (error) {
-    console.error("Error checking if date is today:", dateString, error);
-    return false;
-  }
-};
-
-const isFutureDate = (dateString: string) => {
-  try {
-    if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
-      return false;
-    }
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of day
-    const date = new Date(dateString);
-    return date > today;
-  } catch (error) {
-    console.error("Error checking if date is in future:", dateString, error);
-    return false;
-  }
-};
+import { isToday, isFutureDate, formatDate } from '@/utils/dateFormatters';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Fixtures = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
@@ -81,6 +47,8 @@ const Fixtures = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [dateFilter, setDateFilter] = useState<string>("all");
   const isMobile = useIsMobile();
   const itemsPerPage = 10;
 
@@ -122,7 +90,43 @@ const Fixtures = () => {
       venue.toLowerCase().includes(searchTerm.toLowerCase());
   };
 
-  const filteredFixtures = fixtures.filter(filterBySearchTerm);
+  const filterByDate = (fixture: Fixture) => {
+    if (dateFilter === "all") return true;
+    
+    if (dateFilter === "today") {
+      return isToday(fixture.Date);
+    }
+    
+    if (dateFilter === "tomorrow") {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const fixtureDate = new Date(fixture.Date);
+      return fixtureDate.getDate() === tomorrow.getDate() &&
+        fixtureDate.getMonth() === tomorrow.getMonth() &&
+        fixtureDate.getFullYear() === tomorrow.getFullYear();
+    }
+    
+    if (dateFilter === "thisWeek") {
+      const today = new Date();
+      const nextWeek = new Date();
+      nextWeek.setDate(today.getDate() + 7);
+      const fixtureDate = new Date(fixture.Date);
+      return fixtureDate >= today && fixtureDate <= nextWeek;
+    }
+    
+    if (dateFilter === "custom" && selectedDate) {
+      const fixtureDate = new Date(fixture.Date);
+      return fixtureDate.getDate() === selectedDate.getDate() &&
+        fixtureDate.getMonth() === selectedDate.getMonth() &&
+        fixtureDate.getFullYear() === selectedDate.getFullYear();
+    }
+    
+    return true;
+  };
+
+  const filteredFixtures = fixtures
+    .filter(filterBySearchTerm)
+    .filter(filterByDate);
   
   const upcomingFixtures = filteredFixtures.filter(fixture => isFutureDate(fixture.Date));
   
@@ -155,6 +159,22 @@ const Fixtures = () => {
     console.log("Changed to tab:", value);
   };
 
+  const handleDateFilterChange = (value: string) => {
+    setDateFilter(value);
+    if (value !== "custom") {
+      setSelectedDate(undefined);
+    }
+    setCurrentPage(1);
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date) {
+      setDateFilter("custom");
+    }
+    setCurrentPage(1);
+  };
+
   const emptyFixturesMessage = (
     <div className="py-8 text-center text-muted-foreground">
       No fixtures found
@@ -163,22 +183,14 @@ const Fixtures = () => {
 
   const upcomingColumns = [
     {
-      key: "Date",
-      header: "Date",
-      render: (value: string, row: Fixture) => (
-        <div className="font-medium">
-          {isToday(value) ? 
-            <span className="text-primary">Today</span> : 
-            formatDate(value)}
-        </div>
-      )
-    },
-    {
       key: "Teams",
       header: "Teams",
       render: (_: any, row: Fixture) => (
         <div className="font-medium">
           {row.HomeTeam || 'TBD'} vs {row.AwayTeam || 'TBD'}
+          {isToday(row.Date) && 
+            <span className="ml-2 text-primary text-xs">Today</span>
+          }
         </div>
       )
     },
@@ -218,15 +230,6 @@ const Fixtures = () => {
   ];
 
   const completedColumns = [
-    {
-      key: "Date",
-      header: "Date",
-      render: (value: string) => (
-        <div className="font-medium">
-          {formatDate(value)}
-        </div>
-      )
-    },
     {
       key: "Teams",
       header: "Teams",
@@ -287,11 +290,49 @@ const Fixtures = () => {
         </div>
         
         <Tabs defaultValue="all" className="w-full" onValueChange={handleTabChange}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="all">All Fixtures</TabsTrigger>
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="completed">Results</TabsTrigger>
-          </TabsList>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+            <TabsList>
+              <TabsTrigger value="all">All Fixtures</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="completed">Results</TabsTrigger>
+            </TabsList>
+            
+            {activeTab !== 'all' && (
+              <div className="flex items-center gap-2">
+                <Select value={dateFilter} onValueChange={handleDateFilterChange}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter by date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All dates</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                    <SelectItem value="thisWeek">This week</SelectItem>
+                    <SelectItem value="custom">Custom date</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {dateFilter === "custom" && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="flex gap-2">
+                        <CalendarIcon className="h-4 w-4" />
+                        {selectedDate ? formatDate(selectedDate.toISOString()) : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <CalendarComponent
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={handleDateSelect}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
+            )}
+          </div>
           
           {loading ? (
             <div className="flex justify-center items-center h-96">
