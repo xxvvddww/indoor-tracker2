@@ -102,7 +102,7 @@ const Fixtures = () => {
     loadFixtures();
   }, []);
 
-  // Filter and sort fixtures
+  // Filter fixtures
   const filterFixtures = (fixtures: Fixture[]) => {
     console.log("Filtering fixtures, current count:", fixtures.length);
     
@@ -139,13 +139,15 @@ const Fixtures = () => {
   const paginatedFixtures = filteredFixtures.slice(startIndex, startIndex + itemsPerPage);
   console.log("Paginated fixtures count:", paginatedFixtures.length);
   
-  // FIXED: Modified the filtering for the all tab view to correctly display fixtures
+  // FIX: Prepare the fixtures for display and ensure they don't disappear
+  const displayFixtures = paginatedFixtures;
+  // For "all" tab, we need to separately prepare upcoming and completed fixtures from displayFixtures
   const upcomingFixtures = activeTab === 'all' 
-    ? paginatedFixtures.filter(fixture => isFutureDate(fixture.Date))
-    : paginatedFixtures;
+    ? displayFixtures.filter(fixture => isFutureDate(fixture.Date))
+    : displayFixtures;
     
   const completedFixtures = activeTab === 'all' 
-    ? paginatedFixtures.filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
+    ? displayFixtures.filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
     : [];
 
   console.log("Upcoming fixtures:", upcomingFixtures.length);
@@ -156,6 +158,17 @@ const Fixtures = () => {
     setCurrentPage(newPage);
     window.scrollTo(0, 0);
   };
+
+  // DEBUG: Add more logging to see when/why fixtures disappear
+  useEffect(() => {
+    console.log("Tab changed or filters updated:", {
+      activeTab, 
+      filteredCount: filteredFixtures.length,
+      displayCount: displayFixtures.length,
+      upcomingCount: upcomingFixtures.length, 
+      completedCount: completedFixtures.length
+    });
+  }, [activeTab, filteredFixtures.length, displayFixtures.length, upcomingFixtures.length, completedFixtures.length]);
 
   return (
     <MainLayout>
@@ -205,18 +218,19 @@ const Fixtures = () => {
           ) : (
             <>
               <TabsContent value="all" className="space-y-8">
-                {/* Upcoming Fixtures */}
-                {upcomingFixtures.length > 0 && (
-                  <div className="bg-card rounded-lg border shadow-sm">
-                    <div className="p-4 flex justify-between items-center border-b">
-                      <h2 className="font-semibold text-lg flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>Upcoming Fixtures</span>
-                      </h2>
-                    </div>
-                    
-                    <ScrollArea className="h-full max-h-[400px]">
-                      <div className="p-4">
+                {/* FIX: Don't check length here, as that's what's causing the disappearing content */}
+                {/* Upcoming Fixtures - Always show section if we're in "All" tab */}
+                <div className="bg-card rounded-lg border shadow-sm">
+                  <div className="p-4 flex justify-between items-center border-b">
+                    <h2 className="font-semibold text-lg flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>Upcoming Fixtures</span>
+                    </h2>
+                  </div>
+                  
+                  <ScrollArea className="h-full max-h-[400px]">
+                    <div className="p-4">
+                      {upcomingFixtures.length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -258,23 +272,27 @@ const Fixtures = () => {
                             ))}
                           </TableBody>
                         </Table>
-                      </div>
-                    </ScrollArea>
-                  </div>
-                )}
-                
-                {/* Completed Fixtures / Results */}
-                {completedFixtures.length > 0 && (
-                  <div className="bg-card rounded-lg border shadow-sm">
-                    <div className="p-4 flex justify-between items-center border-b">
-                      <h2 className="font-semibold text-lg flex items-center gap-2">
-                        <Trophy className="h-4 w-4" />
-                        <span>Results</span>
-                      </h2>
+                      ) : (
+                        <div className="py-8 text-center text-muted-foreground">
+                          No upcoming fixtures found
+                        </div>
+                      )}
                     </div>
-                    
-                    <ScrollArea className="h-full max-h-[400px]">
-                      <div className="p-4">
+                  </ScrollArea>
+                </div>
+                
+                {/* Completed Fixtures / Results - Always show section if we're in "All" tab */}
+                <div className="bg-card rounded-lg border shadow-sm">
+                  <div className="p-4 flex justify-between items-center border-b">
+                    <h2 className="font-semibold text-lg flex items-center gap-2">
+                      <Trophy className="h-4 w-4" />
+                      <span>Results</span>
+                    </h2>
+                  </div>
+                  
+                  <ScrollArea className="h-full max-h-[400px]">
+                    <div className="p-4">
+                      {completedFixtures.length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -311,21 +329,14 @@ const Fixtures = () => {
                             ))}
                           </TableBody>
                         </Table>
-                      </div>
-                    </ScrollArea>
-                  </div>
-                )}
-                
-                {/* Show a message when no fixtures are found in "All" tab */}
-                {upcomingFixtures.length === 0 && completedFixtures.length === 0 && (
-                  <div className="bg-card rounded-lg border shadow-sm p-6 text-center">
-                    <Calendar className="mx-auto h-12 w-12 text-primary/50" />
-                    <h2 className="mt-4 text-xl font-medium">No Fixtures Found</h2>
-                    <p className="mt-2 text-muted-foreground">
-                      {searchTerm ? "No fixtures match your search criteria." : "There are no fixtures available for the current season."}
-                    </p>
-                  </div>
-                )}
+                      ) : (
+                        <div className="py-8 text-center text-muted-foreground">
+                          No completed fixtures found
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
               </TabsContent>
               
               <TabsContent value="upcoming">
