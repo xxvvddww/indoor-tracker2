@@ -15,6 +15,11 @@ interface MatchOverviewProps {
 export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, matchData }) => {
   const isMobile = useIsMobile();
   
+  // If there's raw data but no processed venue, try to extract it from Configuration
+  if (matchData && !displayInfo.venue && (matchData.Configuration as any)?.PlayingAreaName) {
+    displayInfo.venue = (matchData.Configuration as any).PlayingAreaName;
+  }
+  
   return (
     <div className="space-y-4">
       {/* Match Winner Section */}

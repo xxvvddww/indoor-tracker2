@@ -1,4 +1,3 @@
-
 export interface Fixture {
   Id: string;
   Date: string;
@@ -70,6 +69,8 @@ export interface Team {
   totalMatches?: number;
   winPercentage?: string;
   skinsWon?: number;
+  VenueName?: string;
+  PlayingAreaName?: string;
 }
 
 export interface MatchConfiguration {

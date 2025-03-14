@@ -13,15 +13,9 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
     teams: []
   };
   
-  // Extract match venue from Teams data if available
-  if (data.Teams && data.Teams.Team) {
-    const teamsData = Array.isArray(data.Teams.Team) ? 
-      data.Teams.Team : [data.Teams.Team];
-    
-    // Try to get venue from the first team's VenueName if available
-    if (teamsData[0] && teamsData[0].VenueName) {
-      displayData.venue = teamsData[0].VenueName;
-    }
+  // Look for venue in PlayingAreaName (which exists in the raw data)
+  if (data.Configuration && (data.Configuration as any).PlayingAreaName) {
+    displayData.venue = (data.Configuration as any).PlayingAreaName;
   }
   
   // Extract match date from Configuration if available
@@ -97,11 +91,9 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
   }
   
   // Initialize player stats
-  if (!displayData.playerStats) {
-    displayData.playerStats = {};
-  }
+  displayData.playerStats = {};
   
-  // Extract player stats from MatchSummary
+  // Extract player stats from MatchSummary - THIS IS THE MAIN DATA SOURCE
   if (data.MatchSummary && data.MatchSummary.team) {
     // Make sure we're dealing with an array of teams
     const teams = Array.isArray(data.MatchSummary.team) ? 
@@ -143,7 +135,7 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
   }
   
   // If no player stats found in MatchSummary, try to create from Batsmen/Bowlers
-  if (!displayData.playerStats || Object.keys(displayData.playerStats).length === 0) {
+  if (Object.keys(displayData.playerStats).length === 0) {
     console.log("Attempting to create player stats from Batsmen/Bowlers");
     
     if (data.Batsmen && data.Batsmen.Batsman && data.Teams && data.Teams.Team) {
@@ -162,12 +154,10 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
         const teamId = team.Id;
         const teamName = team.Name;
         
-        if (!displayData.playerStats![teamId]) {
-          displayData.playerStats![teamId] = {
-            name: teamName,
-            players: []
-          };
-        }
+        displayData.playerStats![teamId] = {
+          name: teamName,
+          players: []
+        };
         
         // Add batsmen from this team
         batsmen.filter(player => player.TeamId === teamId).forEach(batsman => {
