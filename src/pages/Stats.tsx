@@ -22,7 +22,7 @@ const Stats = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [sortBy, setSortBy] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [teamFilter, setTeamFilter] = useState<string>("");
+  const [teamFilter, setTeamFilter] = useState<string>("all");
   
   // Get unique teams for filter dropdown
   const teams = [...new Set(players.map(player => player.TeamName))].sort();
@@ -51,7 +51,7 @@ const Stats = () => {
       player.UserName.toLowerCase().includes(searchTerm.toLowerCase()) || 
       player.TeamName.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesTeam = teamFilter ? player.TeamName === teamFilter : true;
+    const matchesTeam = teamFilter === "all" ? true : player.TeamName === teamFilter;
     
     if (activeTab === "all") return matchesSearch && matchesTeam;
     if (activeTab === "batsmen") return matchesSearch && matchesTeam && parseInt(player.RunsScored) > 0;
@@ -195,7 +195,7 @@ const Stats = () => {
                 <SelectValue placeholder="Filter by team" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Teams</SelectItem>
+                <SelectItem value="all">All Teams</SelectItem>
                 {teams.map((team) => (
                   <SelectItem key={team} value={team}>
                     {team}
