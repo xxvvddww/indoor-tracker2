@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
@@ -144,6 +143,7 @@ const determineMatchWinner = (matchData: MatchDetails, displayInfo: DisplayableM
   }
 };
 
+// Extract player statistics from match data
 const extractPlayerStats = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo) => {
   if (!matchData.Teams?.Team) return;
   
@@ -181,8 +181,7 @@ const extractPlayerStats = (matchData: MatchDetails, displayInfo: DisplayableMat
             RC: player.RC || '0',
             Wkts: player.Wkts || '0',
             SR: player.SR || '0',
-            Econ: player.Econ || '0',
-            C: player.C || '0'
+            Econ: player.Econ || '0'
           }))
         };
       }
@@ -221,8 +220,7 @@ const extractPlayerStats = (matchData: MatchDetails, displayInfo: DisplayableMat
             RC: '0',
             Wkts: '0',
             SR: '0',
-            Econ: '0',
-            C: '0'
+            Econ: '0'
           });
         }
       });

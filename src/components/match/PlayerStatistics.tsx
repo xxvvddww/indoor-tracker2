@@ -13,23 +13,7 @@ interface PlayerStatisticsProps {
 
 export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo }) => {
   const isMobile = useIsMobile();
-  // Use sessionStorage to persist the open/closed state between tab switches
-  const [openTeams, setOpenTeams] = useState<Record<string, boolean>>(() => {
-    try {
-      const savedState = sessionStorage.getItem('cricket-team-collapsible-state');
-      return savedState ? JSON.parse(savedState) : {};
-    } catch {
-      return {}; // If storage fails
-    }
-  });
-  
-  const [combinedSectionOpen, setCombinedSectionOpen] = useState<boolean>(() => {
-    try {
-      return JSON.parse(sessionStorage.getItem('cricket-combined-collapsible-state') || 'false');
-    } catch {
-      return false;
-    }
-  });
+  const [openTeams, setOpenTeams] = useState<Record<string, boolean>>({});
 
   // Get winning team to display at the top
   const sortedTeams = React.useMemo(() => {
@@ -42,89 +26,27 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     });
   }, [displayInfo.teams, displayInfo.winnerId]);
 
-  // Create combined player stats
-  const combinedPlayers = React.useMemo(() => {
-    if (!displayInfo.playerStats) return [];
-    
-    const allPlayers: any[] = [];
-    
-    Object.values(displayInfo.playerStats).forEach(team => {
-      team.players.forEach(player => {
-        if (!player.Name.includes("No player statistics") && player.Name !== "Unknown Player") {
-          // Add team name to each player
-          allPlayers.push({
-            ...player,
-            TeamName: team.name
-          });
-        }
-      });
-    });
-    
-    // Sort by contribution margin (highest first)
-    return allPlayers.sort((a, b) => {
-      const aContrib = parseFloat(a.C || '0');
-      const bContrib = parseFloat(b.C || '0');
-      return bContrib - aContrib;
-    });
-  }, [displayInfo.playerStats]);
-
   useEffect(() => {
-    // Initialize all sections as closed by default
-    if (displayInfo.teams && Object.keys(openTeams).length === 0) {
+    // Initialize all sections as open
+    if (displayInfo.teams) {
       const initialOpenState: Record<string, boolean> = {};
       displayInfo.teams.forEach(team => {
-        initialOpenState[team.id] = false;
+        initialOpenState[team.id] = true;
       });
       setOpenTeams(initialOpenState);
     }
-  }, [displayInfo.teams, openTeams]);
-
-  // Save state to sessionStorage when it changes
-  useEffect(() => {
-    try {
-      sessionStorage.setItem('cricket-team-collapsible-state', JSON.stringify(openTeams));
-      sessionStorage.setItem('cricket-combined-collapsible-state', JSON.stringify(combinedSectionOpen));
-    } catch (e) {
-      console.error('Error saving collapsible state to sessionStorage:', e);
-    }
-  }, [openTeams, combinedSectionOpen]);
+  }, [displayInfo.teams]);
 
   // Define player stat columns for the table - same for all teams to ensure alignment
   const playerColumns = [
-    { 
-      key: "Name", 
-      header: "Player", 
-      className: "font-medium",
-      render: (value: string, row: any) => (
-        <div className="flex flex-col">
-          <span>{value}</span>
-          {row.TeamName && <span className="text-xs text-muted-foreground">{row.TeamName}</span>}
-        </div>
-      )
-    },
+    { key: "Name", header: "Player", className: "font-medium" },
     { key: "RS", header: "Runs", hideOnMobile: false },
     { key: "OB", header: "Overs", hideOnMobile: true },
     { key: "RC", header: "R Con", hideOnMobile: false },
     { key: "Wkts", header: "Wickets", hideOnMobile: false },
     { key: "SR", header: "S/R", hideOnMobile: true },
     { key: "Econ", header: "Econ", hideOnMobile: true },
-    { 
-      key: "C", 
-      header: "Contrib", 
-      hideOnMobile: false,
-      render: (value: string) => {
-        const contrib = parseFloat(value || '0');
-        const textColor = contrib > 0 ? 'text-green-600' : 'text-red-500';
-        const bgColor = contrib > 0 ? 'bg-green-50' : 'bg-red-50';
-        const borderColor = contrib > 0 ? 'border-green-200' : 'border-red-200';
-        
-        return (
-          <span className={`px-1.5 py-0.5 rounded ${textColor} ${bgColor} ${borderColor} border`}>
-            {value || '0'}
-          </span>
-        );
-      }
-    },
+    { key: "C", header: "Contribution", hideOnMobile: false },
   ];
 
   // Check if we have any player stats
@@ -151,10 +73,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     }));
   };
 
-  const toggleCombined = () => {
-    setCombinedSectionOpen(prev => !prev);
-  };
-
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
@@ -170,7 +88,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
           const teamStats = displayInfo.playerStats && displayInfo.playerStats[team.id];
           const hasTeamPlayers = teamStats && teamStats.players && teamStats.players.length > 0;
           const hasActualPlayers = hasRealPlayerData(team.id);
-          const isOpen = openTeams[team.id] || false;
+          const isOpen = openTeams[team.id];
           
           return (
             <Collapsible key={team.id} open={isOpen} onOpenChange={() => toggleTeam(team.id)} className="border rounded-md overflow-hidden mb-4">
@@ -214,36 +132,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
             </Collapsible>
           );
         })
-      )}
-      
-      {/* Combined player stats section */}
-      {combinedPlayers.length > 0 && (
-        <Collapsible open={combinedSectionOpen} onOpenChange={toggleCombined} className="border rounded-md overflow-hidden mb-4">
-          <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-medium">Combined Player Statistics</h3>
-            </div>
-            {combinedSectionOpen ? (
-              <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-            )}
-          </CollapsibleTrigger>
-          
-          <CollapsibleContent>
-            <div className="p-2">
-              <ResponsiveTable 
-                data={combinedPlayers} 
-                columns={playerColumns}
-                superCompact={isMobile}
-                ultraCompact={false}
-                className="mt-1"
-                resultsMode
-              />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
       )}
       
       {/* Show message if no player stats */}

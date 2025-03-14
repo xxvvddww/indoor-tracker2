@@ -1,14 +1,12 @@
-
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
 import PlayerStatistics from './PlayerStatistics';
 import DataExtractor from './DataExtractor';
 import { ResponsiveContainer } from '../ui/responsive-container';
-import { Trophy } from 'lucide-react';
+import { Calendar, Trophy } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card } from "@/components/ui/card";
-import { AlertCircle } from 'lucide-react';
 
 interface MatchOverviewProps {
   displayInfo: DisplayableMatchInfo;
@@ -57,6 +55,14 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
         {/* Match summary section */}
         <Card className="p-4">
           <div className="space-y-4">
+            {/* Match date */}
+            {displayInfo.date ? (
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-sm">{displayInfo.date}</span>
+              </div>
+            ) : null}
+            
             {/* Match winner */}
             {displayInfo.winner ? (
               <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
