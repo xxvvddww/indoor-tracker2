@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -376,7 +377,7 @@ const Index = () => {
                   onOpenChange={() => toggleSection("recentResults")}
                   className="border rounded-lg shadow-sm"
                 >
-                  <CollapsibleTrigger asChild>
+                  <CollapsibleTrigger className="w-full">
                     <Button variant="ghost" className="w-full flex justify-between items-center p-4">
                       <div className="flex items-center">
                         <Award className="h-5 w-5 text-primary mr-2" />
@@ -484,7 +485,7 @@ const Index = () => {
                   onOpenChange={() => toggleSection("topPlayers")}
                   className="border rounded-lg shadow-sm"
                 >
-                  <CollapsibleTrigger asChild>
+                  <CollapsibleTrigger className="w-full">
                     <Button variant="ghost" className="w-full flex justify-between items-center p-4">
                       <div className="flex items-center">
                         <BarChart3 className="h-5 w-5 text-primary mr-2" />
