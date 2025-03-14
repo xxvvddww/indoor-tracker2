@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -98,38 +97,22 @@ const Fixtures = () => {
   const totalPages = Math.max(1, Math.ceil(sortedDates.length / itemsPerPage));
 
   const sortDivisions = (divisionNames: string[]): string[] => {
-    // Define a specific order for divisions
-    const divisionOrder: { [key: string]: number } = {
-      "Division 1": 1,
-      "Division 2": 2,
-      "Division 3": 3,
-      "No Division": 999 // Always last
-    };
-    
     return divisionNames.sort((a, b) => {
-      // Get the order for division a
-      let orderA = divisionOrder[a];
-      if (orderA === undefined) {
-        // Handle numbered divisions not explicitly defined
-        if (a.match(/^Division \d+$/)) {
-          orderA = parseInt(a.replace("Division", "").trim(), 10);
-        } else {
-          orderA = 500; // Middle priority for other named divisions
-        }
+      if (a === "No Division") return 1;
+      if (b === "No Division") return -1;
+      
+      const aDivMatch = a.match(/Division (\d+)/i);
+      const bDivMatch = b.match(/Division (\d+)/i);
+      
+      if (aDivMatch && bDivMatch) {
+        return parseInt(aDivMatch[1], 10) - parseInt(bDivMatch[1], 10);
       }
       
-      // Get the order for division b
-      let orderB = divisionOrder[b];
-      if (orderB === undefined) {
-        // Handle numbered divisions not explicitly defined
-        if (b.match(/^Division \d+$/)) {
-          orderB = parseInt(b.replace("Division", "").trim(), 10);
-        } else {
-          orderB = 500; // Middle priority for other named divisions
-        }
-      }
+      if (aDivMatch) return -1;
       
-      return orderA - orderB;
+      if (bDivMatch) return 1;
+      
+      return a.localeCompare(b);
     });
   };
 
@@ -405,4 +388,3 @@ const Fixtures = () => {
 };
 
 export default Fixtures;
-
