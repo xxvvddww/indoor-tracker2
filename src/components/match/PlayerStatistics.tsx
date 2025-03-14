@@ -51,6 +51,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     Object.values(displayInfo.playerStats).forEach(team => {
       team.players.forEach(player => {
         if (!player.Name.includes("No player statistics") && player.Name !== "Unknown Player") {
+          // We're not adding team names in the combined view as requested
           allPlayers.push({
             ...player
           });
@@ -92,7 +93,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { 
       key: "Name", 
       header: "Player", 
-      className: "font-medium w-[40%]",
+      className: "font-medium",
       render: (value: string, row: any) => (
         <div className="flex flex-col">
           <span>{value}</span>
@@ -100,46 +101,20 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         </div>
       )
     },
-    { 
-      key: "RS", 
-      header: "R", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
-    { 
-      key: "RC", 
-      header: "RA", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
-    { 
-      key: "Wkts", 
-      header: "W", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
+    { key: "RS", header: "R", hideOnMobile: false },
+    { key: "RC", header: "Con", hideOnMobile: false },
+    { key: "Wkts", header: "W", hideOnMobile: false },
     { 
       key: "SR", 
       header: "SR", 
       hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]",
       render: (value: string) => {
         // Remove decimal places
         const srValue = parseFloat(value || '0');
         return Math.round(srValue);
       }
     },
-    { 
-      key: "C", 
-      header: "C", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    }
+    { key: "C", header: "C", hideOnMobile: false }
   ];
 
   // Check if we have any player stats
@@ -171,7 +146,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   };
 
   return (
-    <div className="space-y-4 px-0 -mx-2">
+    <div className="space-y-4 px-0">
       <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
       
       {/* Show teams with player stats */}
@@ -209,7 +184,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
               
               <CollapsibleContent>
                 {hasTeamPlayers ? (
-                  <div className="p-0">
+                  <div className="p-0.5">
                     <ResponsiveTable 
                       data={teamStats.players} 
                       columns={playerColumns}
@@ -245,7 +220,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
           </CollapsibleTrigger>
           
           <CollapsibleContent>
-            <div className="p-0">
+            <div className="p-0.5">
               <ResponsiveTable 
                 data={combinedPlayers} 
                 columns={playerColumns.filter(col => col.key !== 'TeamName')}

@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
@@ -22,6 +23,9 @@ export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, match
     
     // Extract player stats
     extractPlayerStats(matchData, displayInfo);
+    
+    // Clean up the results display
+    cleanUpResultDisplay(displayInfo);
     
   }, [matchData, displayInfo]);
   
@@ -50,6 +54,7 @@ const extractBasicInfo = (matchData: MatchDetails, displayInfo: DisplayableMatch
   }
 };
 
+// Extract teams information and determine winner
 const extractTeamsInfo = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo) => {
   // Extract teams if not already set
   if ((!displayInfo.teams || displayInfo.teams.length === 0) && matchData.Teams?.Team) {
@@ -69,6 +74,7 @@ const extractTeamsInfo = (matchData: MatchDetails, displayInfo: DisplayableMatch
   }
 };
 
+// Determine the match winner from available data
 const determineMatchWinner = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo) => {
   if (!displayInfo.teams || displayInfo.teams.length !== 2) return;
   
@@ -234,6 +240,7 @@ const extractPlayerStats = (matchData: MatchDetails, displayInfo: DisplayableMat
   }
 };
 
+// Clean up the result display to remove point details
 const cleanUpResultDisplay = (displayInfo: DisplayableMatchInfo) => {
   // Clean up Man of Match display
   if (displayInfo.manOfMatch) {
