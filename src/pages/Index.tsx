@@ -1,7 +1,6 @@
-
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
-import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId } from "../services/cricketApi";
+import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
 import { Fixture, Player } from "../types/cricket";
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -49,8 +48,8 @@ const Index = () => {
       
       try {
         const [fixturesData, playersData] = await Promise.all([
-          fetchFixtures("0", seasonId),
-          fetchPlayerStats("0", seasonId)
+          fetchFixtures(DEFAULT_LEAGUE_ID, seasonId),
+          fetchPlayerStats(DEFAULT_LEAGUE_ID, seasonId)
         ]);
         
         setFixtures(fixturesData);
@@ -67,7 +66,6 @@ const Index = () => {
     loadData();
   }, [seasonId]);
   
-  // Filter fixtures
   const upcomingFixtures = fixtures
     .filter(fixture => isFutureDate(fixture.Date))
     .sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
@@ -78,12 +76,10 @@ const Index = () => {
     .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime())
     .slice(0, 5);
   
-  // Filter top players by runs  
   const topBatsmen = [...players]
     .sort((a, b) => parseInt(b.RunsScored) - parseInt(a.RunsScored))
     .slice(0, 5);
     
-  // Filter top players by wickets
   const topBowlers = [...players]
     .sort((a, b) => parseInt(b.Wickets) - parseInt(a.Wickets))
     .slice(0, 5);
@@ -132,7 +128,6 @@ const Index = () => {
         ) : renderEmptyState() || (
           <>
             <div className="grid gap-6 md:grid-cols-2">
-              {/* Upcoming Fixtures */}
               <div className="bg-card rounded-lg border shadow-sm">
                 <div className="p-4 flex justify-between items-center border-b">
                   <h2 className="font-semibold text-lg flex items-center gap-2">
@@ -175,7 +170,6 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Recent Results */}
               <div className="bg-card rounded-lg border shadow-sm">
                 <div className="p-4 flex justify-between items-center border-b">
                   <h2 className="font-semibold text-lg flex items-center gap-2">
@@ -219,7 +213,6 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Player Stats */}
             <div className="bg-card rounded-lg border shadow-sm">
               <div className="p-4 border-b">
                 <h2 className="font-semibold text-lg flex items-center gap-2">

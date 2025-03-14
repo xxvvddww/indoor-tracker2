@@ -1,12 +1,11 @@
-
 import axios from 'axios';
 import { Fixture, Player, MatchDetails } from '../types/cricket';
 import { toast } from 'sonner';
 
 // Config with base URL and parameters
 const API_BASE_URL = "https://seamer.spawtz.com/External/Fixtures/Feed.aspx";
-const CURRENT_SEASON_ID = "90"; // Set as a variable for easy changing
-const DEFAULT_LEAGUE_ID = "6"; // Setting a default based on the image
+export const CURRENT_SEASON_ID = "90"; // Set as a variable for easy changing
+export const DEFAULT_LEAGUE_ID = "6"; // Setting a default based on the image
 
 // Helper function to parse XML
 const parseXml = (xmlString: string) => {
