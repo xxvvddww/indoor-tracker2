@@ -27,6 +27,40 @@ const Stats = () => {
   // Get unique teams for filter dropdown
   const teams = [...new Set(players.map(player => player.TeamName))].sort();
 
+  // DEFINE CALCULATION FUNCTIONS FIRST
+  // Calculate batting average (runs / times out)
+  const calculateBattingAverage = (player: Player) => {
+    const runsScored = parseInt(player.RunsScored);
+    const timesOut = parseInt(player.TimesOut);
+    
+    if (timesOut === 0) return runsScored > 0 ? "∞" : "-";
+    
+    const average = runsScored / timesOut;
+    return average.toFixed(2);
+  };
+
+  // Calculate bowling average (runs conceded / wickets)
+  const calculateBowlingAverage = (player: Player) => {
+    const runsConceded = parseInt(player.RunsConceded);
+    const wickets = parseInt(player.Wickets);
+    
+    if (wickets === 0) return "-";
+    
+    const average = runsConceded / wickets;
+    return average.toFixed(2);
+  };
+
+  // Calculate batting strike rate (runs / balls faced * 100)
+  const calculateStrikeRate = (player: Player) => {
+    const runsScored = parseInt(player.RunsScored);
+    const ballsFaced = parseInt(player.BallsFaced);
+    
+    if (ballsFaced === 0) return "-";
+    
+    const strikeRate = (runsScored / ballsFaced) * 100;
+    return strikeRate.toFixed(2);
+  };
+
   useEffect(() => {
     const loadPlayerStats = async () => {
       setLoading(true);
@@ -113,39 +147,6 @@ const Stats = () => {
   const renderSortIcon = (column: string) => {
     if (sortBy !== column) return null;
     return sortDirection === "asc" ? <ArrowUp className="ml-1 h-3 w-3 inline" /> : <ArrowDown className="ml-1 h-3 w-3 inline" />;
-  };
-
-  // Calculate batting average (runs / times out)
-  const calculateBattingAverage = (player: Player) => {
-    const runsScored = parseInt(player.RunsScored);
-    const timesOut = parseInt(player.TimesOut);
-    
-    if (timesOut === 0) return runsScored > 0 ? "∞" : "-";
-    
-    const average = runsScored / timesOut;
-    return average.toFixed(2);
-  };
-
-  // Calculate bowling average (runs conceded / wickets)
-  const calculateBowlingAverage = (player: Player) => {
-    const runsConceded = parseInt(player.RunsConceded);
-    const wickets = parseInt(player.Wickets);
-    
-    if (wickets === 0) return "-";
-    
-    const average = runsConceded / wickets;
-    return average.toFixed(2);
-  };
-
-  // Calculate batting strike rate (runs / balls faced * 100)
-  const calculateStrikeRate = (player: Player) => {
-    const runsScored = parseInt(player.RunsScored);
-    const ballsFaced = parseInt(player.BallsFaced);
-    
-    if (ballsFaced === 0) return "-";
-    
-    const strikeRate = (runsScored / ballsFaced) * 100;
-    return strikeRate.toFixed(2);
   };
 
   if (loading) {
