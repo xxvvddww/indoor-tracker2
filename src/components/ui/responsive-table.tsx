@@ -59,7 +59,7 @@ export function ResponsiveTable({
   if (ultraCompact) tableClassName += "min-w-full ";
 
   return (
-    <div className={`${compactMode ? "super-compact-table overflow-x-auto w-full" : ""} ${resultsMode ? "-mx-0 px-0" : "-mx-1"} ${ultraCompact ? "ultra-compact-table" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
+    <div className={`${compactMode ? "super-compact-table overflow-x-auto" : ""} ${resultsMode ? "px-1" : "-mx-1"} ${ultraCompact ? "ultra-compact-table" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
       <Table className={tableClassName}>
         {!hideHeader && (
           <TableHeader>
@@ -84,7 +84,7 @@ export function ResponsiveTable({
               {visibleColumns.map((column) => (
                 <TableCell 
                   key={`${getRowKey(row, rowIndex)}-${column.key}`} 
-                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1 px-1 text-[0.65rem]" : ""} ${column.className || ""}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1.5 px-1 text-[0.65rem]" : ""} ${column.className || ""}`}
                 >
                   {column.render 
                     ? column.render(row[column.key], row) 

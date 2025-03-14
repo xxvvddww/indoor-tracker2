@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
-import { AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertCircle, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DisplayableMatchInfo } from './types';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -101,20 +101,11 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         </div>
       )
     },
-    { key: "RS", header: "R", hideOnMobile: false },
-    { key: "RC", header: "Con", hideOnMobile: false },
+    { key: "RS", header: "Runs", hideOnMobile: false },
+    { key: "RC", header: "R Con", hideOnMobile: false },
     { key: "Wkts", header: "W", hideOnMobile: false },
-    { 
-      key: "SR", 
-      header: "SR", 
-      hideOnMobile: false,
-      render: (value: string) => {
-        // Remove decimal places
-        const srValue = parseFloat(value || '0');
-        return Math.round(srValue);
-      }
-    },
-    { key: "C", header: "C", hideOnMobile: false }
+    { key: "SR", header: "SR", hideOnMobile: false },
+    { key: "C", header: "Contrib", hideOnMobile: false }
   ];
 
   // Check if we have any player stats
@@ -184,13 +175,13 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
               
               <CollapsibleContent>
                 {hasTeamPlayers ? (
-                  <div className="p-0.5">
+                  <div className="p-1">
                     <ResponsiveTable 
                       data={teamStats.players} 
                       columns={playerColumns}
-                      superCompact={true}
+                      superCompact={isMobile}
                       ultraCompact={false}
-                      className="mt-0 -mx-0"
+                      className="mt-0"
                       resultsMode
                     />
                   </div>
@@ -220,13 +211,13 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
           </CollapsibleTrigger>
           
           <CollapsibleContent>
-            <div className="p-0.5">
+            <div className="p-1">
               <ResponsiveTable 
                 data={combinedPlayers} 
                 columns={playerColumns.filter(col => col.key !== 'TeamName')}
-                superCompact={true}
+                superCompact={isMobile}
                 ultraCompact={false}
-                className="mt-0 -mx-0"
+                className="mt-0"
                 resultsMode
               />
             </div>
