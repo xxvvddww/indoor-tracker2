@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTeams, fetchFixtures, fetchPlayerStats, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
@@ -170,7 +169,6 @@ const Teams = () => {
     });
   }, [filteredTeams, sortColumn, sortDirection]);
 
-  // Group teams by division
   const teamsByDivision = useMemo(() => {
     if (!sortedTeams.length) return {};
     
@@ -187,12 +185,28 @@ const Teams = () => {
     return divisions;
   }, [sortedTeams]);
 
-  // Initialize openDivisions state when divisions change
+  const sortedDivisions = useMemo(() => {
+    const divisionOrder = ["Div 1", "Div 2", "Div 3", "No Division"];
+    
+    return Object.entries(teamsByDivision).sort((a, b) => {
+      const indexA = divisionOrder.indexOf(a[0]);
+      const indexB = divisionOrder.indexOf(b[0]);
+      
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+      
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      
+      return a[0].localeCompare(b[0]);
+    });
+  }, [teamsByDivision]);
+
   React.useEffect(() => {
     if (Object.keys(teamsByDivision).length > 0) {
       const initialOpenState: Record<string, boolean> = {};
       Object.keys(teamsByDivision).forEach(division => {
-        // Set all divisions to open by default
         initialOpenState[division] = true;
       });
       setOpenDivisions(initialOpenState);
@@ -372,7 +386,7 @@ const Teams = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {Object.entries(teamsByDivision).map(([division, divisionTeams]) => (
+                {sortedDivisions.map(([division, divisionTeams]) => (
                   <Collapsible 
                     key={division}
                     open={openDivisions[division]}
