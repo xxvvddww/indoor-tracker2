@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
@@ -55,7 +54,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       {/* Display Raw Match Data */}
       <div className="space-y-4 w-full">
         <h3 className="text-lg font-medium">Match Data</h3>
-        <ScrollArea className={`${isMobile ? 'h-[300px]' : 'h-[600px]'} rounded-md border`}>
+        <ScrollArea className={`${isMobile ? 'h-[300px]' : 'h-[600px]'} w-full rounded-md border`}>
           <div className="p-4">
             <pre className="whitespace-pre-wrap break-words text-xxs sm:text-xs">
               {JSON.stringify(matchData, null, 2)}
