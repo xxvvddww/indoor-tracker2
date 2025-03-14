@@ -4,7 +4,7 @@ import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
 import { extractBasicInfo } from '../../utils/match/basicInfoExtractor';
 import { extractTeamsAndWinner } from '../../utils/match/teamUtils';
-import { extractPlayerStats } from '../../utils/match/playerStatsUtils';
+import { extractPlayerStatsFromMatch } from '../../utils/match/playerStats/extractorService';
 
 interface DataExtractorProps {
   displayInfo: DisplayableMatchInfo;
@@ -28,9 +28,9 @@ export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, match
     extractTeamsAndWinner(matchData, displayInfo);
     console.log("Teams extracted:", displayInfo.teams?.length, "Winner:", displayInfo.winner);
     
-    // Extract player stats
-    extractPlayerStats(matchData, displayInfo);
-    console.log("Player stats extraction complete");
+    // Extract player stats directly from the specialized service
+    // Use the extractorService directly to avoid any middleware issues
+    extractPlayerStatsFromMatch(matchData, displayInfo);
     
     // Debug what we ended up with
     if (displayInfo.playerStats) {
@@ -38,6 +38,8 @@ export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, match
       Object.keys(displayInfo.playerStats).forEach(teamId => {
         console.log(`Team ${teamId} has ${displayInfo.playerStats![teamId].players.length} players`);
       });
+    } else {
+      console.log("No player stats object was created during extraction");
     }
     
   }, [matchData, displayInfo]);

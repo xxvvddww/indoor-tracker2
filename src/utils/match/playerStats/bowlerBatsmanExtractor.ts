@@ -9,11 +9,13 @@ export const extractFromBatsmenBowlers = (
   teams: Team[],
   displayInfo: DisplayableMatchInfo
 ): void => {
-  console.log("Using Batsmen/Bowlers data for player stats");
+  console.log("Using Batsmen/Bowlers data for player stats extraction");
   
-  const batsmen = matchData.Batsmen?.Batsman ?
+  // Ensure we handle both array and single object cases for batsmen
+  const batsmen = matchData.Batsmen?.Batsman ? 
     (Array.isArray(matchData.Batsmen.Batsman) ? matchData.Batsmen.Batsman : [matchData.Batsmen.Batsman]) : [];
   
+  // Ensure we handle both array and single object cases for bowlers
   const bowlers = matchData.Bowlers?.Bowler ?
     (Array.isArray(matchData.Bowlers.Bowler) ? matchData.Bowlers.Bowler : [matchData.Bowlers.Bowler]) : [];
   
@@ -30,23 +32,26 @@ export const extractFromBatsmenBowlers = (
         name: teamName,
         players: []
       };
+    } else {
+      // Clear existing players to avoid duplication
+      displayInfo.playerStats![teamId].players = [];
     }
     
     // Add players from both bowlers and batsmen lists
-    const teamPlayers = new Set();
+    const teamPlayerIds = new Set();
     
     // Process batsmen first
     batsmen.forEach(player => {
-      if (player.TeamId === teamId && !teamPlayers.has(player.Id)) {
-        teamPlayers.add(player.Id);
+      if (player.TeamId === teamId && !teamPlayerIds.has(player.Id)) {
+        teamPlayerIds.add(player.Id);
         console.log(`Adding batsman ${player.Name} to team ${teamName}`);
         displayInfo.playerStats![teamId].players.push({
           Name: player.Name || 'Unknown',
-          RS: '0',
+          RS: player.RunsScored || '0',
           OB: '0',
           RC: '0',
           Wkts: '0',
-          SR: '0',
+          SR: player.StrikeRate || '0',
           Econ: '0'
         });
       }
@@ -54,17 +59,17 @@ export const extractFromBatsmenBowlers = (
     
     // Then process bowlers
     bowlers.forEach(player => {
-      if (player.TeamId === teamId && !teamPlayers.has(player.Id)) {
-        teamPlayers.add(player.Id);
+      if (player.TeamId === teamId && !teamPlayerIds.has(player.Id)) {
+        teamPlayerIds.add(player.Id);
         console.log(`Adding bowler ${player.Name} to team ${teamName}`);
         displayInfo.playerStats![teamId].players.push({
           Name: player.Name || 'Unknown',
           RS: '0',
-          OB: '0',
-          RC: '0',
-          Wkts: '0',
+          OB: player.OversBowled || '0',
+          RC: player.RunsConceded || '0',
+          Wkts: player.Wickets || '0',
           SR: '0',
-          Econ: '0'
+          Econ: player.Economy || '0'
         });
       }
     });
