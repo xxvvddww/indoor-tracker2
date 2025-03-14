@@ -7,8 +7,6 @@ import App from './App.tsx'
 import { ThemeProvider } from './context/ThemeContext.tsx'
 import { Toaster } from "@/components/ui/toaster";
 import './styles/index.css'
-import './styles/card-styles.css'
-import './styles/moving-border.css'
 
 const queryClient = new QueryClient({
   defaultOptions: {
