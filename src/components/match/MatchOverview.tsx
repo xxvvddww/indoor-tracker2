@@ -85,8 +85,8 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             
             {/* Match result */}
             {displayInfo.winner ? (
-              <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
-                <Trophy className="h-4 w-4 text-green-500" />
+              <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
+                <Trophy className="h-4 w-4 text-amber-500" />
                 <p className="text-sm">
                   <span className="font-medium">Winner:</span> {displayInfo.winner}
                   {displayInfo.result && displayInfo.result !== `${displayInfo.winner} won` && (
@@ -105,8 +105,8 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             
             {/* Man of the match */}
             {displayInfo.manOfMatch && (
-              <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
-                <Trophy className="h-4 w-4 text-green-500" />
+              <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
+                <Trophy className="h-4 w-4 text-amber-500" />
                 <p className="text-sm">
                   <span className="font-medium">Player of the Match:</span> {displayInfo.manOfMatch}
                 </p>
@@ -114,6 +114,35 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             )}
           </div>
         </Card>
+        
+        {/* Teams information */}
+        {displayInfo.teams && displayInfo.teams.length > 0 ? (
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-medium">Teams</h3>
+            </div>
+            <div className="space-y-2">
+              {displayInfo.teams.map((team, index) => (
+                <div key={team.id} className="flex items-center justify-between">
+                  <span className="text-sm">{team.name}</span>
+                  {displayInfo.winnerId === team.id && (
+                    <span className="text-xs bg-amber-500/20 text-amber-600 px-2 py-0.5 rounded-full">
+                      Winner
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : (
+          <Card className="p-4">
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <AlertCircle className="h-4 w-4" />
+              <p className="text-sm">No team information available</p>
+            </div>
+          </Card>
+        )}
         
         {/* Player statistics */}
         <Card className="p-4">

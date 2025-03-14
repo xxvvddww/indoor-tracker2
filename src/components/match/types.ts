@@ -30,8 +30,8 @@ export type DisplayableMatchInfo = {
         Wkts?: string; // Wickets
         SR?: string; // Strike rate
         Econ?: string; // Economy
-        C?: string; // Contribution metric
-        PlayerId?: string; // Player ID
+        C?: string; // Catches or Contribution
+        PlayerId?: string; // Added player ID
         Id?: string; // Alternative ID field
         TeamId?: string; // Team ID
         TeamName?: string; // Team Name
