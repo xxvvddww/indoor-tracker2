@@ -10,8 +10,12 @@ interface ResponsiveCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   withHoverEffect?: boolean;
   withAnimation?: boolean;
   animationDelay?: number;
-  variant?: 'default' | 'glass' | 'outline' | 'glow';
-  accent?: 'default' | 'green' | 'blue' | 'purple' | 'amber';
+  variant?: 'default' | 'glass' | 'outline' | 'glow' | 'gradient' | 'modern' | 'stats';
+  accent?: 'default' | 'green' | 'blue' | 'purple' | 'amber' | 'red' | 'orange' | 'teal' | 'cyan';
+  icon?: React.ReactNode;
+  statValue?: string | number;
+  statLabel?: string;
+  statSubtext?: string;
 }
 
 const ResponsiveCard = React.forwardRef<HTMLDivElement, ResponsiveCardProps>(
@@ -26,6 +30,10 @@ const ResponsiveCard = React.forwardRef<HTMLDivElement, ResponsiveCardProps>(
     animationDelay = 0,
     variant = 'default',
     accent = 'default',
+    icon,
+    statValue,
+    statLabel,
+    statSubtext,
     ...props 
   }, ref) => {
     const animationStyle = withAnimation ? {
@@ -37,15 +45,60 @@ const ResponsiveCard = React.forwardRef<HTMLDivElement, ResponsiveCardProps>(
       glass: "bg-opacity-20 backdrop-blur-sm border-opacity-20",
       outline: "bg-transparent border-2",
       glow: "shadow-[0_0_20px_rgba(0,255,170,0.15)]",
+      gradient: "bg-gradient-to-b from-background to-background/80 border-0",
+      modern: "card-modern",
+      stats: "card-stats border-0"
     };
 
     const accentStyles = {
       default: "",
-      green: "border-green-500 text-green-500",
-      blue: "border-blue-500 text-blue-500",
-      purple: "border-purple-500 text-purple-500",
-      amber: "border-amber-500 text-amber-500",
+      green: "border-green-500",
+      blue: "border-blue-500",
+      purple: "border-purple-500",
+      amber: "border-amber-500",
+      red: "border-red-500",
+      orange: "border-orange-500",
+      teal: "border-teal-500",
+      cyan: "border-cyan-500"
     };
+
+    const accentGradients = {
+      default: "",
+      blue: "bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 text-blue-700 dark:text-blue-300",
+      purple: "bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 text-purple-700 dark:text-purple-300",
+      green: "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 text-green-700 dark:text-green-300",
+      amber: "bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 text-amber-700 dark:text-amber-300",
+      red: "bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 text-red-700 dark:text-red-300",
+      orange: "bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 text-orange-700 dark:text-orange-300",
+      teal: "bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 text-teal-700 dark:text-teal-300", 
+      cyan: "bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/20 dark:to-cyan-800/20 text-cyan-700 dark:text-cyan-300"
+    };
+
+    if (variant === 'stats' && statValue !== undefined && statLabel !== undefined) {
+      return (
+        <Card 
+          ref={ref} 
+          className={cn(
+            "w-full overflow-hidden", 
+            withHoverEffect && "card-hover transform-gpu",
+            withAnimation && "animate-fade-in opacity-0",
+            variant === 'stats' && accentGradients[accent],
+            variantStyles[variant],
+            accentStyles[accent],
+            className
+          )}
+          style={animationStyle}
+          {...props}
+        >
+          <div className="p-4 flex flex-col items-center text-center">
+            {icon && <div className="mb-3 text-4xl">{icon}</div>}
+            <h3 className="text-sm font-medium mb-1">{statLabel}</h3>
+            <p className="text-2xl font-bold">{statValue}</p>
+            {statSubtext && <p className="text-xs mt-1">{statSubtext}</p>}
+          </div>
+        </Card>
+      );
+    }
 
     return (
       <Card 
