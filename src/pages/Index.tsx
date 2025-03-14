@@ -527,15 +527,14 @@ const Index = () => {
                         </TabsTrigger>
                       </TabsList>
                       
-                      <div className="flex items-center gap-2 mb-4">
-                        <Filter className="h-4 w-4 text-muted-foreground" />
+                      <div className="mb-4">
                         <ToggleGroup 
                           type="single" 
                           value={activeDivision}
                           onValueChange={(value) => {
                             if (value) setActiveDivision(value);
                           }}
-                          className="justify-start"
+                          className="w-full grid grid-cols-3 bg-slate-900 dark:bg-slate-800 p-1 rounded-md"
                           darkStyle={true}
                         >
                           <ToggleGroupItem value="all" darkStyle={true}>
