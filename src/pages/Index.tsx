@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { ArrowUpRight, Calendar, Star, Award } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -38,22 +39,26 @@ const Index = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const seasonId = getCurrentSeasonId();
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      setError(null);
       
       try {
         const [fixturesData, playersData] = await Promise.all([
-          fetchFixtures("", seasonId),
-          fetchPlayerStats("", seasonId)
+          fetchFixtures("0", seasonId),
+          fetchPlayerStats("0", seasonId)
         ]);
         
         setFixtures(fixturesData);
         setPlayers(playersData);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
+        setError("Failed to load data. Please try again later.");
+        toast.error("Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
@@ -83,6 +88,29 @@ const Index = () => {
     .sort((a, b) => parseInt(b.Wickets) - parseInt(a.Wickets))
     .slice(0, 5);
 
+  const renderEmptyState = () => {
+    if (fixtures.length === 0 && players.length === 0 && !loading) {
+      return (
+        <div className="bg-card rounded-lg border shadow-sm p-6 text-center">
+          <Award className="mx-auto h-12 w-12 text-primary/50" />
+          <h2 className="mt-4 text-xl font-medium">No Cricket Data Available</h2>
+          <p className="mt-2 text-muted-foreground">
+            There are no fixtures or statistics available for the current season.
+          </p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Try updating the season ID in Settings or check your API connection.
+          </p>
+          <div className="mt-6">
+            <Link to="/settings" className="text-primary hover:underline">
+              Go to Settings
+            </Link>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -97,7 +125,11 @@ const Index = () => {
           <div className="flex justify-center items-center h-96">
             <LoadingSpinner size={8} />
           </div>
-        ) : (
+        ) : error ? (
+          <div className="bg-destructive/10 p-4 rounded-md text-destructive">
+            {error}
+          </div>
+        ) : renderEmptyState() || (
           <>
             <div className="grid gap-6 md:grid-cols-2">
               {/* Upcoming Fixtures */}
@@ -213,15 +245,23 @@ const Index = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {topBatsmen.map((player) => (
-                        <TableRow key={player.Id}>
-                          <TableCell className="font-medium">{player.UserName}</TableCell>
-                          <TableCell>{player.TeamName}</TableCell>
-                          <TableCell>{player.DivisionName}</TableCell>
-                          <TableCell className="text-right">{player.RunsScored}</TableCell>
-                          <TableCell className="text-right">{player.Games}</TableCell>
+                      {topBatsmen.length > 0 ? (
+                        topBatsmen.map((player) => (
+                          <TableRow key={player.Id}>
+                            <TableCell className="font-medium">{player.UserName}</TableCell>
+                            <TableCell>{player.TeamName}</TableCell>
+                            <TableCell>{player.DivisionName}</TableCell>
+                            <TableCell className="text-right">{player.RunsScored}</TableCell>
+                            <TableCell className="text-right">{player.Games}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                            No batting statistics available
+                          </TableCell>
                         </TableRow>
-                      ))}
+                      )}
                     </TableBody>
                   </Table>
                 </TabsContent>
@@ -238,15 +278,23 @@ const Index = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {topBowlers.map((player) => (
-                        <TableRow key={player.Id}>
-                          <TableCell className="font-medium">{player.UserName}</TableCell>
-                          <TableCell>{player.TeamName}</TableCell>
-                          <TableCell>{player.DivisionName}</TableCell>
-                          <TableCell className="text-right">{player.Wickets}</TableCell>
-                          <TableCell className="text-right">{player.Overs}</TableCell>
+                      {topBowlers.length > 0 ? (
+                        topBowlers.map((player) => (
+                          <TableRow key={player.Id}>
+                            <TableCell className="font-medium">{player.UserName}</TableCell>
+                            <TableCell>{player.TeamName}</TableCell>
+                            <TableCell>{player.DivisionName}</TableCell>
+                            <TableCell className="text-right">{player.Wickets}</TableCell>
+                            <TableCell className="text-right">{player.Overs}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                            No bowling statistics available
+                          </TableCell>
                         </TableRow>
-                      ))}
+                      )}
                     </TableBody>
                   </Table>
                 </TabsContent>
