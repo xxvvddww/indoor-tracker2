@@ -31,6 +31,10 @@ export type DisplayableMatchInfo = {
         SR?: string; // Strike rate
         Econ?: string; // Economy
         C?: string; // Catches or Contribution
+        PlayerId?: string; // Added player ID
+        Id?: string; // Alternative ID field
+        TeamId?: string; // Team ID
+        TeamName?: string; // Team Name
         [key: string]: any;
       }[];
     };
