@@ -81,11 +81,39 @@ export const extractPlayerStats = (matchData: MatchDetails, displayInfo: Display
     addFallbackPlayerStats(displayInfo);
   }
   
+  // Add missing contribution field to player stats if not present
+  if (displayInfo.playerStats) {
+    Object.keys(displayInfo.playerStats).forEach(teamId => {
+      const teamStats = displayInfo.playerStats![teamId];
+      teamStats.players.forEach(player => {
+        if (!player.C) {
+          player.C = calculateContribution(player);
+        }
+      });
+    });
+  }
+  
   // Log the results
   console.log("Player stats extraction complete, results:", Object.keys(displayInfo.playerStats).length, "teams");
   Object.keys(displayInfo.playerStats).forEach(teamId => {
     console.log(`Team ${teamId} has ${displayInfo.playerStats![teamId].players.length} players`);
   });
+};
+
+// Calculate a contribution metric based on player stats
+const calculateContribution = (player: any): string => {
+  // Default contribution value if we can't calculate
+  if (!player) return "-";
+  
+  // Get numeric values or defaults
+  const runs = parseInt(player.RS) || 0;
+  const wickets = parseInt(player.Wkts) || 0;
+  
+  // Simple contribution formula: runs + (wickets * 20)
+  // This weights wickets higher in the contribution
+  const contribution = runs + (wickets * 20);
+  
+  return contribution > 0 ? contribution.toString() : "-";
 };
 
 // Add fallback player data when no stats are available
@@ -109,7 +137,8 @@ const addFallbackPlayerStats = (displayInfo: DisplayableMatchInfo): void => {
         RC: "-",
         Wkts: "-",
         SR: "-",
-        Econ: "-"
+        Econ: "-",
+        C: "-"
       }
     ];
   });

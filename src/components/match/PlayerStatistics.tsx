@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
-import { Users, Trophy, AlertCircle } from "lucide-react";
+import { Users, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DisplayableMatchInfo } from './types';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -22,6 +22,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { key: "Wkts", header: "Wickets", hideOnMobile: false },
     { key: "SR", header: "S/R", hideOnMobile: true },
     { key: "Econ", header: "Econ", hideOnMobile: true },
+    { key: "C", header: "Contribution", hideOnMobile: false },
   ];
 
   useEffect(() => {
@@ -38,36 +39,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       });
     }
   }, [displayInfo]);
-
-  // Always display winner at the top
-  const WinnerDisplay = () => {
-    if (displayInfo.winner) {
-      return (
-        <div className="flex items-center gap-2 mb-4 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
-          <Trophy className="h-4 w-4 text-amber-500" />
-          <p className="text-sm">
-            <span className="font-medium">Winner:</span> {displayInfo.winner}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Always show the Man of the Match if available
-  const ManOfMatchDisplay = () => {
-    if (displayInfo.manOfMatch) {
-      return (
-        <div className="flex items-center gap-2 mb-4 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
-          <Trophy className="h-4 w-4 text-amber-500" />
-          <p className="text-sm">
-            <span className="font-medium">Player of the Match:</span> {displayInfo.manOfMatch}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   // Check if we have any player stats
   const hasPlayerStats = displayInfo.playerStats && 
@@ -90,10 +61,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     <div className="space-y-4">
       <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
       
-      {/* Always show winner at top */}
-      <WinnerDisplay />
-      <ManOfMatchDisplay />
-      
       {/* Show teams with player stats */}
       {(!displayInfo.teams || displayInfo.teams.length === 0) ? (
         <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
@@ -113,7 +80,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                 <h3 className="text-sm font-medium">
                   {team.name}
                   {displayInfo.winnerId === team.id && (
-                    <Badge variant="outline" className="ml-2 bg-amber-500/20 text-amber-600 border-amber-500">
+                    <Badge variant="outline" className="ml-2 bg-green-500/20 text-green-600 border-green-500">
                       Winner
                     </Badge>
                   )}
