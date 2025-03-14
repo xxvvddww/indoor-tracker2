@@ -27,6 +27,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
 
   // Check if we have teams but no player stats
   if (!displayInfo.playerStats || Object.keys(displayInfo.playerStats).length === 0) {
+    console.log("No player statistics available in displayInfo");
     return (
       <div className="text-center py-4">
         <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
@@ -40,12 +41,15 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   );
 
   if (!hasActualPlayers) {
+    console.log("No actual players in any team");
     return (
       <div className="text-center py-4">
         <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
       </div>
     );
   }
+
+  console.log("Rendering player statistics with data:", Object.keys(displayInfo.playerStats).length, "teams");
 
   return (
     <div className="space-y-4">
