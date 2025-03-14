@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
-import { Users, Trophy, AlertCircle } from "lucide-react";
+import { Users, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DisplayableMatchInfo } from './types';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -86,10 +86,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         <WinnerDisplay />
         <ManOfMatchDisplay />
         
-        <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
-          <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No team information available for this match</p>
-        </div>
+        <p className="text-sm text-muted-foreground">No team information available for this match</p>
       </div>
     );
   }
@@ -102,14 +99,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       {/* Always show winner at top */}
       <WinnerDisplay />
       <ManOfMatchDisplay />
-      
-      {/* Show message if no player stats */}
-      {!hasPlayerStats && (
-        <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
-          <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
-        </div>
-      )}
       
       {/* Always show teams, even if we don't have player stats */}
       {displayInfo.teams.map((team) => {

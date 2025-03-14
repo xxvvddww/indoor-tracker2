@@ -5,12 +5,8 @@ import { MatchDetails as MatchDetailsType } from "../../types/cricket";
 export type DisplayableMatchInfo = {
   title: string;
   date?: string;
-  time?: string;
   venue?: string;
   result?: string;
-  matchType?: string;
-  tournament?: string;
-  umpires?: string[];
   teams?: {
     id: string;
     name: string;
@@ -31,10 +27,6 @@ export type DisplayableMatchInfo = {
         SR?: string; // Strike rate
         Econ?: string; // Economy
         C?: string; // Catches or Contribution
-        PlayerId?: string; // Added player ID
-        Id?: string; // Alternative ID field
-        TeamId?: string; // Team ID
-        TeamName?: string; // Team Name
         [key: string]: any;
       }[];
     };
