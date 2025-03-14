@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -18,13 +17,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from 'sonner';
-import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { ResponsiveContainer } from '@/components/ui/responsive-container';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { formatDate } from '@/utils/dateFormatters';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Badge } from '@/components/ui/badge';
 
 const Fixtures = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
@@ -98,37 +95,35 @@ const Fixtures = () => {
   const totalPages = Math.max(1, Math.ceil(sortedDates.length / itemsPerPage));
 
   const sortDivisions = (divisionNames: string[]): string[] => {
-    // First, separate "Div X" and other divisions
-    const divisionGroups: Record<string, string[]> = {
-      numbered: [],
-      other: []
-    };
-
+    const divisionMap: Record<string, number> = {};
+    const nonNumberedDivisions: string[] = [];
+    
     divisionNames.forEach(div => {
-      if (div.startsWith("Div") || div.startsWith("Division")) {
-        divisionGroups.numbered.push(div);
+      if (div.startsWith("Division") || div.startsWith("Div")) {
+        let divNumber = 0;
+        if (div.startsWith("Division")) {
+          divNumber = parseInt(div.replace("Division", "").trim());
+        } else if (div.startsWith("Div")) {
+          divNumber = parseInt(div.replace("Div", "").trim());
+        }
+        
+        if (!isNaN(divNumber)) {
+          divisionMap[div] = divNumber;
+        } else {
+          nonNumberedDivisions.push(div);
+        }
       } else {
-        divisionGroups.other.push(div);
+        nonNumberedDivisions.push(div);
       }
     });
-
-    // Sort numbered divisions
-    divisionGroups.numbered.sort((a, b) => {
-      // Extract division number
-      const getNumber = (name: string) => {
-        if (name.startsWith("Division")) {
-          return parseInt(name.replace("Division", "").trim());
-        } else if (name.startsWith("Div")) {
-          return parseInt(name.replace("Div", "").trim());
-        }
-        return 999; // Fallback
-      };
-      
-      return getNumber(a) - getNumber(b);
-    });
-
-    // Sort other divisions and concatenate results
-    return [...divisionGroups.numbered, ...divisionGroups.other.sort()];
+    
+    const numberedDivisions = Object.entries(divisionMap)
+      .sort((a, b) => a[1] - b[1])
+      .map(entry => entry[0]);
+    
+    nonNumberedDivisions.sort();
+    
+    return [...numberedDivisions, ...nonNumberedDivisions];
   };
 
   const getFixturesByDivision = (dateFixtures: Fixture[]) => {
@@ -269,9 +264,6 @@ const Fixtures = () => {
                                 <Calendar className="h-3 w-3 text-primary mr-1.5" />
                                 <span className="font-semibold text-xs">{date}</span>
                               </div>
-                              <span className="text-[0.65rem] text-muted-foreground">
-                                {dateFixtures.length} {dateFixtures.length === 1 ? 'match' : 'matches'}
-                              </span>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <div className="space-y-0.5 py-1">
@@ -294,9 +286,6 @@ const Fixtures = () => {
                                           <Shield className="h-2.5 w-2.5 text-primary mr-1" />
                                           <span className="font-medium text-[0.7rem]">{divisionText}</span>
                                         </div>
-                                        <Badge variant="outline" className="h-3.5 text-[0.6rem] py-0 px-1.5">
-                                          {fixturesByDivision[division].length}
-                                        </Badge>
                                       </CollapsibleTrigger>
                                       <CollapsibleContent>
                                         <table className="results-table">
