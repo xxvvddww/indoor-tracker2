@@ -1,8 +1,11 @@
 
-@import './base.css';
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import './base.css';
 @import './card-styles.css';
 @import './animations.css';
 @import './text-utilities.css';
 @import './table-utilities.css';
+@import './moving-border.css';
