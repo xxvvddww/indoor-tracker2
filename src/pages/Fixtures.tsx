@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -88,6 +89,7 @@ const Fixtures = () => {
       setError(null);
       try {
         const fixturesData = await fetchFixtures();
+        console.log("Fixtures loaded in component:", fixturesData);
         setFixtures(fixturesData);
       } catch (error) {
         console.error("Error loading fixtures:", error);
@@ -102,35 +104,56 @@ const Fixtures = () => {
 
   // Filter and sort fixtures
   const filterFixtures = (fixtures: Fixture[]) => {
+    console.log("Filtering fixtures, current count:", fixtures.length);
+    
     return fixtures.filter((fixture) => {
+      // Convert all fields to strings before checking (to avoid undefined errors)
+      const homeTeam = fixture.HomeTeam || "";
+      const awayTeam = fixture.AwayTeam || "";
+      const divisionName = fixture.DivisionName || "";
+      const venue = fixture.Venue || "";
+      
       const searchMatch = 
-        fixture.HomeTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fixture.AwayTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fixture.DivisionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fixture.Venue.toLowerCase().includes(searchTerm.toLowerCase());
+        homeTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        awayTeam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        divisionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        venue.toLowerCase().includes(searchTerm.toLowerCase());
       
       if (activeTab === 'all') return searchMatch;
       if (activeTab === 'upcoming') return isFutureDate(fixture.Date) && searchMatch;
-      if (activeTab === 'completed') return !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed" && searchMatch;
+      if (activeTab === 'completed') {
+        return !isFutureDate(fixture.Date) && 
+               fixture.CompletionStatus === "Completed" && 
+               searchMatch;
+      }
       return searchMatch;
     });
   };
   
   const filteredFixtures = filterFixtures(fixtures);
+  console.log("Filtered fixtures count:", filteredFixtures.length);
   
   // Pagination
-  const totalPages = Math.ceil(filteredFixtures.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredFixtures.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedFixtures = filteredFixtures.slice(startIndex, startIndex + itemsPerPage);
+  console.log("Paginated fixtures count:", paginatedFixtures.length);
   
   // Sort upcoming and completed separately for the "all" tab view
-  const upcomingFixtures = paginatedFixtures
-    .filter(fixture => isFutureDate(fixture.Date))
-    .sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime());
+  const upcomingFixtures = activeTab === 'all' 
+    ? paginatedFixtures
+        .filter(fixture => isFutureDate(fixture.Date))
+        .sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
+    : paginatedFixtures;
     
-  const completedFixtures = paginatedFixtures
-    .filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
-    .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
+  const completedFixtures = activeTab === 'all' 
+    ? paginatedFixtures
+        .filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
+        .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime())
+    : [];
+
+  console.log("Upcoming fixtures:", upcomingFixtures.length);
+  console.log("Completed fixtures:", completedFixtures.length);
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -208,7 +231,7 @@ const Fixtures = () => {
                           </TableHeader>
                           <TableBody>
                             {upcomingFixtures.map((fixture) => (
-                              <TableRow key={fixture.Id} className="hover-scale">
+                              <TableRow key={fixture.Id} className="hover:bg-muted/50">
                                 <TableCell>
                                   <div className="font-medium">
                                     {isToday(fixture.Date) ? 
@@ -217,14 +240,14 @@ const Fixtures = () => {
                                   </div>
                                 </TableCell>
                                 <TableCell>
-                                  <div className="font-medium">{fixture.HomeTeam} vs {fixture.AwayTeam}</div>
+                                  <div className="font-medium">{fixture.HomeTeam || 'TBD'} vs {fixture.AwayTeam || 'TBD'}</div>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.Venue}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.DivisionName}</TableCell>
+                                <TableCell className="hidden md:table-cell">{fixture.Venue || 'TBD'}</TableCell>
+                                <TableCell className="hidden md:table-cell">{fixture.DivisionName || 'N/A'}</TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex items-center justify-end gap-1">
                                     <Clock className="h-3 w-3 text-muted-foreground" />
-                                    <span>{fixture.StartTime}</span>
+                                    <span>{fixture.StartTime || 'TBD'}</span>
                                   </div>
                                 </TableCell>
                                 <TableCell>
@@ -265,7 +288,7 @@ const Fixtures = () => {
                           </TableHeader>
                           <TableBody>
                             {completedFixtures.map((fixture) => (
-                              <TableRow key={fixture.Id} className="hover-scale">
+                              <TableRow key={fixture.Id} className="hover:bg-muted/50">
                                 <TableCell>
                                   <div className="font-medium">
                                     {formatDate(fixture.Date)}
@@ -273,13 +296,13 @@ const Fixtures = () => {
                                 </TableCell>
                                 <TableCell>
                                   <div className="font-medium">
-                                    <span className={fixture.HomeTeamWon ? "font-bold" : ""}>{fixture.HomeTeam}</span>
+                                    <span className={fixture.HomeTeamWon ? "font-bold" : ""}>{fixture.HomeTeam || 'TBD'}</span>
                                     {" vs "}
-                                    <span className={fixture.AwayTeamWon ? "font-bold" : ""}>{fixture.AwayTeam}</span>
+                                    <span className={fixture.AwayTeamWon ? "font-bold" : ""}>{fixture.AwayTeam || 'TBD'}</span>
                                   </div>
                                 </TableCell>
-                                <TableCell>{fixture.ScoreDescription}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.DivisionName}</TableCell>
+                                <TableCell>{fixture.ScoreDescription || 'No result'}</TableCell>
+                                <TableCell className="hidden md:table-cell">{fixture.DivisionName || 'N/A'}</TableCell>
                                 <TableCell>
                                   <Link to={`/match/${fixture.Id}`} className="text-primary hover:text-primary/80 transition-colors">
                                     <ArrowUpRight className="h-4 w-4" />
@@ -320,7 +343,7 @@ const Fixtures = () => {
                           </TableHeader>
                           <TableBody>
                             {paginatedFixtures.map((fixture) => (
-                              <TableRow key={fixture.Id} className="hover-scale">
+                              <TableRow key={fixture.Id} className="hover:bg-muted/50">
                                 <TableCell>
                                   <div className="font-medium">
                                     {isToday(fixture.Date) ? 
@@ -329,14 +352,14 @@ const Fixtures = () => {
                                   </div>
                                 </TableCell>
                                 <TableCell>
-                                  <div className="font-medium">{fixture.HomeTeam} vs {fixture.AwayTeam}</div>
+                                  <div className="font-medium">{fixture.HomeTeam || 'TBD'} vs {fixture.AwayTeam || 'TBD'}</div>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.Venue}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.DivisionName}</TableCell>
+                                <TableCell className="hidden md:table-cell">{fixture.Venue || 'TBD'}</TableCell>
+                                <TableCell className="hidden md:table-cell">{fixture.DivisionName || 'N/A'}</TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex items-center justify-end gap-1">
                                     <Clock className="h-3 w-3 text-muted-foreground" />
-                                    <span>{fixture.StartTime}</span>
+                                    <span>{fixture.StartTime || 'TBD'}</span>
                                   </div>
                                 </TableCell>
                                 <TableCell>
@@ -383,7 +406,7 @@ const Fixtures = () => {
                           </TableHeader>
                           <TableBody>
                             {paginatedFixtures.map((fixture) => (
-                              <TableRow key={fixture.Id} className="hover-scale">
+                              <TableRow key={fixture.Id} className="hover:bg-muted/50">
                                 <TableCell>
                                   <div className="font-medium">
                                     {formatDate(fixture.Date)}
@@ -391,14 +414,14 @@ const Fixtures = () => {
                                 </TableCell>
                                 <TableCell>
                                   <div className="font-medium">
-                                    <span className={fixture.HomeTeamWon ? "font-bold" : ""}>{fixture.HomeTeam}</span>
+                                    <span className={fixture.HomeTeamWon ? "font-bold" : ""}>{fixture.HomeTeam || 'TBD'}</span>
                                     {" vs "}
-                                    <span className={fixture.AwayTeamWon ? "font-bold" : ""}>{fixture.AwayTeam}</span>
+                                    <span className={fixture.AwayTeamWon ? "font-bold" : ""}>{fixture.AwayTeam || 'TBD'}</span>
                                   </div>
                                 </TableCell>
-                                <TableCell>{fixture.ScoreDescription}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.DivisionName}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.Venue}</TableCell>
+                                <TableCell>{fixture.ScoreDescription || 'No result'}</TableCell>
+                                <TableCell className="hidden md:table-cell">{fixture.DivisionName || 'N/A'}</TableCell>
+                                <TableCell className="hidden md:table-cell">{fixture.Venue || 'TBD'}</TableCell>
                                 <TableCell>
                                   <Link to={`/match/${fixture.Id}`} className="text-primary hover:text-primary/80 transition-colors">
                                     <ArrowUpRight className="h-4 w-4" />
