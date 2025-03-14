@@ -4,7 +4,7 @@ import { DisplayableMatchInfo } from '../components/match/types';
 import { MatchDetails } from '../types/cricket';
 import { extractBasicInfo } from '../utils/match/basicInfoExtractor';
 import { extractTeamsAndWinner } from '../utils/match/teamUtils';
-import { extractPlayerStatsFromMatch } from '../utils/match/playerStats/extractorService';
+import { extractPlayerStats } from '../utils/match/playerStatsUtils';
 
 /**
  * Custom hook to handle match data extraction logic
@@ -22,6 +22,7 @@ export const useMatchDataExtraction = (
     }
     
     console.log("useMatchDataExtraction processing match data");
+    console.log("Raw match data keys:", Object.keys(matchData));
     
     // Extract basic match info
     extractBasicInfo(matchData, displayInfo);
@@ -31,25 +32,28 @@ export const useMatchDataExtraction = (
       date: displayInfo.date 
     });
     
-    // Extract teams info and determine winner using the correct algorithm
+    // Extract teams info first since player stats depend on it
     extractTeamsAndWinner(matchData, displayInfo);
     console.log("Teams extracted:", 
       displayInfo.teams?.length, 
       "Winner:", displayInfo.winner
     );
     
-    // Extract player stats directly from the specialized service
-    // Use the extractorService directly to avoid any middleware issues
-    extractPlayerStatsFromMatch(matchData, displayInfo);
-    
-    // Debug what we ended up with
-    if (displayInfo.playerStats) {
-      console.log("Final player stats:", Object.keys(displayInfo.playerStats).length, "teams");
-      Object.keys(displayInfo.playerStats).forEach(teamId => {
-        console.log(`Team ${teamId} has ${displayInfo.playerStats![teamId].players.length} players`);
-      });
+    // Extract player stats only after teams have been extracted
+    if (displayInfo.teams && displayInfo.teams.length > 0) {
+      extractPlayerStats(matchData, displayInfo);
+      
+      // Debug what we ended up with
+      if (displayInfo.playerStats) {
+        console.log("Final player stats:", Object.keys(displayInfo.playerStats).length, "teams");
+        Object.keys(displayInfo.playerStats).forEach(teamId => {
+          console.log(`Team ${teamId} has ${displayInfo.playerStats![teamId].players.length} players`);
+        });
+      } else {
+        console.log("No player stats were extracted during the process");
+      }
     } else {
-      console.log("No player stats object was created during extraction");
+      console.log("Skipping player stats extraction because no teams were found");
     }
   }, [matchData, displayInfo]);
 };
