@@ -51,7 +51,7 @@ const TeamDivisionTable = ({
     <Collapsible 
       open={isOpen}
       onOpenChange={handleToggle}
-      className="border-2 border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden mb-3"
+      className="border-2 border-gray-400 dark:border-gray-600 rounded-lg overflow-hidden mb-3"
     >
       <CollapsibleTrigger 
         className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}
@@ -118,19 +118,19 @@ const TeamDivisionTable = ({
                     {team.completedMatches || team.Games || 0}
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
-                    {team.Wins || team.wins || 0}
+                    {team.Wins || (team as any).wins || 0}
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
-                    {team.Losses || team.losses || 0}
+                    {team.Losses || (team as any).losses || 0}
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
-                    {team.Draws || team.draws || 0}
+                    {team.Draws || (team as any).draws || 0}
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
                     {team.WinPercentage 
                       ? (typeof team.WinPercentage === 'string' ? parseFloat(team.WinPercentage).toFixed(0) : team.WinPercentage.toFixed(0)) 
-                      : team.winPercentage 
-                        ? parseFloat(team.winPercentage).toFixed(0) 
+                      : (team as any).winPercentage 
+                        ? parseFloat((team as any).winPercentage).toFixed(0) 
                         : '0'}
                   </TableCell>
                 </TableRow>
