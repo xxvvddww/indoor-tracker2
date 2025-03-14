@@ -1,39 +1,34 @@
 
 import { DisplayableMatchInfo } from '../../components/match/types';
 import { MatchDetails } from '../../types/cricket';
-import { formatDate } from '../dateFormatters';
+import { extractMatchTitle, extractVenueInfo, extractDateInfo, extractManOfMatch } from './matchInfoExtractor';
+import { extractMatchTypeInfo } from './displayDataUtils';
 
-// Extract basic match information (title, venue, date)
+/**
+ * Extract basic match information (title, venue, date, etc.)
+ */
 export const extractBasicInfo = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo): void => {
-  // Set title if not already set
-  if (!displayInfo.title || displayInfo.title === "Match Information") {
-    // Try to get title from match name or create from team names
-    if (matchData.Teams?.Team) {
-      const teams = Array.isArray(matchData.Teams.Team) ? 
-        matchData.Teams.Team : [matchData.Teams.Team];
-      
-      if (teams.length >= 2) {
-        displayInfo.title = `${teams[0].Name} vs ${teams[1].Name}`;
-      }
-    }
-  }
+  // Extract title
+  extractMatchTitle(matchData, displayInfo);
   
-  // Try to get venue from Configuration
-  if (!displayInfo.venue && matchData.Configuration) {
-    if ((matchData.Configuration as any)?.PlayingAreaName) {
-      displayInfo.venue = (matchData.Configuration as any).PlayingAreaName;
-    }
-  }
+  // Extract venue
+  extractVenueInfo(matchData, displayInfo);
   
-  // Try to get and format date
-  if (!displayInfo.date && matchData.Configuration) {
-    try {
-      const startTimeStr = (matchData.Configuration as any)?.Team1InningsStartTime;
-      if (startTimeStr && typeof startTimeStr === 'string') {
-        displayInfo.date = formatDate(startTimeStr);
-      }
-    } catch (error) {
-      console.error("Error parsing date:", error);
-    }
-  }
+  // Extract date
+  extractDateInfo(matchData, displayInfo);
+  
+  // Extract match type info
+  extractMatchTypeInfo(matchData, displayInfo);
+  
+  // Extract Man of the Match
+  extractManOfMatch(matchData, displayInfo);
+  
+  console.log("Basic info extraction complete:", {
+    title: displayInfo.title,
+    venue: displayInfo.venue,
+    date: displayInfo.date,
+    matchType: displayInfo.matchType,
+    tournament: displayInfo.tournament,
+    manOfMatch: displayInfo.manOfMatch
+  });
 };
