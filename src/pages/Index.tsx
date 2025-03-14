@@ -12,6 +12,7 @@ import { StatCards } from "@/components/dashboard/StatCards";
 import { RecentResults } from "@/components/dashboard/RecentResults";
 import { TopPerformers } from "@/components/dashboard/TopPerformers";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { WatchLive } from "@/components/dashboard/WatchLive";
 
 const Index = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
@@ -19,7 +20,7 @@ const Index = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeStatsTab, setActiveStatsTab] = useState<"batting" | "bowling">("batting");
-  const [expandedSection, setExpandedSection] = useState<string | null>("topPlayers");
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [activeDivision, setActiveDivision] = useState<string>("all");
   const seasonId = getCurrentSeasonId();
   const isMobile = useIsMobile();
@@ -148,6 +149,11 @@ const Index = () => {
                       activeStatsTab={activeStatsTab}
                       setActiveStatsTab={setActiveStatsTab}
                       allDivisions={allDivisions}
+                      expandedSection={expandedSection}
+                      toggleSection={toggleSection}
+                    />
+                    
+                    <WatchLive
                       expandedSection={expandedSection}
                       toggleSection={toggleSection}
                     />
