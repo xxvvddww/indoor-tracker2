@@ -41,46 +41,4 @@
   .results-table tr:last-child {
     @apply border-b-0;
   }
-  
-  .single-line-cell {
-    @apply whitespace-nowrap overflow-hidden text-ellipsis;
-    max-width: 120px;
-  }
-  
-  .single-line-results td {
-    @apply whitespace-nowrap overflow-hidden;
-  }
-  
-  .division-section {
-    @apply border-t border-gray-800/50 mt-0.5 pt-0.5 first:border-t-0 first:mt-0 first:pt-0;
-  }
-  
-  .division-header {
-    @apply text-[0.65rem] font-medium text-muted-foreground px-2 py-0.5 bg-background/70 flex justify-between items-center;
-  }
-  
-  .dark-results-container {
-    @apply bg-[#111827] text-white border-0 shadow-none;
-  }
-  
-  .dark-results-header {
-    @apply bg-[#1f2937] text-white p-2 rounded-t-md;
-  }
-  
-  .dark-results-date {
-    @apply bg-[#1e293b] border-0 hover:bg-[#0f172a];
-  }
-  
-  .team-name {
-    @apply whitespace-nowrap overflow-hidden text-ellipsis text-[0.65rem];
-    max-width: 120px;
-  }
-  
-  .team-name-winner {
-    @apply text-green-400;
-  }
-  
-  .score-display {
-    @apply whitespace-nowrap text-right text-[0.65rem];
-  }
 }

@@ -4,7 +4,7 @@ import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { fetchFixtures } from '../services/cricketApi';
 import { Fixture } from '../types/cricket';
-import { ArrowUpRight, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowUpRight, Filter, Calendar } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -32,7 +32,6 @@ const Fixtures = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [openDateSections, setOpenDateSections] = useState<Record<string, boolean>>({});
-  const [openDivisionSections, setOpenDivisionSections] = useState<Record<string, boolean>>({});
   const isMobile = useIsMobile();
   const itemsPerPage = 20;
 
@@ -76,29 +75,22 @@ const Fixtures = () => {
 
   const filteredFixtures = fixtures.filter(filterBySearchTerm);
   
-  // Group completed fixtures by date and division
-  const fixturesByDateAndDivision = filteredFixtures
+  // Group completed fixtures by date
+  const fixturesByDate = filteredFixtures
     .filter(fixture => fixture.CompletionStatus === "Completed")
     .reduce((acc, fixture) => {
       const fixtureDate = formatDate(fixture.Date);
-      const division = fixture.DivisionName || "Unknown Division";
-      
       if (!acc[fixtureDate]) {
-        acc[fixtureDate] = {};
+        acc[fixtureDate] = [];
       }
-      
-      if (!acc[fixtureDate][division]) {
-        acc[fixtureDate][division] = [];
-      }
-      
-      acc[fixtureDate][division].push(fixture);
+      acc[fixtureDate].push(fixture);
       return acc;
-    }, {} as Record<string, Record<string, Fixture[]>>);
+    }, {} as Record<string, Fixture[]>);
 
   // Get sorted dates (most recent first)
-  const sortedDates = Object.keys(fixturesByDateAndDivision).sort((a, b) => {
-    const dateA = new Date(fixturesByDateAndDivision[a][Object.keys(fixturesByDateAndDivision[a])[0]][0].Date);
-    const dateB = new Date(fixturesByDateAndDivision[b][Object.keys(fixturesByDateAndDivision[b])[0]][0].Date);
+  const sortedDates = Object.keys(fixturesByDate).sort((a, b) => {
+    const dateA = new Date(fixturesByDate[a][0].Date);
+    const dateB = new Date(fixturesByDate[b][0].Date);
     return dateB.getTime() - dateA.getTime();
   });
 
@@ -124,52 +116,61 @@ const Fixtures = () => {
     }));
   };
 
-  const toggleDivisionSection = (key: string) => {
-    setOpenDivisionSections(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
-
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     setOpenDateSections({}); // Reset open sections when changing page
-    setOpenDivisionSections({}); // Reset open division sections as well
     window.scrollTo(0, 0);
   };
 
-  // Custom match display using JSX instead of ResponsiveTable
-  const renderMatch = (fixture: Fixture) => {
-    return (
-      <div key={fixture.Id} className="flex justify-between items-center py-1.5 border-b border-gray-800 last:border-0">
-        <div className="flex-1 flex items-center">
-          <span className={cn(
-            "team-name",
-            fixture.HomeTeamWon && "team-name-winner"
-          )}>
-            {fixture.HomeTeam || 'TBD'}
+  const resultColumns = [
+    {
+      key: "HomeTeam",
+      header: "Home",
+      className: "text-left w-1/3",
+      render: (value: string, row: Fixture) => (
+        <span className={cn(
+          "text-[0.65rem]",
+          row.HomeTeamWon && "text-green-500 dark:text-green-400 font-medium"
+        )}>
+          {value || 'TBD'}
+        </span>
+      )
+    },
+    {
+      key: "vs",
+      header: "",
+      className: "w-6 text-center px-0",
+      render: () => <span className="text-[0.65rem] text-muted-foreground">vs</span>
+    },
+    {
+      key: "AwayTeam",
+      header: "Away",
+      className: "text-left w-1/3",
+      render: (value: string, row: Fixture) => (
+        <span className={cn(
+          "text-[0.65rem]",
+          row.AwayTeamWon && "text-green-500 dark:text-green-400 font-medium"
+        )}>
+          {value || 'TBD'}
+        </span>
+      )
+    },
+    {
+      key: "Result",
+      header: "Result",
+      className: "w-16 text-right",
+      render: (value: string, row: Fixture) => (
+        <div className="flex items-center justify-end gap-0.5">
+          <span className="text-[0.65rem] whitespace-nowrap">
+            {row.HomeTeamScore}-{row.AwayTeamScore}
           </span>
-        </div>
-        <div className="flex-none px-1 text-[0.65rem] text-muted-foreground">vs</div>
-        <div className="flex-1 flex items-center">
-          <span className={cn(
-            "team-name",
-            fixture.AwayTeamWon && "team-name-winner"
-          )}>
-            {fixture.AwayTeam || 'TBD'}
-          </span>
-        </div>
-        <div className="flex-none flex items-center justify-end">
-          <span className="score-display">
-            {fixture.ScoreDescription || `${fixture.HomeTeamScore}-${fixture.AwayTeamScore}`}
-          </span>
-          <Link to={`/match/${fixture.Id}`} className="text-primary ml-0.5">
+          <Link to={`/match/${row.Id}`} className="text-primary ml-0.5">
             <ArrowUpRight className="h-2.5 w-2.5" />
           </Link>
         </div>
-      </div>
-    );
-  };
+      )
+    }
+  ];
 
   return (
     <MainLayout>
@@ -184,10 +185,10 @@ const Fixtures = () => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
                 setOpenDateSections({});
-                setOpenDivisionSections({});
               }}
               className="pr-8 h-7 text-xs"
             />
+            <Filter className="absolute right-2 top-1.5 h-3 w-3 text-muted-foreground" />
           </div>
         </div>
         
@@ -201,16 +202,16 @@ const Fixtures = () => {
           </div>
         ) : (
           <>
-            <Card className="dark-results-container">
-              <CardHeader className="pb-0.5 pt-2 px-4 dark-results-header">
-                <CardTitle className="flex items-center gap-1 text-base">
+            <Card className="border border-gray-700 bg-background/30">
+              <CardHeader className="pb-0.5 pt-1.5 px-2">
+                <CardTitle className="flex items-center gap-1 text-xs">
                   Results by Date
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <ScrollArea className="h-full max-h-[500px]">
                   {paginatedDates.length > 0 ? (
-                    <div className="space-y-1 p-2">
+                    <div className="space-y-1 px-1 py-1">
                       {paginatedDates.map(date => (
                         <Collapsible 
                           key={date}
@@ -218,50 +219,24 @@ const Fixtures = () => {
                           onOpenChange={() => toggleDateSection(date)}
                           className="border border-gray-800 rounded-md overflow-hidden"
                         >
-                          <CollapsibleTrigger className="w-full flex justify-between items-center p-1.5 dark-results-date">
+                          <CollapsibleTrigger className="w-full flex justify-between items-center p-1.5 bg-background/50 hover:bg-background/70">
                             <div className="flex items-center">
                               <Calendar className="h-3 w-3 text-primary mr-1.5" />
                               <span className="font-semibold text-xs">{date}</span>
                             </div>
-                            <div className="flex items-center">
-                              <span className="text-[0.65rem] text-muted-foreground mr-1">
-                                {Object.values(fixturesByDateAndDivision[date]).flat().length} {Object.values(fixturesByDateAndDivision[date]).flat().length === 1 ? 'match' : 'matches'}
-                              </span>
-                              {openDateSections[date] ? (
-                                <ChevronUp className="h-3 w-3 text-muted-foreground" />
-                              ) : (
-                                <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                              )}
-                            </div>
+                            <span className="text-[0.65rem] text-muted-foreground">
+                              {fixturesByDate[date].length} {fixturesByDate[date].length === 1 ? 'match' : 'matches'}
+                            </span>
                           </CollapsibleTrigger>
-                          <CollapsibleContent className="px-0">
-                            <div className="p-0">
-                              {Object.keys(fixturesByDateAndDivision[date]).sort().map((division, i) => {
-                                const sectionKey = `${date}-${division}`;
-                                return (
-                                  <div key={sectionKey} className="division-section">
-                                    <Collapsible
-                                      open={openDivisionSections[sectionKey] !== false} // Default to open
-                                      onOpenChange={() => toggleDivisionSection(sectionKey)}
-                                    >
-                                      <CollapsibleTrigger className="w-full text-left division-header">
-                                        <span>{division}</span>
-                                        {openDivisionSections[sectionKey] === false ? (
-                                          <ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
-                                        ) : (
-                                          <ChevronUp className="h-2.5 w-2.5 text-muted-foreground" />
-                                        )}
-                                      </CollapsibleTrigger>
-                                      <CollapsibleContent>
-                                        <div className="px-2">
-                                          {fixturesByDateAndDivision[date][division].map(renderMatch)}
-                                        </div>
-                                      </CollapsibleContent>
-                                    </Collapsible>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                          <CollapsibleContent>
+                            <ResponsiveTable
+                              data={fixturesByDate[date]}
+                              columns={resultColumns}
+                              keyField="Id"
+                              resultsMode={true}
+                              darkMode={true}
+                              hideHeader={true}
+                            />
                           </CollapsibleContent>
                         </Collapsible>
                       ))}
