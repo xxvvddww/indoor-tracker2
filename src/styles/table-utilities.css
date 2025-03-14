@@ -23,7 +23,7 @@
   }
   
   .results-table {
-    @apply text-[0.65rem];
+    @apply text-[0.65rem] w-full;
   }
   
   .results-table th {

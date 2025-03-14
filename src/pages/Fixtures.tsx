@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -77,7 +76,6 @@ const Fixtures = () => {
 
   const filteredFixtures = fixtures.filter(filterBySearchTerm);
   
-  // Group completed fixtures by date
   const fixturesByDate = filteredFixtures
     .filter(fixture => fixture.CompletionStatus === "Completed")
     .reduce((acc, fixture) => {
@@ -89,20 +87,32 @@ const Fixtures = () => {
       return acc;
     }, {} as Record<string, Fixture[]>);
 
-  // Get sorted dates (most recent first)
   const sortedDates = Object.keys(fixturesByDate).sort((a, b) => {
     const dateA = new Date(fixturesByDate[a][0].Date);
     const dateB = new Date(fixturesByDate[b][0].Date);
     return dateB.getTime() - dateA.getTime();
   });
 
-  // Paginate the dates
   const paginatedDates = sortedDates.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.max(1, Math.ceil(sortedDates.length / itemsPerPage));
 
-  // Group fixtures by division within each date
+  const sortDivisions = (divisionNames: string[]): string[] => {
+    const sortOrder: Record<string, number> = {
+      "Division 1": 1,
+      "Division 2": 2,
+      "Division 3": 3,
+      "No Division": 999
+    };
+    
+    return divisionNames.sort((a, b) => {
+      const orderA = sortOrder[a] || (a.startsWith("Division") ? parseInt(a.replace("Division", "").trim()) : 500);
+      const orderB = sortOrder[b] || (b.startsWith("Division") ? parseInt(b.replace("Division", "").trim()) : 500);
+      return orderA - orderB;
+    });
+  };
+
   const getFixturesByDivision = (dateFixtures: Fixture[]) => {
-    return dateFixtures.reduce((acc, fixture) => {
+    const divisionMap = dateFixtures.reduce((acc, fixture) => {
       const divisionName = fixture.DivisionName || 'No Division';
       if (!acc[divisionName]) {
         acc[divisionName] = [];
@@ -110,14 +120,15 @@ const Fixtures = () => {
       acc[divisionName].push(fixture);
       return acc;
     }, {} as Record<string, Fixture[]>);
+    
+    return divisionMap;
   };
 
-  // Initialize open state for date sections
   useEffect(() => {
     if (paginatedDates.length > 0 && Object.keys(openDateSections).length === 0) {
       const initialOpenState: Record<string, boolean> = {};
       paginatedDates.forEach((date, index) => {
-        initialOpenState[date] = index === 0; // Open only the first section by default
+        initialOpenState[date] = index === 0;
       });
       setOpenDateSections(initialOpenState);
     }
@@ -139,8 +150,8 @@ const Fixtures = () => {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    setOpenDateSections({}); // Reset open sections when changing page
-    setOpenDivisionSections({}); // Reset division sections too
+    setOpenDateSections({});
+    setOpenDivisionSections({});
     window.scrollTo(0, 0);
   };
 
@@ -238,7 +249,7 @@ const Fixtures = () => {
                       {paginatedDates.map(date => {
                         const dateFixtures = fixturesByDate[date];
                         const fixturesByDivision = getFixturesByDivision(dateFixtures);
-                        const divisionsForDate = Object.keys(fixturesByDivision);
+                        const sortedDivisions = sortDivisions(Object.keys(fixturesByDivision));
                         
                         return (
                           <Collapsible 
@@ -258,9 +269,9 @@ const Fixtures = () => {
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <div className="space-y-0.5 py-1">
-                                {divisionsForDate.map(division => {
+                                {sortedDivisions.map(division => {
                                   const divisionKey = `${date}-${division}`;
-                                  const isOpen = openDivisionSections[divisionKey] !== false; // Default to open
+                                  const isOpen = openDivisionSections[divisionKey] !== false;
                                   
                                   return (
                                     <Collapsible 
