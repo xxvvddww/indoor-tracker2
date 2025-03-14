@@ -131,24 +131,24 @@ export interface Skin {
 
 export interface PlayerMatchSummary {
   Name: string;
-  RS: string; // Runs Scored
-  OB: string; // Overs Bowled
-  RC: string; // Runs Conceded
-  Wkts: string; // Wickets
-  Econ: string; // Economy
-  C: string; // Catches
-  SR: string; // Strike Rate
+  RS: string;    // Runs Scored
+  OB: string;    // Overs Bowled
+  RC: string;    // Runs Conceded
+  Wkts: string;  // Wickets
+  Econ: string;  // Economy
+  C: string;     // Catches or Contribution
+  SR: string;    // Strike Rate
   PlayerId: string;
 }
 
 export interface TeamMatchSummary {
   name: string;
-  player: PlayerMatchSummary[];
+  player: PlayerMatchSummary | PlayerMatchSummary[];
 }
 
 export interface MatchSummary {
-  manOfMatch: string;
-  team: TeamMatchSummary[];
+  manOfMatch?: string;
+  team: TeamMatchSummary | TeamMatchSummary[];
 }
 
 export interface MatchDetails {

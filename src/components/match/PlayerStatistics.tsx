@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
-import { Users } from "lucide-react";
+import { Users, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DisplayableMatchInfo } from './types';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,6 +20,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { key: "OB", header: "Overs", hideOnMobile: true },
     { key: "RC", header: "R Con", hideOnMobile: false },
     { key: "Wkts", header: "Wickets", hideOnMobile: false },
+    { key: "C", header: "Contrib", hideOnMobile: true },
     { key: "SR", header: "S/R", hideOnMobile: true },
     { key: "Econ", header: "Econ", hideOnMobile: true },
   ];
@@ -49,6 +50,15 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
+      
+      {/* Man of the Match display */}
+      {displayInfo.manOfMatch && (
+        <div className="flex items-center gap-2 mb-4 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
+          <Trophy className="h-4 w-4 text-amber-500" />
+          <p className="text-sm">{displayInfo.manOfMatch}</p>
+        </div>
+      )}
+      
       {Object.keys(displayInfo.playerStats).map((teamId) => (
         <div key={teamId} className="space-y-2 mb-4">
           <div className="flex items-center gap-2">

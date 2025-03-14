@@ -14,6 +14,7 @@ export type DisplayableMatchInfo = {
   }[];
   winner?: string;
   winnerId?: string;
+  manOfMatch?: string;
   playerStats?: {
     [teamId: string]: {
       name: string;
@@ -25,6 +26,7 @@ export type DisplayableMatchInfo = {
         Wkts?: string; // Wickets
         SR?: string; // Strike rate
         Econ?: string; // Economy
+        C?: string; // Catches or Contribution
         [key: string]: any;
       }[];
     };
