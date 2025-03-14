@@ -3,6 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import other CSS files after Tailwind directives */
 @import './base.css';
 @import './card-styles.css';
 @import './animations.css';
