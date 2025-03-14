@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 // Config with base URL and parameters
 const API_BASE_URL = "https://seamer.spawtz.com/External/Fixtures/Feed.aspx";
 const CURRENT_SEASON_ID = "90"; // Set as a variable for easy changing
+const DEFAULT_LEAGUE_ID = "6"; // Setting a default based on the image
 
 // Helper function to parse XML
 const parseXml = (xmlString: string) => {
@@ -126,21 +127,21 @@ const processXmlResponse = (xmlString: string, rootTag: string): any => {
 };
 
 // API functions
-export const fetchFixtures = async (leagueId: string = "0", seasonId: string = CURRENT_SEASON_ID): Promise<Fixture[]> => {
+export const fetchFixtures = async (leagueId: string = DEFAULT_LEAGUE_ID, seasonId: string = CURRENT_SEASON_ID): Promise<Fixture[]> => {
   try {
-    console.log(`Fetching fixtures with seasonId: ${seasonId}`);
+    console.log(`Fetching fixtures with leagueId: ${leagueId}, seasonId: ${seasonId}`);
     const response = await axios.get(`${API_BASE_URL}`, {
       params: {
         Type: "fixtures",
-        LeagueId: leagueId || "0", // Use "0" as default if empty
+        LeagueId: leagueId, 
         SeasonId: seasonId
       },
       responseType: 'text'
     });
     
-    console.log('Fixtures API response:', response.data.substring(0, 200) + '...');
+    console.log('Fixtures API response received. Length:', response.data.length);
     const parsed = processXmlResponse(response.data, 'Fixture');
-    console.log('Parsed fixtures:', parsed);
+    console.log('Parsed fixtures count:', parsed && parsed.Fixture ? parsed.Fixture.length : 0);
     
     if (parsed === null) {
       toast.warning("No fixtures available for the selected season");
@@ -150,7 +151,9 @@ export const fetchFixtures = async (leagueId: string = "0", seasonId: string = C
     const fixtures = parsed && parsed.Fixture ? parsed.Fixture as Fixture[] : [];
     
     if (fixtures.length === 0) {
-      toast.info("No fixtures found for the selected season");
+      toast.info("No fixtures found for the selected season and league");
+    } else {
+      toast.success(`Loaded ${fixtures.length} fixtures`);
     }
     
     return fixtures;
@@ -161,21 +164,21 @@ export const fetchFixtures = async (leagueId: string = "0", seasonId: string = C
   }
 };
 
-export const fetchPlayerStats = async (leagueId: string = "0", seasonId: string = CURRENT_SEASON_ID): Promise<Player[]> => {
+export const fetchPlayerStats = async (leagueId: string = DEFAULT_LEAGUE_ID, seasonId: string = CURRENT_SEASON_ID): Promise<Player[]> => {
   try {
-    console.log(`Fetching player stats with seasonId: ${seasonId}`);
+    console.log(`Fetching player stats with leagueId: ${leagueId}, seasonId: ${seasonId}`);
     const response = await axios.get(`${API_BASE_URL}`, {
       params: {
         Type: "statistics",
-        LeagueId: leagueId || "0", // Use "0" as default if empty
+        LeagueId: leagueId,
         SeasonId: seasonId
       },
       responseType: 'text'
     });
     
-    console.log('Player stats API response:', response.data.substring(0, 200) + '...');
+    console.log('Player stats API response received. Length:', response.data.length);
     const parsed = processXmlResponse(response.data, 'Item');
-    console.log('Parsed player stats:', parsed);
+    console.log('Parsed player stats count:', parsed ? parsed.length : 0);
     
     if (parsed === null) {
       toast.warning("No player statistics available for the selected season");
@@ -185,7 +188,9 @@ export const fetchPlayerStats = async (leagueId: string = "0", seasonId: string 
     const players = parsed as Player[] || [];
     
     if (players.length === 0) {
-      toast.info("No player statistics found for the selected season");
+      toast.info("No player statistics found for the selected season and league");
+    } else {
+      toast.success(`Loaded statistics for ${players.length} players`);
     }
     
     return players;
@@ -207,7 +212,7 @@ export const fetchMatchDetails = async (fixtureId: string): Promise<MatchDetails
       responseType: 'text'
     });
     
-    console.log('Match details API response:', response.data.substring(0, 200) + '...');
+    console.log('Match details API response received. Length:', response.data.length);
     const parsed = processXmlResponse(response.data, 'Statistics');
     console.log('Parsed match details:', parsed);
     
@@ -220,6 +225,8 @@ export const fetchMatchDetails = async (fixtureId: string): Promise<MatchDetails
     
     if (!matchDetails) {
       toast.info("No statistics found for this match");
+    } else {
+      toast.success("Match details loaded successfully");
     }
     
     return matchDetails;
