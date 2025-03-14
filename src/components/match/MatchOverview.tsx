@@ -65,7 +65,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             </div>
           ) : null}
           
-          {/* Man of the match */}
+          {/* Man of the match - renamed to MoM */}
           {displayInfo.manOfMatch && (
             <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
               <Trophy className="h-4 w-4 text-green-500" />

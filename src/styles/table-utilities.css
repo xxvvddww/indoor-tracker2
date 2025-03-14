@@ -31,14 +31,19 @@
   }
   
   .results-table td {
-    @apply py-1.5 px-1;
+    @apply py-1 px-1;
   }
   
   .results-table tr {
-    @apply border-b border-gray-800;
+    @apply border-b border-gray-700/50;
   }
   
   .results-table tr:last-child {
     @apply border-b-0;
+  }
+  
+  .results-table th:not(:first-child),
+  .results-table td:not(:first-child) {
+    @apply text-right;
   }
 }
