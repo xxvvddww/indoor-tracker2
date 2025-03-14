@@ -5,10 +5,9 @@ import { MatchDetails } from '../../types/cricket';
 import PlayerStatistics from './PlayerStatistics';
 import DataExtractor from './DataExtractor';
 import { ResponsiveContainer } from '../ui/responsive-container';
-import { Trophy, ArrowLeft } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface MatchOverviewProps {
   displayInfo: DisplayableMatchInfo;
@@ -47,26 +46,15 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
     );
   };
 
-  // Back to fixtures link
-  const BackToFixturesLink = () => (
-    <Link to="/fixtures" className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors mb-2">
-      <ArrowLeft className="h-3 w-3 mr-1" />
-      Back to fixtures
-    </Link>
-  );
-
   return (
-    <ResponsiveContainer spacing="md" className="px-2">
-      {/* Back to fixtures link */}
-      <BackToFixturesLink />
-
+    <ResponsiveContainer spacing="md">
       {/* This component extracts data from matchData and updates displayInfo */}
       <DataExtractor displayInfo={displayInfo} matchData={matchData} />
       
       {/* Display summary information at the top */}
       <div className="space-y-4 w-full">
-        {/* Match summary section */}
-        <div className="space-y-4">
+        {/* Match summary section - removed the outer Card */}
+        <div className="space-y-4 px-0">
           {/* Match winner */}
           {displayInfo.winner ? (
             <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
@@ -77,7 +65,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             </div>
           ) : null}
           
-          {/* Man of the match - formatted as MoM: Name (Team) */}
+          {/* Man of the match - renamed to MoM */}
           {displayInfo.manOfMatch && (
             <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
               <Trophy className="h-4 w-4 text-green-500" />
@@ -89,7 +77,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
         </div>
         
         {/* Player statistics - removed the outer Card */}
-        <div>
+        <div className="px-0">
           <PlayerStatistics displayInfo={displayInfo} />
         </div>
       </div>

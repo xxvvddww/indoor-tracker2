@@ -52,8 +52,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       team.players.forEach(player => {
         if (!player.Name.includes("No player statistics") && player.Name !== "Unknown Player") {
           allPlayers.push({
-            ...player,
-            TeamName: team.name
+            ...player
           });
         }
       });
@@ -172,7 +171,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-0 -mx-2">
       <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
       
       {/* Show teams with player stats */}
@@ -216,7 +215,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                       columns={playerColumns}
                       superCompact={true}
                       ultraCompact={false}
-                      className="mt-0"
+                      className="mt-0 -mx-0"
                       resultsMode
                     />
                   </div>
@@ -249,10 +248,10 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
             <div className="p-0">
               <ResponsiveTable 
                 data={combinedPlayers} 
-                columns={playerColumns}
+                columns={playerColumns.filter(col => col.key !== 'TeamName')}
                 superCompact={true}
                 ultraCompact={false}
-                className="mt-0"
+                className="mt-0 -mx-0"
                 resultsMode
               />
             </div>

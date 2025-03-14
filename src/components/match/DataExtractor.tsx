@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
@@ -23,9 +22,6 @@ export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, match
     
     // Extract player stats
     extractPlayerStats(matchData, displayInfo);
-    
-    // Clean up display format
-    cleanUpResultDisplay(displayInfo);
     
   }, [matchData, displayInfo]);
   
@@ -244,29 +240,6 @@ const cleanUpResultDisplay = (displayInfo: DisplayableMatchInfo) => {
     // Remove any "Player of the match:" prefix if it exists
     displayInfo.manOfMatch = displayInfo.manOfMatch.replace(/Player of the match:\s*/i, '');
     displayInfo.manOfMatch = displayInfo.manOfMatch.replace(/Man of the match:\s*/i, '');
-    
-    // Format as "Name (Team)" if team info is available
-    if (displayInfo.teams && displayInfo.teams.length > 0) {
-      // Try to find player's team
-      let playerTeam = '';
-      if (displayInfo.playerStats) {
-        Object.entries(displayInfo.playerStats).forEach(([teamId, team]) => {
-          team.players.forEach(player => {
-            if (displayInfo.manOfMatch?.includes(player.Name)) {
-              const foundTeam = displayInfo.teams?.find(t => t.id === teamId);
-              if (foundTeam) {
-                playerTeam = foundTeam.name;
-              }
-            }
-          });
-        });
-      }
-      
-      // Add team in parentheses if we found it
-      if (playerTeam && !displayInfo.manOfMatch.includes('(')) {
-        displayInfo.manOfMatch = `${displayInfo.manOfMatch} (${playerTeam})`;
-      }
-    }
   }
   
   // Clean up winner display
