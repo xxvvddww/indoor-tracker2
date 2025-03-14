@@ -10,6 +10,8 @@ interface ResponsiveCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   withHoverEffect?: boolean;
   withAnimation?: boolean;
   animationDelay?: number;
+  variant?: 'default' | 'glass' | 'outline' | 'glow';
+  accent?: 'default' | 'green' | 'blue' | 'purple' | 'amber';
 }
 
 const ResponsiveCard = React.forwardRef<HTMLDivElement, ResponsiveCardProps>(
@@ -22,19 +24,38 @@ const ResponsiveCard = React.forwardRef<HTMLDivElement, ResponsiveCardProps>(
     withHoverEffect = true,
     withAnimation = false,
     animationDelay = 0,
+    variant = 'default',
+    accent = 'default',
     ...props 
   }, ref) => {
     const animationStyle = withAnimation ? {
       animationDelay: `${animationDelay}ms`,
     } : {};
 
+    const variantStyles = {
+      default: "",
+      glass: "bg-opacity-20 backdrop-blur-sm border-opacity-20",
+      outline: "bg-transparent border-2",
+      glow: "shadow-[0_0_20px_rgba(0,255,170,0.15)]",
+    };
+
+    const accentStyles = {
+      default: "",
+      green: "border-green-500 text-green-500",
+      blue: "border-blue-500 text-blue-500",
+      purple: "border-purple-500 text-purple-500",
+      amber: "border-amber-500 text-amber-500",
+    };
+
     return (
       <Card 
         ref={ref} 
         className={cn(
           "w-full overflow-hidden", 
-          withHoverEffect && "card-hover",
+          withHoverEffect && "card-hover transform-gpu",
           withAnimation && "animate-fade-in opacity-0",
+          variantStyles[variant],
+          accentStyles[accent],
           className
         )}
         style={animationStyle}
