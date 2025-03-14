@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTeams, fetchFixtures, fetchPlayerStats, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
@@ -6,14 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Users, Search, Trophy, Shield, ChevronUp, ChevronDown } from 'lucide-react';
+import { Users, Search, Trophy, Shield, ChevronUp, ChevronDown, ChevronRight } from 'lucide-react';
 import { Team, Fixture, Player } from '../types/cricket';
 import LoadingSpinner from '../components/ui/loading-spinner';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Separator } from "@/components/ui/separator";
 
 const Teams = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState('Name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [openDivisions, setOpenDivisions] = useState<Record<string, boolean>>({});
 
   const { data: teams, isLoading: teamsLoading, error: teamsError } = useQuery({
     queryKey: ['teams', DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID],
@@ -166,6 +170,42 @@ const Teams = () => {
     });
   }, [filteredTeams, sortColumn, sortDirection]);
 
+  // Group teams by division
+  const teamsByDivision = useMemo(() => {
+    if (!sortedTeams.length) return {};
+    
+    const divisions: Record<string, typeof sortedTeams> = {};
+    
+    sortedTeams.forEach(team => {
+      const divisionName = team.DivisionName || 'No Division';
+      if (!divisions[divisionName]) {
+        divisions[divisionName] = [];
+      }
+      divisions[divisionName].push(team);
+    });
+    
+    return divisions;
+  }, [sortedTeams]);
+
+  // Initialize openDivisions state when divisions change
+  React.useEffect(() => {
+    if (Object.keys(teamsByDivision).length > 0) {
+      const initialOpenState: Record<string, boolean> = {};
+      Object.keys(teamsByDivision).forEach(division => {
+        // Set all divisions to open by default
+        initialOpenState[division] = true;
+      });
+      setOpenDivisions(initialOpenState);
+    }
+  }, [teamsByDivision]);
+
+  const toggleDivision = (division: string) => {
+    setOpenDivisions(prev => ({
+      ...prev,
+      [division]: !prev[division]
+    }));
+  };
+
   const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -305,7 +345,7 @@ const Teams = () => {
           </Card>
         )}
         
-        {!isLoading && displayTeams.length === 0 && (
+        {!isLoading && Object.keys(teamsByDivision).length === 0 && (
           <Card>
             <CardHeader>
               <CardTitle>No Teams Found</CardTitle>
@@ -317,7 +357,7 @@ const Teams = () => {
           </Card>
         )}
         
-        {displayTeams && displayTeams.length > 0 && (
+        {Object.keys(teamsByDivision).length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -331,84 +371,107 @@ const Teams = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="sticky top-0 bg-card">
-                    <TableRow>
-                      <TableHead 
-                        className="cursor-pointer w-[180px]" 
-                        onClick={() => handleSort('Name')}
-                      >
-                        Team {renderSortIcon('Name')}
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer text-center" 
-                        onClick={() => handleSort('Players')}
-                      >
-                        Players {renderSortIcon('Players')}
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer text-center" 
-                        onClick={() => handleSort('Games')}
-                      >
-                        Games {renderSortIcon('Games')}
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer text-center" 
-                        onClick={() => handleSort('Wins')}
-                      >
-                        Wins {renderSortIcon('Wins')}
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer text-center" 
-                        onClick={() => handleSort('Losses')}
-                      >
-                        Losses {renderSortIcon('Losses')}
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer text-center" 
-                        onClick={() => handleSort('Win%')}
-                      >
-                        Win% {renderSortIcon('Win%')}
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer text-center" 
-                        onClick={() => handleSort('Skins')}
-                      >
-                        Skins Won {renderSortIcon('Skins')}
-                      </TableHead>
-                      <TableHead className="text-center">
-                        Last 5
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {displayTeams.map((team) => (
-                      <TableRow key={team.Id}>
-                        <TableCell className="font-medium">{team.Name}</TableCell>
-                        <TableCell className="text-center">{team.playerCount || '-'}</TableCell>
-                        <TableCell className="text-center">{team.completedMatches}</TableCell>
-                        <TableCell className="text-center">{team.wins}</TableCell>
-                        <TableCell className="text-center">{team.losses}</TableCell>
-                        <TableCell className="text-center">{team.winPercentage}%</TableCell>
-                        <TableCell className="text-center">{team.skinsWon}</TableCell>
-                        <TableCell>
-                          <div className="flex justify-center gap-1">
-                            {team.lastFiveResults && team.lastFiveResults.length > 0 ? (
-                              team.lastFiveResults.map((result, idx) => (
-                                <span key={idx}>{renderResultBadge(result)}</span>
-                              ))
-                            ) : (
-                              Array(5).fill(0).map((_, idx) => (
-                                <span key={idx}>{renderResultBadge('')}</span>
-                              ))
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <div className="space-y-6">
+                {Object.entries(teamsByDivision).map(([division, divisionTeams]) => (
+                  <Collapsible 
+                    key={division}
+                    open={openDivisions[division]}
+                    onOpenChange={() => toggleDivision(division)}
+                    className="border rounded-lg overflow-hidden"
+                  >
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-2 font-medium text-lg">
+                        <Shield className="h-5 w-5 text-primary" />
+                        <span>{division}</span>
+                        <Badge variant="outline">{divisionTeams.length} Teams</Badge>
+                      </div>
+                      {openDivisions[division] ? 
+                        <ChevronUp className="h-5 w-5" /> : 
+                        <ChevronDown className="h-5 w-5" />}
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader className="sticky top-0 bg-card">
+                            <TableRow>
+                              <TableHead 
+                                className="cursor-pointer w-[180px]" 
+                                onClick={() => handleSort('Name')}
+                              >
+                                Team {renderSortIcon('Name')}
+                              </TableHead>
+                              <TableHead 
+                                className="cursor-pointer text-center" 
+                                onClick={() => handleSort('Players')}
+                              >
+                                Players {renderSortIcon('Players')}
+                              </TableHead>
+                              <TableHead 
+                                className="cursor-pointer text-center" 
+                                onClick={() => handleSort('Games')}
+                              >
+                                Games {renderSortIcon('Games')}
+                              </TableHead>
+                              <TableHead 
+                                className="cursor-pointer text-center" 
+                                onClick={() => handleSort('Wins')}
+                              >
+                                Wins {renderSortIcon('Wins')}
+                              </TableHead>
+                              <TableHead 
+                                className="cursor-pointer text-center" 
+                                onClick={() => handleSort('Losses')}
+                              >
+                                Losses {renderSortIcon('Losses')}
+                              </TableHead>
+                              <TableHead 
+                                className="cursor-pointer text-center" 
+                                onClick={() => handleSort('Win%')}
+                              >
+                                Win% {renderSortIcon('Win%')}
+                              </TableHead>
+                              <TableHead 
+                                className="cursor-pointer text-center" 
+                                onClick={() => handleSort('Skins')}
+                              >
+                                Skins Won {renderSortIcon('Skins')}
+                              </TableHead>
+                              <TableHead className="text-center">
+                                Last 5
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {divisionTeams.map((team) => (
+                              <TableRow key={team.Id}>
+                                <TableCell className="font-medium">{team.Name}</TableCell>
+                                <TableCell className="text-center">{team.playerCount || '-'}</TableCell>
+                                <TableCell className="text-center">{team.completedMatches}</TableCell>
+                                <TableCell className="text-center">{team.wins}</TableCell>
+                                <TableCell className="text-center">{team.losses}</TableCell>
+                                <TableCell className="text-center">{team.winPercentage}%</TableCell>
+                                <TableCell className="text-center">{team.skinsWon}</TableCell>
+                                <TableCell>
+                                  <div className="flex justify-center gap-1">
+                                    {team.lastFiveResults && team.lastFiveResults.length > 0 ? (
+                                      team.lastFiveResults.map((result, idx) => (
+                                        <span key={idx}>{renderResultBadge(result)}</span>
+                                      ))
+                                    ) : (
+                                      Array(5).fill(0).map((_, idx) => (
+                                        <span key={idx}>{renderResultBadge('')}</span>
+                                      ))
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
               </div>
             </CardContent>
             <CardFooter className="text-sm text-muted-foreground">
