@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -246,20 +245,20 @@ const Index = () => {
             {error}
           </div>
         ) : renderEmptyState() || (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               <ResponsiveCard 
                 className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800"
               >
-                <div className="p-4 flex flex-col items-center text-center">
-                  <Calendar className={`${compactMode ? 'h-6 w-6' : 'h-8 w-8'} text-blue-500 mb-2`} />
-                  <h3 className={`${compactMode ? 'text-sm' : 'text-base'} font-medium text-blue-700 dark:text-blue-300 mb-1`}>
+                <div className="p-3 flex flex-col items-center text-center">
+                  <Calendar className={`${compactMode ? 'h-5 w-5' : 'h-7 w-7'} text-blue-500 mb-1`} />
+                  <h3 className={`${compactMode ? 'text-xs' : 'text-sm'} font-medium text-blue-700 dark:text-blue-300 mb-0.5`}>
                     Season Progress
                   </h3>
-                  <p className={`${compactMode ? 'text-xl' : 'text-2xl'} font-bold text-blue-800 dark:text-blue-200`}>
+                  <p className={`${compactMode ? 'text-lg' : 'text-xl'} font-bold text-blue-800 dark:text-blue-200`}>
                     {seasonProgressPercentage}%
                   </p>
-                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
                     {completedMatchesCount} of {totalMatchesCount} matches played
                   </p>
                 </div>
@@ -268,15 +267,15 @@ const Index = () => {
               <ResponsiveCard 
                 className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800"
               >
-                <div className="p-4 flex flex-col items-center text-center">
-                  <Users className={`${compactMode ? 'h-6 w-6' : 'h-8 w-8'} text-purple-500 mb-2`} />
-                  <h3 className={`${compactMode ? 'text-sm' : 'text-base'} font-medium text-purple-700 dark:text-purple-300 mb-1`}>
+                <div className="p-3 flex flex-col items-center text-center">
+                  <Users className={`${compactMode ? 'h-5 w-5' : 'h-7 w-7'} text-purple-500 mb-1`} />
+                  <h3 className={`${compactMode ? 'text-xs' : 'text-sm'} font-medium text-purple-700 dark:text-purple-300 mb-0.5`}>
                     Active Players
                   </h3>
-                  <p className={`${compactMode ? 'text-xl' : 'text-2xl'} font-bold text-purple-800 dark:text-purple-200`}>
+                  <p className={`${compactMode ? 'text-lg' : 'text-xl'} font-bold text-purple-800 dark:text-purple-200`}>
                     {players.length}
                   </p>
-                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-0.5">
                     Across all teams
                   </p>
                 </div>
@@ -285,15 +284,15 @@ const Index = () => {
               <ResponsiveCard 
                 className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800"
               >
-                <div className="p-4 flex flex-col items-center text-center">
-                  <Trophy className={`${compactMode ? 'h-6 w-6' : 'h-8 w-8'} text-green-500 mb-2`} />
-                  <h3 className={`${compactMode ? 'text-sm' : 'text-base'} font-medium text-green-700 dark:text-green-300 mb-1`}>
+                <div className="p-3 flex flex-col items-center text-center">
+                  <Trophy className={`${compactMode ? 'h-5 w-5' : 'h-7 w-7'} text-green-500 mb-1`} />
+                  <h3 className={`${compactMode ? 'text-xs' : 'text-sm'} font-medium text-green-700 dark:text-green-300 mb-0.5`}>
                     Completed Matches
                   </h3>
-                  <p className={`${compactMode ? 'text-xl' : 'text-2xl'} font-bold text-green-800 dark:text-green-200`}>
+                  <p className={`${compactMode ? 'text-lg' : 'text-xl'} font-bold text-green-800 dark:text-green-200`}>
                     {completedMatchesCount}
                   </p>
-                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">
                     This season
                   </p>
                 </div>
@@ -302,15 +301,15 @@ const Index = () => {
               <ResponsiveCard 
                 className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-800"
               >
-                <div className="p-4 flex flex-col items-center text-center">
-                  <Calendar className={`${compactMode ? 'h-6 w-6' : 'h-8 w-8'} text-amber-500 mb-2`} />
-                  <h3 className={`${compactMode ? 'text-sm' : 'text-base'} font-medium text-amber-700 dark:text-amber-300 mb-1`}>
+                <div className="p-3 flex flex-col items-center text-center">
+                  <Calendar className={`${compactMode ? 'h-5 w-5' : 'h-7 w-7'} text-amber-500 mb-1`} />
+                  <h3 className={`${compactMode ? 'text-xs' : 'text-sm'} font-medium text-amber-700 dark:text-amber-300 mb-0.5`}>
                     Upcoming Matches
                   </h3>
-                  <p className={`${compactMode ? 'text-xl' : 'text-2xl'} font-bold text-amber-800 dark:text-amber-200`}>
+                  <p className={`${compactMode ? 'text-lg' : 'text-xl'} font-bold text-amber-800 dark:text-amber-200`}>
                     {fixtures.filter(fixture => isFutureDate(fixture.Date)).length}
                   </p>
-                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
                     Scheduled
                   </p>
                 </div>
@@ -378,16 +377,12 @@ const Index = () => {
                   className="border rounded-lg shadow-sm"
                 >
                   <CollapsibleTrigger className="w-full">
-                    <Button variant="ghost" className="w-full flex justify-between items-center p-4">
+                    <div className="flex justify-between items-center p-4">
                       <div className="flex items-center">
                         <Award className="h-5 w-5 text-primary mr-2" />
                         <span className="font-semibold">Recent Results</span>
                       </div>
-                      {expandedSection === "recentResults" ? 
-                        <ChevronUp className="h-4 w-4" /> : 
-                        <ChevronDown className="h-4 w-4" />
-                      }
-                    </Button>
+                    </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="px-4 pb-4">
                     {recentFixtures.length > 0 ? (
@@ -486,16 +481,12 @@ const Index = () => {
                   className="border rounded-lg shadow-sm"
                 >
                   <CollapsibleTrigger className="w-full">
-                    <Button variant="ghost" className="w-full flex justify-between items-center p-4">
+                    <div className="flex justify-between items-center p-4">
                       <div className="flex items-center">
                         <BarChart3 className="h-5 w-5 text-primary mr-2" />
                         <span className="font-semibold">Top Performers</span>
                       </div>
-                      {expandedSection === "topPlayers" ? 
-                        <ChevronUp className="h-4 w-4" /> : 
-                        <ChevronDown className="h-4 w-4" />
-                      }
-                    </Button>
+                    </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="px-4 pb-4">
                     <Tabs 

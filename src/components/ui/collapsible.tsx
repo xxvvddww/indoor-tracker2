@@ -11,8 +11,9 @@ const CollapsibleTrigger = React.forwardRef<
   React.ElementRef<typeof CollapsiblePrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.Trigger> & {
     showArrow?: boolean
+    customIcon?: React.ReactNode
   }
->(({ className, children, showArrow = true, ...props }, ref) => (
+>(({ className, children, showArrow = true, customIcon, ...props }, ref) => (
   <CollapsiblePrimitive.Trigger
     ref={ref}
     className={cn(
@@ -23,7 +24,7 @@ const CollapsibleTrigger = React.forwardRef<
   >
     {children}
     {showArrow && (
-      <ChevronDown
+      customIcon || <ChevronDown
         className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
         aria-hidden="true"
       />
