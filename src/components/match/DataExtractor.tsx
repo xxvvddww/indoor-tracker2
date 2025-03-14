@@ -1,10 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
-import { extractBasicInfo } from '../../utils/match/basicInfoExtractor';
-import { extractTeamsAndWinner } from '../../utils/match/teamUtils';
-import { extractPlayerStats } from '../../utils/match/playerStatsUtils';
+import useMatchDataExtraction from '../../hooks/useMatchDataExtraction';
 
 interface DataExtractorProps {
   displayInfo: DisplayableMatchInfo;
@@ -12,25 +10,11 @@ interface DataExtractorProps {
 }
 
 export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, matchData }) => {
-  useEffect(() => {
-    if (!matchData) return;
-    
-    console.log("DataExtractor processing match data");
-    
-    // Extract basic match info
-    extractBasicInfo(matchData, displayInfo);
-    
-    // Extract teams info and determine winner using the correct algorithm
-    extractTeamsAndWinner(matchData, displayInfo);
-    
-    // Extract player stats
-    extractPlayerStats(matchData, displayInfo);
-    
-    console.log("Processed match data:", displayInfo);
-    
-  }, [matchData, displayInfo]);
+  // Use the custom hook to handle all data extraction logic
+  useMatchDataExtraction(matchData, displayInfo);
   
-  return null; // This component doesn't render anything
+  // This component doesn't render anything
+  return null;
 };
 
 export default DataExtractor;
