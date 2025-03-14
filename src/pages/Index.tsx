@@ -6,7 +6,7 @@ import { Fixture, Player } from "../types/cricket";
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import { ArrowUpRight, Calendar, Star } from "lucide-react";
+import { ArrowUpRight, Calendar, Star, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const formatDate = (dateString: string) => {
@@ -147,7 +147,7 @@ const Index = () => {
               <div className="bg-card rounded-lg border shadow-sm">
                 <div className="p-4 flex justify-between items-center border-b">
                   <h2 className="font-semibold text-lg flex items-center gap-2">
-                    <Trophy className="h-4 w-4" />
+                    <Award className="h-4 w-4" />
                     <span>Recent Results</span>
                   </h2>
                   <Link to="/fixtures" className="text-sm text-primary flex items-center">

@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Cricket, Trophy, Users, Calendar, BarChart3, Settings, Home } from "lucide-react";
+import { Award, Users, Calendar, BarChart3, Settings, Home } from "lucide-react";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -20,7 +20,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="w-64 border-r bg-card hidden md:block">
         <div className="p-4 border-b">
           <div className="flex items-center gap-2">
-            <Cricket className="h-6 w-6 text-primary" />
+            <Award className="h-6 w-6 text-primary" />
             <h1 className="font-bold text-xl">Cricket Tracker</h1>
           </div>
         </div>
@@ -49,7 +49,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                 to="/standings" 
                 className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive('/standings')}`}
               >
-                <Trophy className="h-4 w-4" />
+                <Award className="h-4 w-4" />
                 Team Standings
               </Link>
             </li>
@@ -88,7 +88,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="md:hidden fixed top-0 left-0 right-0 bg-background border-b z-10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <Cricket className="h-6 w-6 text-primary" />
+            <Award className="h-6 w-6 text-primary" />
             <h1 className="font-bold text-xl">Cricket Tracker</h1>
           </div>
           <button className="p-2">

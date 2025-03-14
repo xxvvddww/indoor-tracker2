@@ -46,13 +46,13 @@ const xmlNodeToObject = (node: Element): any => {
 };
 
 // Process XML to objects
-const processXmlResponse = (xmlString: string, rootTag: string) => {
+const processXmlResponse = (xmlString: string, rootTag: string): any => {
   const xmlDoc = parseXml(xmlString);
   const items: Element[] = Array.from(xmlDoc.getElementsByTagName(rootTag === 'Item' ? 'Item' : rootTag));
   
   if (rootTag === 'Statistics') {
     return {
-      [rootTag]: Array.from(items).map(item => xmlNodeToObject(item))
+      Statistics: Array.from(items).map(item => xmlNodeToObject(item))
     };
   }
   
@@ -84,7 +84,7 @@ export const fetchFixtures = async (leagueId: string = "", seasonId: string = CU
     });
     
     const parsed = processXmlResponse(response.data, 'Fixture');
-    return parsed.Fixture as Fixture[];
+    return parsed && parsed.Fixture ? parsed.Fixture as Fixture[] : [];
   } catch (error) {
     console.error("Error fetching fixtures:", error);
     return [];
@@ -121,7 +121,7 @@ export const fetchMatchDetails = async (fixtureId: string): Promise<MatchDetails
     });
     
     const parsed = processXmlResponse(response.data, 'Statistics');
-    return parsed.Statistics as MatchDetails;
+    return parsed && parsed.Statistics ? parsed.Statistics as MatchDetails : null;
   } catch (error) {
     console.error("Error fetching match details:", error);
     return null;
