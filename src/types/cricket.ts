@@ -1,3 +1,4 @@
+
 export interface Fixture {
   Id: string;
   Date: string;
@@ -69,8 +70,6 @@ export interface Team {
   totalMatches?: number;
   winPercentage?: string;
   skinsWon?: number;
-  VenueName?: string;
-  PlayingAreaName?: string;
 }
 
 export interface MatchConfiguration {
@@ -131,24 +130,24 @@ export interface Skin {
 
 export interface PlayerMatchSummary {
   Name: string;
-  RS: string;    // Runs Scored
-  OB: string;    // Overs Bowled
-  RC: string;    // Runs Conceded
-  Wkts: string;  // Wickets
-  Econ: string;  // Economy
-  C: string;     // Catches or Contribution
-  SR: string;    // Strike Rate
+  RS: string; // Runs Scored
+  OB: string; // Overs Bowled
+  RC: string; // Runs Conceded
+  Wkts: string; // Wickets
+  Econ: string; // Economy
+  C: string; // Catches
+  SR: string; // Strike Rate
   PlayerId: string;
 }
 
 export interface TeamMatchSummary {
   name: string;
-  player: PlayerMatchSummary | PlayerMatchSummary[];
+  player: PlayerMatchSummary[];
 }
 
 export interface MatchSummary {
-  manOfMatch?: string;
-  team: TeamMatchSummary | TeamMatchSummary[];
+  manOfMatch: string;
+  team: TeamMatchSummary[];
 }
 
 export interface MatchDetails {
