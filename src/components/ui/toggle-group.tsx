@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
 import { type VariantProps } from "class-variance-authority"
@@ -15,11 +16,17 @@ const ToggleGroupContext = React.createContext<
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-    VariantProps<typeof toggleVariants>
->(({ className, variant, size, children, ...props }, ref) => (
+    VariantProps<typeof toggleVariants> & {
+      darkStyle?: boolean
+    }
+>(({ className, variant, size, children, darkStyle = false, ...props }, ref) => (
   <ToggleGroupPrimitive.Root
     ref={ref}
-    className={cn("flex items-center justify-center gap-1", className)}
+    className={cn(
+      "flex items-center justify-center gap-1", 
+      darkStyle && "bg-slate-900 dark:bg-slate-800 p-1 rounded-md",
+      className
+    )}
     {...props}
   >
     <ToggleGroupContext.Provider value={{ variant, size }}>
@@ -33,8 +40,10 @@ ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName
 const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-    VariantProps<typeof toggleVariants>
->(({ className, children, variant, size, ...props }, ref) => {
+    VariantProps<typeof toggleVariants> & {
+      darkStyle?: boolean
+    }
+>(({ className, children, variant, size, darkStyle = false, ...props }, ref) => {
   const context = React.useContext(ToggleGroupContext)
 
   return (
@@ -42,9 +51,10 @@ const ToggleGroupItem = React.forwardRef<
       ref={ref}
       className={cn(
         toggleVariants({
-          variant: context.variant || variant,
+          variant: darkStyle ? undefined : (context.variant || variant),
           size: context.size || size,
         }),
+        darkStyle && "text-white hover:bg-slate-800 hover:dark:bg-slate-700 data-[state=on]:bg-slate-800 data-[state=on]:dark:bg-slate-700 data-[state=on]:text-white",
         className
       )}
       {...props}

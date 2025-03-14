@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -31,6 +30,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const formatDate = (dateString: string) => {
   try {
@@ -167,7 +167,6 @@ const Index = () => {
     .filter(fixture => fixture.Date === mostRecentDate && fixture.CompletionStatus === "Completed")
     .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
   
-  // Group fixtures by division
   const fixturesByDivision = recentFixtures.reduce((acc, fixture) => {
     const division = fixture.DivisionName || 'Other';
     if (!acc[division]) {
@@ -177,9 +176,7 @@ const Index = () => {
     return acc;
   }, {} as Record<string, Fixture[]>);
 
-  // Order divisions
   const orderedDivisions = Object.keys(fixturesByDivision).sort((a, b) => {
-    // Put "Div 1", "Div 2", "Div 3" at the top in that order
     const divOrder = { "Div 1": 1, "Div 2": 2, "Div 3": 3 };
     const orderA = divOrder[a] || 99;
     const orderB = divOrder[b] || 99;
@@ -189,7 +186,6 @@ const Index = () => {
   const getFilteredPlayers = () => {
     let filteredPlayers = [...players];
     
-    // Filter by division if needed
     if (activeDivision !== "all") {
       filteredPlayers = filteredPlayers.filter(player => 
         player.DivisionName === activeDivision
@@ -242,9 +238,8 @@ const Index = () => {
   const mostRunsPlayer = topBatsmen.length > 0 ? topBatsmen[0] : null;
   const mostWicketsPlayer = topBowlers.length > 0 ? topBowlers[0] : null;
 
-  // Get all unique divisions for the filter
   const allDivisions = Array.from(new Set(players.map(p => p.DivisionName).filter(Boolean)));
-  
+
   const recentResultsColumns = [
     {
       key: "teams",
@@ -517,9 +512,19 @@ const Index = () => {
                       onValueChange={(value) => setActiveStatsTab(value as "batting" | "bowling")}
                       className="w-full"
                     >
-                      <TabsList className="w-full grid grid-cols-2 mb-2">
-                        <TabsTrigger value="batting">Batting</TabsTrigger>
-                        <TabsTrigger value="bowling">Bowling</TabsTrigger>
+                      <TabsList className="w-full grid grid-cols-2 mb-2 bg-slate-900 dark:bg-slate-800 p-1 rounded-md">
+                        <TabsTrigger 
+                          value="batting" 
+                          className="data-[state=active]:bg-slate-800 data-[state=active]:dark:bg-slate-700 text-white data-[state=active]:text-white"
+                        >
+                          Batting
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="bowling"
+                          className="data-[state=active]:bg-slate-800 data-[state=active]:dark:bg-slate-700 text-white data-[state=active]:text-white"
+                        >
+                          Bowling
+                        </TabsTrigger>
                       </TabsList>
                       
                       <div className="flex items-center gap-2 mb-4">
