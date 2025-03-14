@@ -54,7 +54,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       {/* Display summary information at the top */}
       <div className="space-y-4 w-full">
         {/* Match summary section - removed the outer Card */}
-        <div className="space-y-4">
+        <div className="space-y-4 px-0">
           {/* Match winner */}
           {displayInfo.winner ? (
             <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
@@ -70,14 +70,14 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
               <Trophy className="h-4 w-4 text-green-500" />
               <p className="text-sm">
-                <span className="font-medium">Player of the Match:</span> {displayInfo.manOfMatch}
+                <span className="font-medium">MoM:</span> {displayInfo.manOfMatch}
               </p>
             </div>
           )}
         </div>
         
         {/* Player statistics - removed the outer Card */}
-        <div>
+        <div className="px-0">
           <PlayerStatistics displayInfo={displayInfo} />
         </div>
       </div>
