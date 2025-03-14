@@ -4,7 +4,12 @@ import { MatchDetails, Team } from "../../types/cricket";
 
 // Extract teams information and determine winner
 export const extractTeamsAndWinner = (data: MatchDetails, displayData: DisplayableMatchInfo): void => {
-  if (!data.Teams || !data.Teams.Team) return;
+  if (!data.Teams || !data.Teams.Team) {
+    console.log("No Teams data available");
+    return;
+  }
+  
+  console.log("Extracting teams and winner from data:", data.Teams);
   
   const teamsData = Array.isArray(data.Teams.Team) ? 
     data.Teams.Team : [data.Teams.Team];
@@ -15,13 +20,15 @@ export const extractTeamsAndWinner = (data: MatchDetails, displayData: Displayab
     isWinner: false // Will set later
   }));
   
-  // First try to determine winner from team points (the most reliable method)
+  // PRIORITY: determine winner from team points (the most reliable method)
   determineWinnerFromPoints(displayData, teamsData);
   
-  // If winner couldn't be determined from points, try using skins
+  // FALLBACK: If winner couldn't be determined from points, try using skins
   if (!displayData.winner) {
     determineWinnerFromSkins(data, displayData, teamsData);
   }
+
+  console.log("Winner determined:", displayData.winner, "with ID:", displayData.winnerId);
 };
 
 // Determine winner based on team points (PRIMARY method)
@@ -29,9 +36,20 @@ const determineWinnerFromPoints = (
   displayData: DisplayableMatchInfo, 
   teamsData: Team[]
 ): void => {
-  if (teamsData.length !== 2 || !teamsData[0]?.Points || !teamsData[1]?.Points) return;
+  if (teamsData.length !== 2) {
+    console.log("Not exactly 2 teams found, can't determine winner from points");
+    return;
+  }
   
-  console.log("Determining winner from Points:", teamsData[0].Name, teamsData[0].Points, "vs", teamsData[1].Name, teamsData[1].Points);
+  // Check if Points attribute exists on both teams
+  if (!teamsData[0].Points || !teamsData[1].Points) {
+    console.log("Missing Points data on teams");
+    return;
+  }
+  
+  console.log("Determining winner from Points:", 
+    teamsData[0].Name, teamsData[0].Points, "vs", 
+    teamsData[1].Name, teamsData[1].Points);
   
   const team1Points = parseInt(teamsData[0].Points || '0');
   const team2Points = parseInt(teamsData[1].Points || '0');
@@ -58,12 +76,17 @@ const determineWinnerFromSkins = (
   displayData: DisplayableMatchInfo, 
   teamsData: Team[]
 ): void => {
-  if (!data.Skins || !data.Skins.Skin || teamsData.length !== 2) return;
+  if (!data.Skins || !data.Skins.Skin || teamsData.length !== 2) {
+    console.log("No Skins data available or not exactly 2 teams");
+    return;
+  }
   
   const skins = Array.isArray(data.Skins.Skin) ? 
     data.Skins.Skin : [data.Skins.Skin];
   
   if (skins.length > 0) {
+    console.log("Determining winner from Skins as fallback");
+    
     const lastSkin = skins[skins.length - 1];
     const team1Score = parseInt(lastSkin.Team1Score || '0') + parseInt(lastSkin.Team1BonusPenaltyRuns || '0');
     const team2Score = parseInt(lastSkin.Team2Score || '0') + parseInt(lastSkin.Team2BonusPenaltyRuns || '0');

@@ -4,7 +4,7 @@ import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
 import { formatDate } from '../../utils/dateFormatters';
 import { extractTeamsAndWinner } from '../../utils/match/teamUtils';
-import { extractPlayerStats } from '../../utils/match/playerDataExtractor';
+import { extractPlayerStats } from '../../utils/match/playerStatsUtils';
 
 interface DataExtractorProps {
   displayInfo: DisplayableMatchInfo;
