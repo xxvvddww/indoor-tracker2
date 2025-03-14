@@ -5,8 +5,12 @@ import { MatchDetails as MatchDetailsType } from "../../types/cricket";
 export type DisplayableMatchInfo = {
   title: string;
   date?: string;
+  time?: string;
   venue?: string;
   result?: string;
+  matchType?: string;
+  tournament?: string;
+  umpires?: string[];
   teams?: {
     id: string;
     name: string;
