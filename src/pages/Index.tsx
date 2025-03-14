@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -529,16 +530,25 @@ const Index = () => {
                       
                       <div className="flex items-center gap-2 mb-4">
                         <Filter className="h-4 w-4 text-muted-foreground" />
-                        <select 
-                          className="text-sm bg-transparent border rounded p-1"
+                        <span className="text-sm text-muted-foreground">Division:</span>
+                        <ToggleGroup 
+                          type="single" 
                           value={activeDivision}
-                          onChange={(e) => setActiveDivision(e.target.value)}
+                          onValueChange={(value) => {
+                            if (value) setActiveDivision(value);
+                          }}
+                          className="justify-start"
+                          darkStyle={true}
                         >
-                          <option value="all">All Divisions</option>
+                          <ToggleGroupItem value="all" darkStyle={true}>
+                            All
+                          </ToggleGroupItem>
                           {allDivisions.map(div => (
-                            <option key={div} value={div}>{div}</option>
+                            <ToggleGroupItem key={div} value={div} darkStyle={true}>
+                              {div}
+                            </ToggleGroupItem>
                           ))}
-                        </select>
+                        </ToggleGroup>
                       </div>
                       
                       <TabsContent value="batting" className="mt-0">
