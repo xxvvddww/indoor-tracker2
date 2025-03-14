@@ -88,7 +88,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
           )}
         </div>
         
-        {/* Player statistics - removed the outer Card */}
+        {/* Player statistics - removed the outer Card and header */}
         <div>
           <PlayerStatistics displayInfo={displayInfo} />
         </div>
