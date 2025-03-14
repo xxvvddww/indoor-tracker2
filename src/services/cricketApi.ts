@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { Fixture, Player, MatchDetails } from '../types/cricket';
 import { toast } from 'sonner';
@@ -64,7 +65,7 @@ const processXmlResponse = (xmlString: string, rootTag: string): any => {
   // Check for API errors first
   const errorMessage = checkForApiError(xmlDoc);
   if (errorMessage) {
-    console.warn("API returned an error:", errorMessage);
+    console.error("API returned an error:", errorMessage);
     toast.error(`API Error: ${errorMessage}`);
     return null;
   }
@@ -81,6 +82,8 @@ const processXmlResponse = (xmlString: string, rootTag: string): any => {
     
     // Look for fixtures
     const items: Element[] = Array.from(xmlDoc.getElementsByTagName(rootTag));
+    console.log(`Found ${items.length} ${rootTag} elements in XML response`);
+    
     if (items.length === 0) {
       console.warn(`No ${rootTag} data found in response`);
       return { [rootTag]: [] };
@@ -92,6 +95,7 @@ const processXmlResponse = (xmlString: string, rootTag: string): any => {
   }
   
   const items: Element[] = Array.from(xmlDoc.getElementsByTagName(rootTag === 'Item' ? 'Item' : rootTag));
+  console.log(`Found ${items.length} ${rootTag} elements in XML response`);
   
   if (items.length === 0) {
     console.warn(`No ${rootTag} data found in response`);
@@ -128,8 +132,10 @@ const processXmlResponse = (xmlString: string, rootTag: string): any => {
 // API functions
 export const fetchFixtures = async (leagueId: string = DEFAULT_LEAGUE_ID, seasonId: string = CURRENT_SEASON_ID): Promise<Fixture[]> => {
   try {
-    console.log(`Fetching fixtures with leagueId: ${leagueId}, seasonId: ${seasonId}`);
-    const response = await axios.get(`${API_BASE_URL}`, {
+    const url = `${API_BASE_URL}?Type=fixtures&LeagueId=${leagueId}&SeasonId=${seasonId}`;
+    console.log(`Fetching fixtures with URL: ${url}`);
+    
+    const response = await axios.get(API_BASE_URL, {
       params: {
         Type: "fixtures",
         LeagueId: leagueId, 
@@ -139,6 +145,8 @@ export const fetchFixtures = async (leagueId: string = DEFAULT_LEAGUE_ID, season
     });
     
     console.log('Fixtures API response received. Length:', response.data.length);
+    console.log('First 200 chars of response:', response.data.substring(0, 200));
+    
     const parsed = processXmlResponse(response.data, 'Fixture');
     console.log('Parsed fixtures count:', parsed && parsed.Fixture ? parsed.Fixture.length : 0);
     
@@ -153,6 +161,24 @@ export const fetchFixtures = async (leagueId: string = DEFAULT_LEAGUE_ID, season
       toast.info("No fixtures found for the selected season and league");
     } else {
       toast.success(`Loaded ${fixtures.length} fixtures`);
+      
+      // Map XML properties to our expected fixture properties
+      const mappedFixtures = fixtures.map(fixture => {
+        // Add mapping for missing properties
+        return {
+          ...fixture,
+          Date: fixture.DateTime ? fixture.DateTime.split(' ')[0] : '',
+          StartTime: fixture.DateTime ? fixture.DateTime.split(' ')[1] : '',
+          Venue: fixture.VenueName || fixture.PlayingAreaName || '',
+          CompletionStatus: fixture.HomeTeamScore && fixture.AwayTeamScore ? 'Completed' : 'Scheduled',
+          HomeTeamWon: parseInt(fixture.HomeTeamScore || '0') > parseInt(fixture.AwayTeamScore || '0'),
+          AwayTeamWon: parseInt(fixture.AwayTeamScore || '0') > parseInt(fixture.HomeTeamScore || '0'),
+          ScoreDescription: `${fixture.HomeTeamScore || '0'} - ${fixture.AwayTeamScore || '0'}`
+        };
+      });
+      
+      console.log('First fixture after mapping:', mappedFixtures[0]);
+      return mappedFixtures;
     }
     
     return fixtures;

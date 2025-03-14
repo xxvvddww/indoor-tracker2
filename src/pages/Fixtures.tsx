@@ -19,6 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from 'sonner';
 
 const formatDate = (dateString: string) => {
   try {
@@ -73,7 +74,7 @@ const isFutureDate = (dateString: string) => {
 };
 
 const Fixtures = () => {
-  const [allFixtures, setAllFixtures] = useState<Fixture[]>([]);
+  const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -88,7 +89,12 @@ const Fixtures = () => {
       try {
         const fixturesData = await fetchFixtures();
         console.log("Fixtures loaded in component:", fixturesData);
-        setAllFixtures(fixturesData);
+        
+        if (fixturesData.length === 0) {
+          toast.warning("No fixtures data available");
+        }
+        
+        setFixtures(fixturesData);
       } catch (error) {
         console.error("Error loading fixtures:", error);
         setError("Failed to load fixtures. Please try again later.");
@@ -115,17 +121,18 @@ const Fixtures = () => {
       venue.toLowerCase().includes(searchTerm.toLowerCase());
   };
 
+  // Filter fixtures for each category
+  const filteredFixtures = fixtures.filter(filterBySearchTerm);
+  
   // Upcoming fixtures (future dates)
-  const upcomingFixtures = allFixtures
-    .filter(fixture => isFutureDate(fixture.Date))
-    .filter(filterBySearchTerm);
+  const upcomingFixtures = filteredFixtures.filter(fixture => isFutureDate(fixture.Date));
   
   // Completed fixtures (past dates with completion status)
-  const completedFixtures = allFixtures
-    .filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
-    .filter(filterBySearchTerm);
+  const completedFixtures = filteredFixtures.filter(fixture => 
+    !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed"
+  );
 
-  // For "all" tab, we show a limited number of each type
+  // For the "all" tab, we'll show a limited number
   const allTabUpcomingFixtures = upcomingFixtures.slice(0, 5);
   const allTabCompletedFixtures = completedFixtures.slice(0, 5);
 
@@ -154,6 +161,12 @@ const Fixtures = () => {
     console.log("Changed to tab:", value);
   };
 
+  const emptyFixturesMessage = (
+    <div className="py-8 text-center text-muted-foreground">
+      No fixtures found
+    </div>
+  );
+  
   return (
     <MainLayout>
       <div className="space-y-6 animate-fade-in">
@@ -244,9 +257,7 @@ const Fixtures = () => {
                           </TableBody>
                         </Table>
                       ) : (
-                        <div className="py-8 text-center text-muted-foreground">
-                          No upcoming fixtures found
-                        </div>
+                        emptyFixturesMessage
                       )}
                     </ScrollArea>
                   </CardContent>
@@ -300,9 +311,7 @@ const Fixtures = () => {
                           </TableBody>
                         </Table>
                       ) : (
-                        <div className="py-8 text-center text-muted-foreground">
-                          No completed fixtures found
-                        </div>
+                        emptyFixturesMessage
                       )}
                     </ScrollArea>
                   </CardContent>
