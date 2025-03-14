@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
 import { formatDate } from '../../utils/dateFormatters';
+import { extractTeamsAndWinner } from '../../utils/match/teamUtils';
+import { extractPlayerStats } from '../../utils/match/playerDataExtractor';
 
 interface DataExtractorProps {
   displayInfo: DisplayableMatchInfo;
@@ -18,18 +20,20 @@ export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, match
     // Extract basic match info
     extractBasicInfo(matchData, displayInfo);
     
-    // Extract teams info
-    extractTeamsInfo(matchData, displayInfo);
+    // Extract teams info and determine winner using the correct algorithm
+    extractTeamsAndWinner(matchData, displayInfo);
     
     // Extract player stats
     extractPlayerStats(matchData, displayInfo);
+    
+    console.log("Processed match data:", displayInfo);
     
   }, [matchData, displayInfo]);
   
   return null; // This component doesn't render anything
 };
 
-// Helper functions moved from utils
+// Helper function for basic info extraction
 const extractBasicInfo = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo) => {
   // Set title using Teams data if available
   if (!displayInfo.title || displayInfo.title === "Match Information") {
@@ -56,133 +60,6 @@ const extractBasicInfo = (matchData: MatchDetails, displayInfo: DisplayableMatch
     } catch (error) {
       console.error("Error parsing date:", error);
     }
-  }
-};
-
-// Extract teams information and determine winner
-const extractTeamsInfo = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo) => {
-  // Extract teams if not already set
-  if ((!displayInfo.teams || displayInfo.teams.length === 0) && matchData.Teams?.Team) {
-    console.log("Extracting team information");
-    
-    const teams = Array.isArray(matchData.Teams.Team) ? 
-      matchData.Teams.Team : [matchData.Teams.Team];
-      
-    displayInfo.teams = teams.map(team => ({
-      id: team.Id,
-      name: team.Name,
-      isWinner: false
-    }));
-    
-    // Try to determine winner
-    determineMatchWinner(matchData, displayInfo);
-  }
-};
-
-// Determine the match winner from available data
-const determineMatchWinner = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo) => {
-  if (!displayInfo.teams || displayInfo.teams.length !== 2) return;
-  
-  // First try to get winner from Skins
-  if (matchData.Skins?.Skin) {
-    const skins = Array.isArray(matchData.Skins.Skin) ? 
-      matchData.Skins.Skin : [matchData.Skins.Skin];
-    
-    if (skins.length > 0) {
-      const lastSkin = skins[skins.length - 1];
-      const team1Score = parseInt(lastSkin.Team1Score || '0') + parseInt(lastSkin.Team1BonusPenaltyRuns || '0');
-      const team2Score = parseInt(lastSkin.Team2Score || '0') + parseInt(lastSkin.Team2BonusPenaltyRuns || '0');
-      
-      const team1Id = lastSkin.Team1Id;
-      const team2Id = lastSkin.Team2Id;
-      
-      const team1 = displayInfo.teams.find(t => t.id === team1Id);
-      const team2 = displayInfo.teams.find(t => t.id === team2Id);
-      
-      if (team1 && team2) {
-        // Set result string
-        displayInfo.result = `${team1.name}: ${team1Score} - ${team2.name}: ${team2Score}`;
-        
-        if (team1Score > team2Score) {
-          displayInfo.winner = team1.name;
-          displayInfo.winnerId = team1.id;
-          displayInfo.teams.forEach(t => {
-            if (t.id === team1.id) t.isWinner = true;
-          });
-        } else if (team2Score > team1Score) {
-          displayInfo.winner = team2.name;
-          displayInfo.winnerId = team2.id;
-          displayInfo.teams.forEach(t => {
-            if (t.id === team2.id) t.isWinner = true;
-          });
-        } else {
-          displayInfo.winner = "Draw";
-        }
-      }
-    }
-  }
-  
-  // If no winner determined, try using Teams points
-  if (!displayInfo.winner && matchData.Teams?.Team) {
-    const teams = Array.isArray(matchData.Teams.Team) ? 
-      matchData.Teams.Team : [matchData.Teams.Team];
-    
-    if (teams.length === 2 && teams[0].Points && teams[1].Points) {
-      const team1Points = parseInt(teams[0].Points);
-      const team2Points = parseInt(teams[1].Points);
-      
-      displayInfo.result = `${teams[0].Name}: ${team1Points} pts - ${teams[1].Name}: ${team2Points} pts`;
-      
-      if (team1Points > team2Points) {
-        displayInfo.winner = teams[0].Name;
-        displayInfo.winnerId = teams[0].Id;
-        if (displayInfo.teams) displayInfo.teams[0].isWinner = true;
-      } else if (team2Points > team1Points) {
-        displayInfo.winner = teams[1].Name;
-        displayInfo.winnerId = teams[1].Id;
-        if (displayInfo.teams) displayInfo.teams[1].isWinner = true;
-      } else {
-        displayInfo.winner = "Draw";
-      }
-    }
-  }
-};
-
-// Extract player stats from the match data
-const extractPlayerStats = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo) => {
-  if (!matchData.Teams?.Team) return;
-  
-  const teams = Array.isArray(matchData.Teams.Team) ? 
-    matchData.Teams.Team : [matchData.Teams.Team];
-    
-  displayInfo.playerStats = displayInfo.playerStats || {};
-  
-  console.log("Extracting player statistics");
-  
-  // Load the external extractors
-  const { extractFromMatchSummary } = require('../../utils/match/playerStats/summaryExtractor');
-  const { extractFromBatsmenBowlers } = require('../../utils/match/playerStats/bowlerBatsmanExtractor');
-  
-  // First check if we have MatchSummary data
-  if (matchData.MatchSummary) {
-    extractFromMatchSummary(matchData, teams, displayInfo);
-  } 
-  // If no MatchSummary, try using Batsmen/Bowlers
-  else if (matchData.Batsmen?.Batsman || matchData.Bowlers?.Bowler) {
-    extractFromBatsmenBowlers(matchData, teams, displayInfo);
-  }
-  
-  // If still no player stats, add empty player lists to each team
-  if (Object.keys(displayInfo.playerStats).length === 0) {
-    teams.forEach(team => {
-      displayInfo.playerStats![team.Id] = {
-        name: team.Name,
-        players: []
-      };
-    });
-    console.log("No player statistics found, initialized empty player lists");
-  } else {
-    console.log("Successfully extracted player stats");
   }
 };
 

@@ -15,15 +15,44 @@ export const extractTeamsAndWinner = (data: MatchDetails, displayData: Displayab
     isWinner: false // Will set later
   }));
   
-  determineWinnerFromSkins(data, displayData, teamsData);
+  // First try to determine winner from team points (the most reliable method)
+  determineWinnerFromPoints(displayData, teamsData);
   
-  // If winner couldn't be determined from skins, try using points
+  // If winner couldn't be determined from points, try using skins
   if (!displayData.winner) {
-    determineWinnerFromPoints(displayData, teamsData);
+    determineWinnerFromSkins(data, displayData, teamsData);
   }
 };
 
-// Determine winner based on skin scores
+// Determine winner based on team points (PRIMARY method)
+const determineWinnerFromPoints = (
+  displayData: DisplayableMatchInfo, 
+  teamsData: Team[]
+): void => {
+  if (teamsData.length !== 2 || !teamsData[0]?.Points || !teamsData[1]?.Points) return;
+  
+  console.log("Determining winner from Points:", teamsData[0].Name, teamsData[0].Points, "vs", teamsData[1].Name, teamsData[1].Points);
+  
+  const team1Points = parseInt(teamsData[0].Points || '0');
+  const team2Points = parseInt(teamsData[1].Points || '0');
+  
+  if (team1Points > team2Points) {
+    displayData.winner = teamsData[0].Name;
+    displayData.winnerId = teamsData[0].Id;
+    if (displayData.teams) displayData.teams[0].isWinner = true;
+    displayData.result = `${teamsData[0].Name} won by ${team1Points - team2Points} points`;
+  } else if (team2Points > team1Points) {
+    displayData.winner = teamsData[1].Name;
+    displayData.winnerId = teamsData[1].Id;
+    if (displayData.teams) displayData.teams[1].isWinner = true;
+    displayData.result = `${teamsData[1].Name} won by ${team2Points - team1Points} points`;
+  } else {
+    displayData.winner = "Draw";
+    displayData.result = "Match ended in a draw";
+  }
+};
+
+// Determine winner based on skin scores (SECONDARY method)
 const determineWinnerFromSkins = (
   data: MatchDetails, 
   displayData: DisplayableMatchInfo, 
@@ -53,31 +82,5 @@ const determineWinnerFromSkins = (
       displayData.winner = "Draw";
       displayData.result = "Match ended in a draw";
     }
-  }
-};
-
-// Determine winner based on team points
-const determineWinnerFromPoints = (
-  displayData: DisplayableMatchInfo, 
-  teamsData: Team[]
-): void => {
-  if (teamsData.length !== 2 || !teamsData[0]?.Points || !teamsData[1]?.Points) return;
-  
-  const team1Points = parseInt(teamsData[0].Points || '0');
-  const team2Points = parseInt(teamsData[1].Points || '0');
-  
-  if (team1Points > team2Points) {
-    displayData.winner = teamsData[0].Name;
-    displayData.winnerId = teamsData[0].Id;
-    if (displayData.teams) displayData.teams[0].isWinner = true;
-    displayData.result = `${teamsData[0].Name} won by ${team1Points - team2Points} points`;
-  } else if (team2Points > team1Points) {
-    displayData.winner = teamsData[1].Name;
-    displayData.winnerId = teamsData[1].Id;
-    if (displayData.teams) displayData.teams[1].isWinner = true;
-    displayData.result = `${teamsData[1].Name} won by ${team2Points - team1Points} points`;
-  } else {
-    displayData.winner = "Draw";
-    displayData.result = "Match ended in a draw";
   }
 };

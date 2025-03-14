@@ -26,7 +26,36 @@ export const extractTeamsInfo = (matchData: MatchDetails, displayInfo: Displayab
 export const determineMatchWinner = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo): void => {
   if (!displayInfo.teams || displayInfo.teams.length !== 2) return;
   
-  // First try to get winner from Skins
+  // First try to get winner from Teams points (PRIORITIZED)
+  if (matchData.Teams?.Team) {
+    const teams = Array.isArray(matchData.Teams.Team) ? 
+      matchData.Teams.Team : [matchData.Teams.Team];
+    
+    if (teams.length === 2 && teams[0].Points && teams[1].Points) {
+      const team1Points = parseInt(teams[0].Points);
+      const team2Points = parseInt(teams[1].Points);
+      
+      console.log("Determining winner from Points:", teams[0].Name, teams[0].Points, "vs", teams[1].Name, teams[1].Points);
+      
+      displayInfo.result = `${teams[0].Name}: ${team1Points} pts - ${teams[1].Name}: ${team2Points} pts`;
+      
+      if (team1Points > team2Points) {
+        displayInfo.winner = teams[0].Name;
+        displayInfo.winnerId = teams[0].Id;
+        if (displayInfo.teams) displayInfo.teams[0].isWinner = true;
+      } else if (team2Points > team1Points) {
+        displayInfo.winner = teams[1].Name;
+        displayInfo.winnerId = teams[1].Id;
+        if (displayInfo.teams) displayInfo.teams[1].isWinner = true;
+      } else {
+        displayInfo.winner = "Draw";
+      }
+      
+      return; // Exit early if we've determined a winner
+    }
+  }
+  
+  // If no winner determined from points, try using Skins
   if (matchData.Skins?.Skin) {
     const skins = Array.isArray(matchData.Skins.Skin) ? 
       matchData.Skins.Skin : [matchData.Skins.Skin];
@@ -61,31 +90,6 @@ export const determineMatchWinner = (matchData: MatchDetails, displayInfo: Displ
         } else {
           displayInfo.winner = "Draw";
         }
-      }
-    }
-  }
-  
-  // If no winner determined, try using Teams points
-  if (!displayInfo.winner && matchData.Teams?.Team) {
-    const teams = Array.isArray(matchData.Teams.Team) ? 
-      matchData.Teams.Team : [matchData.Teams.Team];
-    
-    if (teams.length === 2 && teams[0].Points && teams[1].Points) {
-      const team1Points = parseInt(teams[0].Points);
-      const team2Points = parseInt(teams[1].Points);
-      
-      displayInfo.result = `${teams[0].Name}: ${team1Points} pts - ${teams[1].Name}: ${team2Points} pts`;
-      
-      if (team1Points > team2Points) {
-        displayInfo.winner = teams[0].Name;
-        displayInfo.winnerId = teams[0].Id;
-        if (displayInfo.teams) displayInfo.teams[0].isWinner = true;
-      } else if (team2Points > team1Points) {
-        displayInfo.winner = teams[1].Name;
-        displayInfo.winnerId = teams[1].Id;
-        if (displayInfo.teams) displayInfo.teams[1].isWinner = true;
-      } else {
-        displayInfo.winner = "Draw";
       }
     }
   }
