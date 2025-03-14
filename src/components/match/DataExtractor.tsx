@@ -241,11 +241,11 @@ const extractPlayerStats = (matchData: MatchDetails, displayInfo: DisplayableMat
 const cleanUpResultDisplay = (displayInfo: DisplayableMatchInfo) => {
   // Clean up Man of Match display
   if (displayInfo.manOfMatch) {
-    // Remove any "Player of the match:" or "Man of the match:" prefix if it exists
+    // Remove any "Player of the match:" prefix if it exists
     displayInfo.manOfMatch = displayInfo.manOfMatch.replace(/Player of the match:\s*/i, '');
     displayInfo.manOfMatch = displayInfo.manOfMatch.replace(/Man of the match:\s*/i, '');
     
-    // Format as "Name (Team)" if team info is available and not already formatted
+    // Format as "Name (Team)" if team info is available
     if (displayInfo.teams && displayInfo.teams.length > 0) {
       // Try to find player's team
       let playerTeam = '';
@@ -262,7 +262,7 @@ const cleanUpResultDisplay = (displayInfo: DisplayableMatchInfo) => {
         });
       }
       
-      // Add team in parentheses if we found it and it's not already there
+      // Add team in parentheses if we found it
       if (playerTeam && !displayInfo.manOfMatch.includes('(')) {
         displayInfo.manOfMatch = `${displayInfo.manOfMatch} (${playerTeam})`;
       }

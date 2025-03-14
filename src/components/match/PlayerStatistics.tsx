@@ -16,21 +16,20 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   // Use sessionStorage to persist the open/closed state between tab switches
   const [openTeams, setOpenTeams] = useState<Record<string, boolean>>(() => {
     try {
-      // Initialize all sections as closed by default
-      if (displayInfo.teams) {
-        const initialOpenState: Record<string, boolean> = {};
-        displayInfo.teams.forEach(team => {
-          initialOpenState[team.id] = false;
-        });
-        return initialOpenState;
-      }
-      return {};
+      const savedState = sessionStorage.getItem('cricket-team-collapsible-state');
+      return savedState ? JSON.parse(savedState) : {};
     } catch {
       return {}; // If storage fails
     }
   });
   
-  const [combinedSectionOpen, setCombinedSectionOpen] = useState<boolean>(false);
+  const [combinedSectionOpen, setCombinedSectionOpen] = useState<boolean>(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem('cricket-combined-collapsible-state') || 'false');
+    } catch {
+      return false;
+    }
+  });
 
   // Get winning team to display at the top
   const sortedTeams = React.useMemo(() => {
@@ -53,8 +52,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       team.players.forEach(player => {
         if (!player.Name.includes("No player statistics") && player.Name !== "Unknown Player") {
           allPlayers.push({
-            ...player,
-            TeamName: team.name
+            ...player
           });
         }
       });
@@ -68,6 +66,17 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     });
   }, [displayInfo.playerStats]);
 
+  useEffect(() => {
+    // Initialize all sections as closed by default
+    if (displayInfo.teams && Object.keys(openTeams).length === 0) {
+      const initialOpenState: Record<string, boolean> = {};
+      displayInfo.teams.forEach(team => {
+        initialOpenState[team.id] = false;
+      });
+      setOpenTeams(initialOpenState);
+    }
+  }, [displayInfo.teams, openTeams]);
+
   // Save state to sessionStorage when it changes
   useEffect(() => {
     try {
@@ -78,7 +87,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     }
   }, [openTeams, combinedSectionOpen]);
 
-  // Define player stat columns for the team tables
+  // Define player stat columns for the table - same for all teams to ensure alignment
   const playerColumns = [
     { 
       key: "Name", 
@@ -90,55 +99,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
           {row.TeamName && <span className="text-xs text-muted-foreground">{row.TeamName}</span>}
         </div>
       )
-    },
-    { 
-      key: "RS", 
-      header: "R", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
-    { 
-      key: "RC", 
-      header: "RA", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
-    { 
-      key: "Wkts", 
-      header: "W", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
-    { 
-      key: "SR", 
-      header: "SR", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]",
-      render: (value: string) => {
-        // Remove decimal places
-        const srValue = parseFloat(value || '0');
-        return Math.round(srValue);
-      }
-    },
-    { 
-      key: "C", 
-      header: "C", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    }
-  ];
-
-  // Define columns for the combined table (no player names)
-  const combinedColumns = [
-    { 
-      key: "TeamName", 
-      header: "Team", 
-      className: "font-medium w-[40%]"
     },
     { 
       key: "RS", 
@@ -211,7 +171,9 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-0 -mx-2">
+      <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
+      
       {/* Show teams with player stats */}
       {(!displayInfo.teams || displayInfo.teams.length === 0) ? (
         <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
@@ -253,7 +215,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                       columns={playerColumns}
                       superCompact={true}
                       ultraCompact={false}
-                      className="mt-0"
+                      className="mt-0 -mx-0"
                       resultsMode
                     />
                   </div>
@@ -286,10 +248,10 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
             <div className="p-0">
               <ResponsiveTable 
                 data={combinedPlayers} 
-                columns={combinedColumns}
+                columns={playerColumns.filter(col => col.key !== 'TeamName')}
                 superCompact={true}
                 ultraCompact={false}
-                className="mt-0"
+                className="mt-0 -mx-0"
                 resultsMode
               />
             </div>

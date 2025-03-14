@@ -56,7 +56,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
   );
 
   return (
-    <ResponsiveContainer spacing="md" className="px-2">
+    <ResponsiveContainer spacing="md" className="px-0">
       {/* Back to fixtures link */}
       <BackToFixturesLink />
 
@@ -64,9 +64,9 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       <DataExtractor displayInfo={displayInfo} matchData={matchData} />
       
       {/* Display summary information at the top */}
-      <div className="space-y-4 w-full">
+      <div className="space-y-4 w-full px-0">
         {/* Match summary section */}
-        <div className="space-y-4">
+        <div className="space-y-4 px-0">
           {/* Match winner */}
           {displayInfo.winner ? (
             <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
@@ -88,8 +88,8 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
           )}
         </div>
         
-        {/* Player statistics - removed the outer Card and header */}
-        <div>
+        {/* Player statistics - removed the outer Card */}
+        <div className="px-0">
           <PlayerStatistics displayInfo={displayInfo} />
         </div>
       </div>
