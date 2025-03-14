@@ -48,7 +48,7 @@ const MatchDetails = () => {
   return (
     <MainLayout>
       <div className="space-y-4 w-full mx-auto px-0">
-        <h1 className="text-lg md:text-2xl font-bold tracking-tight animate-fade-in px-2">Match Details</h1>
+        <h1 className="text-lg md:text-2xl font-bold tracking-tight animate-fade-in">Match Details</h1>
         
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -56,7 +56,7 @@ const MatchDetails = () => {
           </div>
         ) : matchData ? (
           <div className="space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
-            {/* Minimize padding to push content closer to edges */}
+            {/* Removed the ResponsiveCard here to reduce nesting */}
             <div className="w-full overflow-hidden bg-card rounded-xl shadow-md transition-all duration-300 hover:shadow-xl">
               <Tabs defaultValue="stats" className="w-full">
                 <TabsList className="w-full grid grid-cols-3 mb-2 text-xxs sm:text-sm">
@@ -65,7 +65,7 @@ const MatchDetails = () => {
                   <TabsTrigger value="raw">Raw Data</TabsTrigger>
                 </TabsList>
                 
-                <div className="px-1">
+                <div className="p-4">
                   <TabsContent value="stats" className="space-y-4 mt-0">
                     <MatchOverview displayInfo={displayInfo} matchData={matchData} />
                   </TabsContent>
