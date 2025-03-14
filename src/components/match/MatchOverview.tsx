@@ -2,17 +2,12 @@
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
-import MatchWinner from './MatchWinner';
 import PlayerStatistics from './PlayerStatistics';
-import MatchHeader from './MatchHeader';
 import DataExtractor from './DataExtractor';
-import MatchTeams from './MatchTeams';
 import { ResponsiveContainer } from '../ui/responsive-container';
 import { AlertCircle, Calendar, MapPin, Trophy, Users } from 'lucide-react';
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card } from "@/components/ui/card";
-import { Separator } from '@/components/ui/separator';
 
 interface MatchOverviewProps {
   displayInfo: DisplayableMatchInfo;
@@ -40,6 +35,16 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       </div>
     );
   }
+
+  // Function to check if we have actual player data
+  const hasPlayerData = () => {
+    if (!displayInfo.playerStats) return false;
+    
+    return Object.values(displayInfo.playerStats).some(team => 
+      team.players && team.players.length > 0 && 
+      team.players.some(player => !player.Name.includes("No player statistics"))
+    );
+  };
 
   return (
     <ResponsiveContainer spacing="md">
@@ -84,6 +89,9 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
                 <Trophy className="h-4 w-4 text-amber-500" />
                 <p className="text-sm">
                   <span className="font-medium">Winner:</span> {displayInfo.winner}
+                  {displayInfo.result && displayInfo.result !== `${displayInfo.winner} won` && (
+                    <span className="ml-1">({displayInfo.result.replace(`${displayInfo.winner} won`, '').trim()})</span>
+                  )}
                 </p>
               </div>
             ) : (
@@ -118,7 +126,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
               {displayInfo.teams.map((team, index) => (
                 <div key={team.id} className="flex items-center justify-between">
                   <span className="text-sm">{team.name}</span>
-                  {team.isWinner && (
+                  {displayInfo.winnerId === team.id && (
                     <span className="text-xs bg-amber-500/20 text-amber-600 px-2 py-0.5 rounded-full">
                       Winner
                     </span>

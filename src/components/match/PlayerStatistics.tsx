@@ -69,12 +69,22 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     return null;
   };
 
-  // Check if we have player stats data in any team
+  // Check if we have any player stats
   const hasPlayerStats = displayInfo.playerStats && 
     Object.keys(displayInfo.playerStats).length > 0 &&
-    Object.values(displayInfo.playerStats).some(
-      team => team.players && team.players.length > 0
+    Object.values(displayInfo.playerStats).some(team => 
+      team.players && team.players.length > 0
     );
+
+  // Function to check if a team has actual player data (not just placeholders)
+  const hasRealPlayerData = (teamId: string) => {
+    if (!displayInfo.playerStats || !displayInfo.playerStats[teamId]) return false;
+    
+    const teamPlayers = displayInfo.playerStats[teamId].players;
+    return teamPlayers.some(player => 
+      !player.Name.includes("No player statistics") && player.Name !== "Unknown Player"
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -84,7 +94,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       <WinnerDisplay />
       <ManOfMatchDisplay />
       
-      {/* Show teams even if empty */}
+      {/* Show teams with player stats */}
       {(!displayInfo.teams || displayInfo.teams.length === 0) ? (
         <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
           <AlertCircle className="h-4 w-4 text-muted-foreground" />
@@ -94,6 +104,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         displayInfo.teams.map((team) => {
           const teamStats = displayInfo.playerStats && displayInfo.playerStats[team.id];
           const hasTeamPlayers = teamStats && teamStats.players && teamStats.players.length > 0;
+          const hasActualPlayers = hasRealPlayerData(team.id);
           
           return (
             <div key={team.id} className="space-y-2 mb-4">
@@ -126,6 +137,14 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
             </div>
           );
         })
+      )}
+      
+      {/* Show message if no player stats */}
+      {displayInfo.teams && displayInfo.teams.length > 0 && !hasPlayerStats && (
+        <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center mt-4">
+          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
+        </div>
       )}
     </div>
   );

@@ -27,20 +27,57 @@ export const extractPlayerStats = (matchData: MatchDetails, displayInfo: Display
   });
   
   try {
-    // Call the specialized extractor service
+    // First try to get player data from the array-like structure if present
+    if (typeof matchData === 'object' && matchData['0']) {
+      console.log("Found array-like match data, attempting to extract player stats from it");
+      
+      // Try to extract from each item in the array-like object
+      for (const key in matchData) {
+        if (!isNaN(Number(key))) {
+          const item = matchData[key] as any;
+          
+          // Recursively call extract with this item
+          if (item && typeof item === 'object') {
+            extractPlayerStatsFromMatch(item, displayInfo);
+            
+            // Check if we got any players - if yes, we can stop processing
+            const hasPlayers = Object.values(displayInfo.playerStats).some(
+              team => team.players && team.players.length > 0 && 
+                     !team.players[0].Name.includes("No player statistics")
+            );
+            
+            if (hasPlayers) {
+              console.log("Successfully extracted player stats from array item", key);
+              return;
+            }
+          }
+        }
+      }
+    }
+    
+    // Call the specialized extractor service with the full match data
     extractPlayerStatsFromMatch(matchData, displayInfo);
   } catch (error) {
     console.error("Error extracting player stats:", error);
   }
   
-  // Add fallback data if no players were found
-  let totalPlayers = 0;
-  Object.keys(displayInfo.playerStats).forEach(teamId => {
-    totalPlayers += displayInfo.playerStats![teamId].players.length;
-  });
+  // Check if extraction returned any usable player data
+  let extractedValidPlayers = false;
+  if (displayInfo.playerStats) {
+    Object.keys(displayInfo.playerStats).forEach(teamId => {
+      const team = displayInfo.playerStats![teamId];
+      if (team.players && team.players.length > 0) {
+        // Check if we have real player names (not placeholder text)
+        extractedValidPlayers = team.players.some(p => 
+          p.Name && !p.Name.includes("No player statistics")
+        );
+      }
+    });
+  }
   
-  if (totalPlayers === 0) {
-    console.log("No players found in actual data, adding fallback players");
+  // Add fallback data if no players were found or if all players have placeholder text
+  if (!extractedValidPlayers) {
+    console.log("No real player data found, adding fallback players");
     addFallbackPlayerStats(displayInfo);
   }
   
@@ -58,8 +95,10 @@ const addFallbackPlayerStats = (displayInfo: DisplayableMatchInfo): void => {
   displayInfo.teams.forEach(team => {
     const teamId = team.id;
     
-    // Skip if team already has players
-    if (displayInfo.playerStats![teamId].players.length > 0) return;
+    // Skip if team already has real players
+    if (displayInfo.playerStats![teamId].players.some(p => !p.Name.includes("No player statistics"))) {
+      return;
+    }
     
     // Create a notice "player" to indicate no data
     displayInfo.playerStats![teamId].players = [

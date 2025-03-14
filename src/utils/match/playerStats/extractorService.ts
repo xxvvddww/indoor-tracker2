@@ -30,6 +30,24 @@ export const extractPlayerStatsFromMatch = (matchData: MatchDetails, displayInfo
   
   let statsExtracted = false;
   
+  // Check if the data is contained in a nested property
+  if (matchData.Statistics) {
+    console.log("Found nested Statistics data, using it instead");
+    extractPlayerStatsFromMatch(matchData.Statistics as any, displayInfo);
+    
+    // Check if we actually got player data
+    statsExtracted = Object.keys(displayInfo.playerStats).some(teamId => 
+      displayInfo.playerStats![teamId].players && 
+      displayInfo.playerStats![teamId].players.length > 0 &&
+      !displayInfo.playerStats![teamId].players[0].Name.includes("No player statistics")
+    );
+    
+    if (statsExtracted) {
+      console.log("Successfully extracted player stats from nested Statistics");
+      return;
+    }
+  }
+  
   // First check if we have MatchSummary data (highest quality source)
   if (matchData.MatchSummary) {
     console.log("Found MatchSummary data, using it for player stats");
@@ -45,7 +63,8 @@ export const extractPlayerStatsFromMatch = (matchData: MatchDetails, displayInfo
     // Check if we actually got player data
     statsExtracted = Object.keys(displayInfo.playerStats).some(teamId => 
       displayInfo.playerStats![teamId].players && 
-      displayInfo.playerStats![teamId].players.length > 0
+      displayInfo.playerStats![teamId].players.length > 0 &&
+      !displayInfo.playerStats![teamId].players[0].Name.includes("No player statistics")
     );
     
     console.log("Stats extracted from MatchSummary:", statsExtracted);
@@ -66,7 +85,8 @@ export const extractPlayerStatsFromMatch = (matchData: MatchDetails, displayInfo
     // Check if we got player data
     statsExtracted = Object.keys(displayInfo.playerStats).some(teamId => 
       displayInfo.playerStats![teamId].players && 
-      displayInfo.playerStats![teamId].players.length > 0
+      displayInfo.playerStats![teamId].players.length > 0 &&
+      !displayInfo.playerStats![teamId].players[0].Name.includes("No player statistics")
     );
     
     console.log("Stats extracted from Batsmen/Bowlers:", statsExtracted);
@@ -87,39 +107,63 @@ export const extractPlayerStatsFromMatch = (matchData: MatchDetails, displayInfo
     // Check again if we got any players
     statsExtracted = Object.keys(displayInfo.playerStats).some(teamId => 
       displayInfo.playerStats![teamId].players && 
-      displayInfo.playerStats![teamId].players.length > 0
+      displayInfo.playerStats![teamId].players.length > 0 &&
+      !displayInfo.playerStats![teamId].players[0].Name.includes("No player statistics")
     );
     
     console.log("Stats extracted from Balls data:", statsExtracted);
   }
   
-  // If no data was extracted from any source, add placeholder text
-  if (!statsExtracted) {
-    console.log("No player stats could be extracted from any data source");
+  // Try additional data sources - check if there are player lists in the data
+  if (!statsExtracted && matchData.Players) {
+    console.log("Trying to extract player stats from Players list");
     
-    // Add placeholder message for each team
-    teams.forEach(team => {
-      displayInfo.playerStats![team.id].players = [
-        {
-          Name: "No player statistics available for this match",
-          RS: "-",
-          OB: "-",
-          RC: "-",
-          Wkts: "-",
-          SR: "-",
-          Econ: "-"
-        }
-      ];
-    });
+    try {
+      extractPlayersFromPlayersList(matchData, displayInfo);
+      
+      // Check if we got any players
+      statsExtracted = Object.keys(displayInfo.playerStats).some(teamId => 
+        displayInfo.playerStats![teamId].players && 
+        displayInfo.playerStats![teamId].players.length > 0 &&
+        !displayInfo.playerStats![teamId].players[0].Name.includes("No player statistics")
+      );
+      
+      console.log("Stats extracted from Players list:", statsExtracted);
+    } catch (error) {
+      console.error("Error extracting from Players list:", error);
+    }
   }
+};
+
+// Extract players from Players list if available
+const extractPlayersFromPlayersList = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo): void => {
+  if (!matchData.Players || !displayInfo.playerStats) return;
   
-  // Log the final result
-  Object.keys(displayInfo.playerStats).forEach(teamId => {
-    const team = displayInfo.playerStats![teamId];
-    console.log(`Team ${teamId} (${team.name}) final player count: ${team.players.length}`);
+  const players = Array.isArray(matchData.Players.Player) 
+    ? matchData.Players.Player 
+    : [matchData.Players.Player];
+  
+  console.log(`Found ${players.length} players in Players list`);
+  
+  displayInfo.teams?.forEach(team => {
+    const teamId = team.id;
     
-    if (team.players.length > 0) {
-      console.log(`First player: ${team.players[0].Name}`);
+    // Find players for this team
+    const teamPlayers = players.filter(p => p.TeamId === teamId);
+    
+    if (teamPlayers.length > 0) {
+      console.log(`Found ${teamPlayers.length} players for team ${team.name}`);
+      
+      displayInfo.playerStats![teamId].players = teamPlayers.map(player => ({
+        Name: player.Name || player.PlayerName || 'Unknown Player',
+        RS: player.RunsScored || player.RS || '0',
+        OB: player.OversBowled || player.OB || '0',
+        RC: player.RunsConceded || player.RC || '0',
+        Wkts: player.Wickets || player.Wkts || '0',
+        SR: player.StrikeRate || player.SR || '0',
+        Econ: player.Economy || player.Econ || '0',
+        PlayerId: player.Id || player.PlayerId || ''
+      }));
     }
   });
 };
