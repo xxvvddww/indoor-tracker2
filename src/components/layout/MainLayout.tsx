@@ -1,7 +1,7 @@
 
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Award, Users, Calendar, BarChart3, Settings, Home, Menu, X } from "lucide-react";
+import { Users, Calendar, BarChart3, Settings, Home, Menu, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
@@ -23,7 +23,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const navItems = [
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/fixtures", label: "Fixtures & Results", icon: Calendar },
-    { path: "/standings", label: "Team Standings", icon: Award },
+    { path: "/standings", label: "Team Standings", icon: Users },
     { path: "/teams", label: "Teams", icon: Users },
     { path: "/stats", label: "Player Statistics", icon: BarChart3 },
     { path: "/settings", label: "Settings", icon: Settings },
@@ -39,8 +39,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="w-64 bg-background border-r border-secondary hidden md:block">
         <div className="p-4 border-b border-secondary flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Award className="h-6 w-6 text-success" />
-            <h1 className="font-bold text-xl">Cricket Tracker</h1>
+            <h1 className="font-bold text-xl">Seamers Indoor</h1>
           </div>
           <ThemeToggle />
         </div>
@@ -65,8 +64,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="md:hidden fixed top-0 left-0 right-0 bg-background border-b border-secondary z-20">
         <div className="flex items-center justify-between p-2">
           <div className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-success" />
-            <h1 className="font-bold text-base">Cricket Tracker</h1>
+            <h1 className="font-bold text-base">Seamers Indoor</h1>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
