@@ -114,6 +114,27 @@
   }
 }
 
+/* Mobile menu animations */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 @layer utilities {
   .animate-collapsible-down {
     animation: collapsible-down 0.2s ease-out;
@@ -121,5 +142,33 @@
   
   .animate-collapsible-up {
     animation: collapsible-up 0.2s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out forwards;
+  }
+}
+
+/* Card hover animation */
+.card-hover {
+  @apply transition-all duration-200;
+}
+
+.card-hover:hover {
+  @apply shadow-lg transform -translate-y-1;
+}
+
+/* Responsive fonts */
+@responsive {
+  .text-responsive {
+    @apply text-sm md:text-base;
+  }
+  
+  .heading-responsive {
+    @apply text-lg md:text-xl lg:text-2xl;
   }
 }

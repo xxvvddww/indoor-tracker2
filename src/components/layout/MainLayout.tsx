@@ -2,6 +2,7 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Award, Users, Calendar, BarChart3, Settings, Home, Menu, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const isActive = (path: string) => {
     return location.pathname === path 
@@ -54,14 +56,14 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </div>
       
       {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-background border-b border-secondary z-10">
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-background border-b border-secondary z-20">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <Award className="h-6 w-6 text-success" />
             <h1 className="font-bold text-xl">Cricket Tracker</h1>
           </div>
           <button 
-            className="p-2"
+            className="p-2 rounded-md hover:bg-secondary/50 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -74,13 +76,19 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu with improved animation */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed top-16 left-0 right-0 bottom-0 bg-background z-10 overflow-y-auto">
+        <div 
+          className="md:hidden fixed top-16 left-0 right-0 bottom-0 bg-background z-10 overflow-y-auto animate-fade-in"
+        >
           <nav className="p-4">
             <ul className="space-y-2">
-              {navItems.map((item) => (
-                <li key={item.path}>
+              {navItems.map((item, index) => (
+                <li 
+                  key={item.path} 
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  className="animate-slide-in-right"
+                >
                   <Link 
                     to={item.path} 
                     className={`flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors ${isActive(item.path)}`}
@@ -98,7 +106,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       
       {/* Main content */}
       <div className="flex-1 flex flex-col">
-        <main className="flex-1 p-4 md:p-6 md:pt-4 overflow-y-auto pt-16 md:pt-0">
+        <main className="flex-1 p-4 md:p-6 md:pt-4 overflow-y-auto pt-20 md:pt-0">
           {children}
         </main>
       </div>
