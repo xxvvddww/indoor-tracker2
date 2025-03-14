@@ -24,7 +24,21 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { key: "Econ", header: "Econ", hideOnMobile: true },
   ];
 
+  // Check if we have teams but no player stats
   if (!displayInfo.playerStats || Object.keys(displayInfo.playerStats).length === 0) {
+    return (
+      <div className="text-center py-4">
+        <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
+      </div>
+    );
+  }
+
+  // Check if we have empty player arrays
+  const hasActualPlayers = Object.values(displayInfo.playerStats).some(
+    team => team.players && team.players.length > 0
+  );
+
+  if (!hasActualPlayers) {
     return (
       <div className="text-center py-4">
         <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
@@ -48,14 +62,19 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
               )}
             </h3>
           </div>
-          <ResponsiveTable 
-            data={displayInfo.playerStats[teamId].players} 
-            columns={playerColumns}
-            superCompact={isMobile}
-            ultraCompact={false}
-            className="mt-1"
-            resultsMode
-          />
+          
+          {displayInfo.playerStats[teamId].players.length > 0 ? (
+            <ResponsiveTable 
+              data={displayInfo.playerStats[teamId].players} 
+              columns={playerColumns}
+              superCompact={isMobile}
+              ultraCompact={false}
+              className="mt-1"
+              resultsMode
+            />
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">No player data available for this team</p>
+          )}
         </div>
       ))}
     </div>

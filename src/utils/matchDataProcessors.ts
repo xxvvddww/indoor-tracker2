@@ -13,7 +13,7 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
     teams: []
   };
   
-  // Look for venue in PlayingAreaName (which exists in the raw data)
+  // Try to get venue from Configuration's PlayingAreaName field
   if (data.Configuration && (data.Configuration as any).PlayingAreaName) {
     displayData.venue = (data.Configuration as any).PlayingAreaName;
   }
@@ -263,7 +263,7 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
             if (bowler && bowler.Id) {
               const bowlerId = bowler.Id;
               const ballsBowled = bowlerBalls[bowlerId] || 0;
-              const overs = Math.floor(ballsBowled / 5); // Assuming 5 balls per over
+              const overs = Math.floor(ballsBowled / 6); // Assuming 6 balls per over
               
               player.OB = overs.toString();
               player.RC = (bowlerRuns[bowlerId] || 0).toString();
