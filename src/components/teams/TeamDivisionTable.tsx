@@ -18,7 +18,7 @@ interface TeamDivisionTableProps {
 const TeamDivisionTable = ({ 
   divisionName, 
   teams, 
-  initialOpen = true,
+  initialOpen = false,  // Changed default from true to false
   preserveOpenState = false 
 }: TeamDivisionTableProps) => {
   const [isOpen, setIsOpen] = useState(initialOpen);

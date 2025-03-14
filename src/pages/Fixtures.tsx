@@ -132,8 +132,8 @@ const Fixtures = () => {
   useEffect(() => {
     if (paginatedDates.length > 0 && Object.keys(openDateSections).length === 0) {
       const initialOpenState: Record<string, boolean> = {};
-      paginatedDates.forEach((date, index) => {
-        initialOpenState[date] = index === 0;
+      paginatedDates.forEach((date) => {
+        initialOpenState[date] = false;
       });
       setOpenDateSections(initialOpenState);
     }
