@@ -5,6 +5,7 @@ import MainLayout from "../components/layout/MainLayout";
 import { fetchMatchDetails } from "../services/cricketApi";
 import { MatchDetails as MatchDetailsType } from "../types/cricket";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { ResponsiveCard } from "@/components/ui/responsive-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DisplayableMatchInfo } from '@/components/match/types';
@@ -56,8 +57,13 @@ const MatchDetails = () => {
           </div>
         ) : matchData ? (
           <div className="space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
-            {/* Removed the ResponsiveCard here to reduce nesting */}
-            <div className="w-full overflow-hidden bg-card rounded-xl shadow-md transition-all duration-300 hover:shadow-xl">
+            <ResponsiveCard 
+              title={displayInfo.title}
+              description={displayInfo.date ? `Date: ${displayInfo.date}` : "Match details"}
+              withAnimation
+              animationDelay={200}
+              className="overflow-hidden"
+            >
               <Tabs defaultValue="stats" className="w-full">
                 <TabsList className="w-full grid grid-cols-3 mb-2 text-xxs sm:text-sm">
                   <TabsTrigger value="stats">Stats</TabsTrigger>
@@ -65,28 +71,24 @@ const MatchDetails = () => {
                   <TabsTrigger value="raw">Raw Data</TabsTrigger>
                 </TabsList>
                 
-                <div className="p-4">
-                  <TabsContent value="stats" className="space-y-4 mt-0">
-                    <MatchOverview displayInfo={displayInfo} matchData={matchData} />
-                  </TabsContent>
-                  
-                  <TabsContent value="teams" className="space-y-2 mt-0">
-                    <TeamDetails teams={displayInfo.teams} />
-                  </TabsContent>
-                  
-                  <TabsContent value="raw" className="mt-0">
-                    <RawMatchData matchData={matchData} />
-                  </TabsContent>
-                </div>
+                <TabsContent value="stats" className="space-y-4">
+                  <MatchOverview displayInfo={displayInfo} matchData={matchData} />
+                </TabsContent>
+                
+                <TabsContent value="teams" className="space-y-2">
+                  <TeamDetails teams={displayInfo.teams} />
+                </TabsContent>
+                
+                <TabsContent value="raw">
+                  <RawMatchData matchData={matchData} />
+                </TabsContent>
               </Tabs>
-            </div>
+            </ResponsiveCard>
           </div>
         ) : (
-          <div className="w-full rounded-xl border bg-card text-card-foreground shadow-md transition-all duration-300 hover:shadow-xl animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <div className="p-4">
-              <p className="text-xs sm:text-sm">No match data available</p>
-            </div>
-          </div>
+          <ResponsiveCard withAnimation animationDelay={100}>
+            <p className="text-xs sm:text-sm">No match data available</p>
+          </ResponsiveCard>
         )}
       </div>
     </MainLayout>

@@ -7,6 +7,7 @@ import DataExtractor from './DataExtractor';
 import { ResponsiveContainer } from '../ui/responsive-container';
 import { Trophy } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Card } from "@/components/ui/card";
 import { AlertCircle } from 'lucide-react';
 
 interface MatchOverviewProps {
@@ -53,33 +54,35 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       
       {/* Display summary information at the top */}
       <div className="space-y-4 w-full">
-        {/* Match summary section - removed the outer Card */}
-        <div className="space-y-4">
-          {/* Match winner */}
-          {displayInfo.winner ? (
-            <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
-              <Trophy className="h-4 w-4 text-green-500" />
-              <p className="text-sm">
-                <span className="font-medium">Winner:</span> {displayInfo.winner}
-              </p>
-            </div>
-          ) : null}
-          
-          {/* Man of the match */}
-          {displayInfo.manOfMatch && (
-            <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
-              <Trophy className="h-4 w-4 text-green-500" />
-              <p className="text-sm">
-                <span className="font-medium">Player of the Match:</span> {displayInfo.manOfMatch}
-              </p>
-            </div>
-          )}
-        </div>
+        {/* Match summary section */}
+        <Card className="p-4">
+          <div className="space-y-4">
+            {/* Match winner */}
+            {displayInfo.winner ? (
+              <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
+                <Trophy className="h-4 w-4 text-green-500" />
+                <p className="text-sm">
+                  <span className="font-medium">Winner:</span> {displayInfo.winner}
+                </p>
+              </div>
+            ) : null}
+            
+            {/* Man of the match */}
+            {displayInfo.manOfMatch && (
+              <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
+                <Trophy className="h-4 w-4 text-green-500" />
+                <p className="text-sm">
+                  <span className="font-medium">Player of the Match:</span> {displayInfo.manOfMatch}
+                </p>
+              </div>
+            )}
+          </div>
+        </Card>
         
-        {/* Player statistics - removed the outer Card */}
-        <div>
+        {/* Player statistics */}
+        <Card className="p-4">
           <PlayerStatistics displayInfo={displayInfo} />
-        </div>
+        </Card>
       </div>
     </ResponsiveContainer>
   );

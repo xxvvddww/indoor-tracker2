@@ -108,7 +108,23 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { key: "Wkts", header: "Wickets", hideOnMobile: false },
     { key: "SR", header: "S/R", hideOnMobile: true },
     { key: "Econ", header: "Econ", hideOnMobile: true },
-    { key: "C", header: "Contrib", hideOnMobile: false }
+    { 
+      key: "C", 
+      header: "Contrib", 
+      hideOnMobile: false,
+      render: (value: string) => {
+        const contrib = parseFloat(value || '0');
+        const textColor = contrib > 0 ? 'text-green-600' : 'text-red-500';
+        const bgColor = contrib > 0 ? 'bg-green-50' : 'bg-red-50';
+        const borderColor = contrib > 0 ? 'border-green-200' : 'border-red-200';
+        
+        return (
+          <span className={`px-1.5 py-0.5 rounded ${textColor} ${bgColor} ${borderColor} border`}>
+            {value || '0'}
+          </span>
+        );
+      }
+    },
   ];
 
   // Check if we have any player stats
@@ -157,7 +173,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
           const isOpen = openTeams[team.id] || false;
           
           return (
-            <Collapsible key={team.id} open={isOpen} onOpenChange={() => toggleTeam(team.id)} className="border rounded-md overflow-hidden mb-4 bg-muted/10">
+            <Collapsible key={team.id} open={isOpen} onOpenChange={() => toggleTeam(team.id)} className="border rounded-md overflow-hidden mb-4">
               <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-primary" />
@@ -202,7 +218,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       
       {/* Combined player stats section */}
       {combinedPlayers.length > 0 && (
-        <Collapsible open={combinedSectionOpen} onOpenChange={toggleCombined} className="border rounded-md overflow-hidden mb-4 bg-muted/10">
+        <Collapsible open={combinedSectionOpen} onOpenChange={toggleCombined} className="border rounded-md overflow-hidden mb-4">
           <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />
