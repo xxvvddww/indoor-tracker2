@@ -139,17 +139,13 @@ const Fixtures = () => {
   const paginatedFixtures = filteredFixtures.slice(startIndex, startIndex + itemsPerPage);
   console.log("Paginated fixtures count:", paginatedFixtures.length);
   
-  // Sort upcoming and completed separately for the "all" tab view
+  // FIXED: Modified the filtering for the all tab view to correctly display fixtures
   const upcomingFixtures = activeTab === 'all' 
-    ? paginatedFixtures
-        .filter(fixture => isFutureDate(fixture.Date))
-        .sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
+    ? paginatedFixtures.filter(fixture => isFutureDate(fixture.Date))
     : paginatedFixtures;
     
   const completedFixtures = activeTab === 'all' 
-    ? paginatedFixtures
-        .filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
-        .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime())
+    ? paginatedFixtures.filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
     : [];
 
   console.log("Upcoming fixtures:", upcomingFixtures.length);
@@ -180,7 +176,10 @@ const Fixtures = () => {
           </div>
         </div>
         
-        <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+        <Tabs defaultValue="all" className="w-full" onValueChange={(value) => {
+          setActiveTab(value);
+          setCurrentPage(1); // Reset to first page when changing tabs
+        }}>
           <TabsList className="mb-4">
             <TabsTrigger value="all">All Fixtures</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
@@ -314,6 +313,17 @@ const Fixtures = () => {
                         </Table>
                       </div>
                     </ScrollArea>
+                  </div>
+                )}
+                
+                {/* Show a message when no fixtures are found in "All" tab */}
+                {upcomingFixtures.length === 0 && completedFixtures.length === 0 && (
+                  <div className="bg-card rounded-lg border shadow-sm p-6 text-center">
+                    <Calendar className="mx-auto h-12 w-12 text-primary/50" />
+                    <h2 className="mt-4 text-xl font-medium">No Fixtures Found</h2>
+                    <p className="mt-2 text-muted-foreground">
+                      {searchTerm ? "No fixtures match your search criteria." : "There are no fixtures available for the current season."}
+                    </p>
                   </div>
                 )}
               </TabsContent>
