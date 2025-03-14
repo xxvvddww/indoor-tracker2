@@ -9,25 +9,73 @@ import { MatchDetails, Team } from "../../types/cricket";
  * @returns Array of teams if available, empty array otherwise
  */
 export const extractTeams = (data: MatchDetails, displayData: DisplayableMatchInfo): Team[] => {
-  // Special case: handle array-like objects that have numeric keys
-  // This happens when the API returns array-like objects instead of proper arrays
-  if (data && typeof data === 'object' && Object.keys(data).every(key => !isNaN(Number(key)))) {
-    console.log("Found array-like object in match data, attempting to process");
+  // First check if we're dealing with a simple array structure (common in some responses)
+  if (Array.isArray(data) && data.length > 0) {
+    console.log("Extracting teams from array data");
     
-    // Try to find the first item that has useful data
-    for (const key in data) {
-      const item = data[key];
-      if (item && typeof item === 'object') {
-        // Recursively call extract with this item
-        const result = extractTeams(item as any, displayData);
-        if (result.length > 0) {
-          return result;
+    // Try to get team info from Properties
+    const matchData = data[0];
+    if (matchData.Properties) {
+      // Extract team info from Properties
+      const homeTeamId = matchData.Properties.Team1Id || "team1";
+      const awayTeamId = matchData.Properties.Team2Id || "team2";
+      const homeTeamName = matchData.Properties.Team1Name || "Home Team";
+      const awayTeamName = matchData.Properties.Team2Name || "Away Team";
+      
+      displayData.teams = [
+        {
+          id: homeTeamId,
+          name: homeTeamName,
+          isWinner: false
+        },
+        {
+          id: awayTeamId,
+          name: awayTeamName,
+          isWinner: false
         }
+      ];
+      
+      // Create mock team objects to return
+      return [
+        { Id: homeTeamId, Name: homeTeamName } as Team,
+        { Id: awayTeamId, Name: awayTeamName } as Team
+      ];
+    }
+    
+    // Try to get team info from Players
+    if (matchData.Players && matchData.Players.Player) {
+      const players = Array.isArray(matchData.Players.Player) ? 
+        matchData.Players.Player : [matchData.Players.Player];
+      
+      // Extract unique teams from players
+      const teamMap = new Map<string, {id: string, name: string}>();
+      
+      players.forEach(player => {
+        if (player.TeamId && player.TeamName) {
+          teamMap.set(player.TeamId, {
+            id: player.TeamId,
+            name: player.TeamName
+          });
+        }
+      });
+      
+      if (teamMap.size > 0) {
+        displayData.teams = Array.from(teamMap.values()).map(team => ({
+          id: team.id,
+          name: team.name,
+          isWinner: false
+        }));
+        
+        // Create team objects to return
+        return Array.from(teamMap.values()).map(team => ({
+          Id: team.id,
+          Name: team.name
+        } as Team));
       }
     }
   }
   
-  // First check for Teams structure
+  // Standard approach: check for Teams structure
   if (data.Teams && data.Teams.Team) {
     console.log("Extracting teams from Teams data");
     
@@ -43,6 +91,34 @@ export const extractTeams = (data: MatchDetails, displayData: DisplayableMatchIn
     return teamsData;
   }
   
+  // Check for Properties with team info
+  if (data.Properties) {
+    const props = data.Properties;
+    if (props.Team1Id && props.Team2Id) {
+      const team1Name = props.Team1Name || `Team 1`;
+      const team2Name = props.Team2Name || `Team 2`;
+      
+      displayData.teams = [
+        {
+          id: props.Team1Id,
+          name: team1Name,
+          isWinner: false
+        },
+        {
+          id: props.Team2Id,
+          name: team2Name,
+          isWinner: false
+        }
+      ];
+      
+      // Create team objects to return
+      return [
+        { Id: props.Team1Id, Name: team1Name } as Team,
+        { Id: props.Team2Id, Name: team2Name } as Team
+      ];
+    }
+  }
+  
   // If no Teams data, try extracting from Skins
   if (data.Skins && data.Skins.Skin) {
     console.log("No Teams data, trying to extract from Skins");
@@ -53,26 +129,29 @@ export const extractTeams = (data: MatchDetails, displayData: DisplayableMatchIn
       const lastSkin = skins[skins.length - 1];
       
       // Only proceed if we have team IDs and names
-      if (lastSkin.Team1Id && lastSkin.Team2Id && lastSkin.Team1Name && lastSkin.Team2Name) {
+      if (lastSkin.Team1Id && lastSkin.Team2Id) {
         console.log("Found team info in Skins data");
+        
+        const team1Name = lastSkin.Team1Name || `Team ${lastSkin.Team1Id}`;
+        const team2Name = lastSkin.Team2Name || `Team ${lastSkin.Team2Id}`;
         
         displayData.teams = [
           {
             id: lastSkin.Team1Id,
-            name: lastSkin.Team1Name,
+            name: team1Name,
             isWinner: false
           },
           {
             id: lastSkin.Team2Id,
-            name: lastSkin.Team2Name,
+            name: team2Name,
             isWinner: false
           }
         ];
         
         // Create mock team objects to return
         return [
-          { Id: lastSkin.Team1Id, Name: lastSkin.Team1Name } as Team,
-          { Id: lastSkin.Team2Id, Name: lastSkin.Team2Name } as Team
+          { Id: lastSkin.Team1Id, Name: team1Name } as Team,
+          { Id: lastSkin.Team2Id, Name: team2Name } as Team
         ];
       }
     }
@@ -80,27 +159,22 @@ export const extractTeams = (data: MatchDetails, displayData: DisplayableMatchIn
   
   // Fallback: Check if we have Configuration with team names
   if (data.Configuration) {
-    const config = data.Configuration as any;
-    
-    // Check for Team1Name, Team2Name or similar fields
-    const team1Name = config.Team1Name || config.Home || config.HomeTeam;
-    const team2Name = config.Team2Name || config.Away || config.AwayTeam;
-    
-    if (team1Name && team2Name) {
+    const config = data.Configuration;
+    if (config.Team1Id && config.Team2Id) {
       console.log("Extracting teams from Configuration");
       
-      // Generate unique IDs if not available
-      const team1Id = config.Team1Id || config.HomeId || "team1";
-      const team2Id = config.Team2Id || config.AwayId || "team2";
+      // Use team names if available, otherwise use IDs
+      const team1Name = config.Team1Name || `Team ${config.Team1Id}`;
+      const team2Name = config.Team2Name || `Team ${config.Team2Id}`;
       
       displayData.teams = [
         {
-          id: team1Id,
+          id: config.Team1Id,
           name: team1Name,
           isWinner: false
         },
         {
-          id: team2Id,
+          id: config.Team2Id,
           name: team2Name,
           isWinner: false
         }
@@ -108,41 +182,55 @@ export const extractTeams = (data: MatchDetails, displayData: DisplayableMatchIn
       
       // Create mock team objects to return
       return [
-        { Id: team1Id, Name: team1Name } as Team,
-        { Id: team2Id, Name: team2Name } as Team
+        { Id: config.Team1Id, Name: team1Name } as Team,
+        { Id: config.Team2Id, Name: team2Name } as Team
       ];
     }
   }
   
-  // Try to find any data that looks like teams
-  if (data.Team1 && data.Team2) {
-    console.log("Found Team1/Team2 objects in data");
+  // Last resort: Try to find Players data
+  if (data.Players && data.Players.Player) {
+    console.log("Extracting teams from Players data");
     
-    const team1Name = typeof data.Team1 === 'string' ? data.Team1 : (data.Team1.Name || "Team 1");
-    const team2Name = typeof data.Team2 === 'string' ? data.Team2 : (data.Team2.Name || "Team 2");
+    const players = Array.isArray(data.Players.Player) ? 
+      data.Players.Player : [data.Players.Player];
     
-    const team1Id = typeof data.Team1 === 'object' && data.Team1.Id ? data.Team1.Id : "team1";
-    const team2Id = typeof data.Team2 === 'object' && data.Team2.Id ? data.Team2.Id : "team2";
+    // Extract unique teams from players
+    const teamMap = new Map<string, {id: string, name: string}>();
     
-    displayData.teams = [
-      {
-        id: team1Id,
-        name: team1Name,
-        isWinner: false
-      },
-      {
-        id: team2Id,
-        name: team2Name,
-        isWinner: false
+    players.forEach(player => {
+      if (player.TeamId && player.TeamName) {
+        teamMap.set(player.TeamId, {
+          id: player.TeamId,
+          name: player.TeamName
+        });
       }
-    ];
+    });
     
-    return [
-      { Id: team1Id, Name: team1Name } as Team,
-      { Id: team2Id, Name: team2Name } as Team
-    ];
+    if (teamMap.size > 0) {
+      displayData.teams = Array.from(teamMap.values()).map(team => ({
+        id: team.id,
+        name: team.name,
+        isWinner: false
+      }));
+      
+      // Create team objects to return
+      return Array.from(teamMap.values()).map(team => ({
+        Id: team.id,
+        Name: team.name
+      } as Team));
+    }
   }
   
-  console.log("No Teams data available from any source");
-  return [];
+  // If all else fails, create generic teams
+  console.log("No Teams data available from any source, creating generic teams");
+  displayData.teams = [
+    { id: "team1", name: "Home Team", isWinner: false },
+    { id: "team2", name: "Away Team", isWinner: false }
+  ];
+  
+  return [
+    { Id: "team1", Name: "Home Team" } as Team,
+    { Id: "team2", Name: "Away Team" } as Team
+  ];
 };

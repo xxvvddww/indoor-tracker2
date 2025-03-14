@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Users, Trophy, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -17,29 +17,14 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   const playerColumns = [
     { key: "Name", header: "Player", className: "font-medium" },
     { key: "RS", header: "Runs", hideOnMobile: false },
-    { key: "OB", header: "Overs", hideOnMobile: true },
     { key: "RC", header: "R Con", hideOnMobile: false },
     { key: "Wkts", header: "Wickets", hideOnMobile: false },
+    { key: "OB", header: "Overs", hideOnMobile: true },
     { key: "SR", header: "S/R", hideOnMobile: true },
     { key: "Econ", header: "Econ", hideOnMobile: true },
   ];
 
-  useEffect(() => {
-    console.log("PlayerStatistics rendering with displayInfo:", displayInfo);
-    console.log("Winner:", displayInfo.winner);
-    console.log("Teams:", displayInfo.teams ? displayInfo.teams.length : 0);
-    console.log("Player stats:", displayInfo.playerStats ? 
-      Object.keys(displayInfo.playerStats).length : "none");
-    
-    if (displayInfo.playerStats) {
-      Object.keys(displayInfo.playerStats).forEach(teamId => {
-        console.log(`Team ${teamId} (${displayInfo.playerStats![teamId].name}) players:`, 
-          displayInfo.playerStats![teamId].players.length);
-      });
-    }
-  }, [displayInfo]);
-
-  // Always display winner at the top
+  // Always display winner at the top if available
   const WinnerDisplay = () => {
     if (displayInfo.winner) {
       return (
@@ -54,7 +39,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     return null;
   };
 
-  // Always show the Man of the Match if available
+  // Show Man of the Match if available
   const ManOfMatchDisplay = () => {
     if (displayInfo.manOfMatch) {
       return (
@@ -80,18 +65,20 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     <div className="space-y-4">
       <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
       
-      {/* Always show winner at top */}
+      {/* Always show winner at top if available */}
       <WinnerDisplay />
       <ManOfMatchDisplay />
       
-      {/* Show teams even if empty */}
+      {/* If no teams, show message */}
       {(!displayInfo.teams || displayInfo.teams.length === 0) ? (
         <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
           <AlertCircle className="h-4 w-4 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No team information available for this match</p>
         </div>
       ) : (
+        /* Show teams and their players */
         displayInfo.teams.map((team) => {
+          // Find the team in playerStats
           const teamStats = displayInfo.playerStats && displayInfo.playerStats[team.id];
           const hasTeamPlayers = teamStats && teamStats.players && teamStats.players.length > 0;
           
@@ -111,7 +98,16 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
               
               {hasTeamPlayers ? (
                 <ResponsiveTable 
-                  data={teamStats.players} 
+                  data={teamStats.players.map(player => ({
+                    ...player,
+                    // Ensure values are strings for display
+                    RS: player.RS || '0',
+                    OB: player.OB || '0', 
+                    RC: player.RC || '0',
+                    Wkts: player.Wkts || '0',
+                    SR: player.SR || '0',
+                    Econ: player.Econ || '0'
+                  }))} 
                   columns={playerColumns}
                   superCompact={isMobile}
                   ultraCompact={false}
@@ -119,13 +115,19 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                   resultsMode
                 />
               ) : (
-                <p className="text-xs text-muted-foreground mt-1 p-2 bg-muted/30 rounded-md">
-                  No player data available for this team
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">No player data available for this team</p>
               )}
             </div>
           );
         })
+      )}
+      
+      {/* Show general message if no player stats */}
+      {!hasPlayerStats && displayInfo.teams && displayInfo.teams.length > 0 && (
+        <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
+          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
+        </div>
       )}
     </div>
   );
