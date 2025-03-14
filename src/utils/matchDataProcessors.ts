@@ -65,25 +65,37 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
     }
   }
   
-  // Extract player stats
+  // Initialize player stats
+  if (!displayData.playerStats) {
+    displayData.playerStats = {};
+  }
+  
+  // Extract player stats from MatchSummary
   if (data.MatchSummary && data.MatchSummary.team) {
+    // Make sure we're dealing with an array of teams
     const teams = Array.isArray(data.MatchSummary.team) ? 
       data.MatchSummary.team : [data.MatchSummary.team];
     
     teams.forEach(team => {
-      // Fix for type error: Check if team has id property before using it
-      const teamId = 'id' in team ? team.id : '';
-      const teamName = 'name' in team ? team.name : '';
+      if (!team) return;
+      
+      // Safe access to team properties
+      const teamName = typeof team === 'object' && 'name' in team ? team.name : '';
+      
+      // Find team ID from Teams data
+      let teamId = '';
+      if (displayData.teams) {
+        const matchingTeam = displayData.teams.find(t => t.name === teamName);
+        if (matchingTeam) {
+          teamId = matchingTeam.id;
+        }
+      }
       
       if (teamId && teamName) {
+        // Handle players
         const players = Array.isArray(team.player) ? team.player : team.player ? [team.player] : [];
         
-        if (!displayData.playerStats) {
-          displayData.playerStats = {};
-        }
-        
-        // Fix for type error: Use safe access to teamId
-        displayData.playerStats[teamId as string] = {
+        displayData.playerStats[teamId] = {
           name: teamName,
           players: players.map(player => ({
             Name: player.Name || 'Unknown',
@@ -110,12 +122,11 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
       const bowlers = Array.isArray(data.Bowlers?.Bowler) ? 
         data.Bowlers.Bowler : data.Bowlers?.Bowler ? [data.Bowlers.Bowler] : [];
       
+      // Get team data
       const teams = Array.isArray(data.Teams.Team) ? 
         data.Teams.Team : [data.Teams.Team];
       
-      // Initialize player stats for each team
-      if (!displayData.playerStats) displayData.playerStats = {};
-      
+      // Create player stats for each team
       teams.forEach(team => {
         const teamId = team.Id;
         const teamName = team.Name;
@@ -127,22 +138,140 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
           };
         }
         
-        // Get team's batsmen
-        const teamBatsmen = batsmen.filter(player => player.TeamId === teamId);
+        // Add batsmen from this team
+        batsmen.filter(player => player.TeamId === teamId).forEach(batsman => {
+          // Check if player is already added
+          const existingPlayerIndex = displayData.playerStats![teamId].players.findIndex(
+            p => p.Name === batsman.Name
+          );
+          
+          if (existingPlayerIndex >= 0) {
+            // Update existing player
+            displayData.playerStats![teamId].players[existingPlayerIndex].RS = '0';
+          } else {
+            // Add new player
+            displayData.playerStats![teamId].players.push({
+              Name: batsman.Name,
+              RS: '0',
+              OB: '0',
+              RC: '0',
+              Wkts: '0',
+              SR: '0',
+              Econ: '0'
+            });
+          }
+        });
         
-        // Create player records
-        teamBatsmen.forEach(batsman => {
-          displayData.playerStats![teamId].players.push({
-            Name: batsman.Name,
-            RS: '0',  // Default values
-            OB: '0',
-            RC: '0',
-            Wkts: '0',
-            SR: '0',
-            Econ: '0'
-          });
+        // Add bowlers from this team
+        bowlers.filter(player => player.TeamId === teamId).forEach(bowler => {
+          // Check if player is already added
+          const existingPlayerIndex = displayData.playerStats![teamId].players.findIndex(
+            p => p.Name === bowler.Name
+          );
+          
+          if (existingPlayerIndex >= 0) {
+            // Update existing player
+            displayData.playerStats![teamId].players[existingPlayerIndex].OB = '0';
+            displayData.playerStats![teamId].players[existingPlayerIndex].RC = '0';
+            displayData.playerStats![teamId].players[existingPlayerIndex].Wkts = '0';
+          } else {
+            // Add new player
+            displayData.playerStats![teamId].players.push({
+              Name: bowler.Name,
+              RS: '0',
+              OB: '0',
+              RC: '0',
+              Wkts: '0',
+              SR: '0',
+              Econ: '0'
+            });
+          }
         });
       });
+      
+      // Now calculate some stats from Balls data
+      if (data.Balls && data.Balls.Ball) {
+        const balls = Array.isArray(data.Balls.Ball) ? 
+          data.Balls.Ball : [data.Balls.Ball];
+        
+        // Count balls bowled by each bowler
+        const bowlerBalls: {[bowlerId: string]: number} = {};
+        const bowlerRuns: {[bowlerId: string]: number} = {};
+        const bowlerWickets: {[bowlerId: string]: number} = {};
+        
+        // Count runs scored by each batsman
+        const batsmanRuns: {[batsmanId: string]: number} = {};
+        const batsmanBalls: {[batsmanId: string]: number} = {};
+        
+        balls.forEach(ball => {
+          // Process bowler stats
+          const bowlerId = ball.BowlerId;
+          const bowlerTeamId = ball.BowlerTeamId;
+          
+          if (bowlerId && bowlerTeamId) {
+            if (!bowlerBalls[bowlerId]) bowlerBalls[bowlerId] = 0;
+            bowlerBalls[bowlerId]++;
+            
+            if (!bowlerRuns[bowlerId]) bowlerRuns[bowlerId] = 0;
+            bowlerRuns[bowlerId] += parseInt(ball.Score || '0');
+            
+            if (!bowlerWickets[bowlerId]) bowlerWickets[bowlerId] = 0;
+            if (ball.IsWicket === 'True') bowlerWickets[bowlerId]++;
+          }
+          
+          // Process batsman stats
+          const batsmanId = ball.BatsmanId;
+          const batsmanTeamId = ball.BatsmanTeamId;
+          
+          if (batsmanId && batsmanTeamId) {
+            if (!batsmanRuns[batsmanId]) batsmanRuns[batsmanId] = 0;
+            batsmanRuns[batsmanId] += parseInt(ball.Score || '0');
+            
+            if (!batsmanBalls[batsmanId]) batsmanBalls[batsmanId] = 0;
+            batsmanBalls[batsmanId]++;
+          }
+        });
+        
+        // Update player stats with calculated values
+        teams.forEach(team => {
+          const teamId = team.Id;
+          
+          displayData.playerStats![teamId].players.forEach(player => {
+            // Find player ID
+            const bowler = bowlers.find(b => b.Name === player.Name && b.TeamId === teamId);
+            if (bowler && bowler.Id) {
+              const bowlerId = bowler.Id;
+              const ballsBowled = bowlerBalls[bowlerId] || 0;
+              const overs = Math.floor(ballsBowled / 5); // Assuming 5 balls per over
+              
+              player.OB = overs.toString();
+              player.RC = (bowlerRuns[bowlerId] || 0).toString();
+              player.Wkts = (bowlerWickets[bowlerId] || 0).toString();
+              
+              // Calculate economy
+              if (overs > 0) {
+                const economy = (bowlerRuns[bowlerId] || 0) / overs;
+                player.Econ = economy.toFixed(1);
+              }
+            }
+            
+            // Update batsman stats
+            const batsman = batsmen.find(b => b.Name === player.Name && b.TeamId === teamId);
+            if (batsman && batsman.Id) {
+              const batsmanId = batsman.Id;
+              
+              player.RS = (batsmanRuns[batsmanId] || 0).toString();
+              
+              // Calculate strike rate
+              const ballsFaced = batsmanBalls[batsmanId] || 0;
+              if (ballsFaced > 0) {
+                const strikeRate = ((batsmanRuns[batsmanId] || 0) / ballsFaced) * 100;
+                player.SR = strikeRate.toFixed(1);
+              }
+            }
+          });
+        });
+      }
     }
   }
   
