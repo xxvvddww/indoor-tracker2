@@ -1,10 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { fetchFixtures } from '../services/cricketApi';
 import { Fixture } from '../types/cricket';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, ArrowUpRight, Clock, Trophy, Filter } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,6 +18,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from 'sonner';
+import { ResponsiveTable } from "@/components/ui/responsive-table";
+import { ResponsiveContainer } from '@/components/ui/responsive-container';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const formatDate = (dateString: string) => {
   try {
@@ -80,6 +81,7 @@ const Fixtures = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<string>('all');
+  const isMobile = useIsMobile();
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -106,7 +108,6 @@ const Fixtures = () => {
     loadFixtures();
   }, []);
 
-  // Filter by search term
   const filterBySearchTerm = (fixture: Fixture) => {
     if (!searchTerm) return true;
     
@@ -121,22 +122,17 @@ const Fixtures = () => {
       venue.toLowerCase().includes(searchTerm.toLowerCase());
   };
 
-  // Filter fixtures for each category
   const filteredFixtures = fixtures.filter(filterBySearchTerm);
   
-  // Upcoming fixtures (future dates)
   const upcomingFixtures = filteredFixtures.filter(fixture => isFutureDate(fixture.Date));
   
-  // Completed fixtures (past dates with completion status)
   const completedFixtures = filteredFixtures.filter(fixture => 
     !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed"
   );
 
-  // For the "all" tab, we'll show a limited number
   const allTabUpcomingFixtures = upcomingFixtures.slice(0, 5);
   const allTabCompletedFixtures = completedFixtures.slice(0, 5);
 
-  // For pagination in the dedicated tabs
   const getFixturesForCurrentTab = () => {
     if (activeTab === 'upcoming') return upcomingFixtures;
     if (activeTab === 'completed') return completedFixtures;
@@ -148,16 +144,14 @@ const Fixtures = () => {
 
   const totalPages = Math.max(1, Math.ceil(getFixturesForCurrentTab().length / itemsPerPage));
 
-  // Handle page change
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo(0, 0);
   };
 
-  // For tabs
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setCurrentPage(1); // Reset to first page when changing tabs
+    setCurrentPage(1);
     console.log("Changed to tab:", value);
   };
 
@@ -166,10 +160,116 @@ const Fixtures = () => {
       No fixtures found
     </div>
   );
-  
+
+  const upcomingColumns = [
+    {
+      key: "Date",
+      header: "Date",
+      render: (value: string, row: Fixture) => (
+        <div className="font-medium">
+          {isToday(value) ? 
+            <span className="text-primary">Today</span> : 
+            formatDate(value)}
+        </div>
+      )
+    },
+    {
+      key: "Teams",
+      header: "Teams",
+      render: (_: any, row: Fixture) => (
+        <div className="font-medium">
+          {row.HomeTeam || 'TBD'} vs {row.AwayTeam || 'TBD'}
+        </div>
+      )
+    },
+    {
+      key: "Venue",
+      header: "Venue",
+      hideOnMobile: true,
+      render: (_: any, row: Fixture) => row.Venue || 'TBD'
+    },
+    {
+      key: "DivisionName",
+      header: "Division",
+      hideOnMobile: true,
+      render: (value: string) => value || 'N/A'
+    },
+    {
+      key: "StartTime",
+      header: "Time",
+      className: "text-right",
+      render: (value: string) => (
+        <div className="flex items-center justify-end gap-1">
+          <Clock className="h-3 w-3 text-muted-foreground" />
+          <span>{value || 'TBD'}</span>
+        </div>
+      )
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "w-[50px]",
+      render: (_: any, row: Fixture) => (
+        <Link to={`/match/${row.Id}`} className="text-primary hover:text-primary/80 transition-colors">
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      )
+    }
+  ];
+
+  const completedColumns = [
+    {
+      key: "Date",
+      header: "Date",
+      render: (value: string) => (
+        <div className="font-medium">
+          {formatDate(value)}
+        </div>
+      )
+    },
+    {
+      key: "Teams",
+      header: "Teams",
+      render: (_: any, row: Fixture) => (
+        <div className="font-medium">
+          <span className={row.HomeTeamWon ? "font-bold" : ""}>{row.HomeTeam || 'TBD'}</span>
+          {" vs "}
+          <span className={row.AwayTeamWon ? "font-bold" : ""}>{row.AwayTeam || 'TBD'}</span>
+        </div>
+      )
+    },
+    {
+      key: "ScoreDescription",
+      header: "Result",
+      render: (value: string) => value || 'No result'
+    },
+    {
+      key: "DivisionName",
+      header: "Division",
+      hideOnMobile: true,
+      render: (value: string) => value || 'N/A'
+    },
+    {
+      key: "Venue",
+      header: "Venue",
+      hideOnMobile: true,
+      render: (value: string) => value || 'TBD'
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "w-[50px]",
+      render: (_: any, row: Fixture) => (
+        <Link to={`/match/${row.Id}`} className="text-primary hover:text-primary/80 transition-colors">
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      )
+    }
+  ];
+
   return (
     <MainLayout>
-      <div className="space-y-6 animate-fade-in">
+      <ResponsiveContainer className="space-y-6 animate-fade-in">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold tracking-tight">Fixtures & Results</h1>
           <div className="relative w-64">
@@ -178,7 +278,7 @@ const Fixtures = () => {
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // Reset to first page when searching
+                setCurrentPage(1);
               }}
               className="pr-8"
             />
@@ -204,7 +304,6 @@ const Fixtures = () => {
           ) : (
             <>
               <TabsContent value="all" className="space-y-8">
-                {/* Upcoming Fixtures Section */}
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -215,47 +314,15 @@ const Fixtures = () => {
                   <CardContent>
                     <ScrollArea className="h-full max-h-[400px]">
                       {allTabUpcomingFixtures.length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Teams</TableHead>
-                              <TableHead className="hidden md:table-cell">Venue</TableHead>
-                              <TableHead className="hidden md:table-cell">Division</TableHead>
-                              <TableHead className="text-right">Time</TableHead>
-                              <TableHead className="w-[50px]"></TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {allTabUpcomingFixtures.map((fixture) => (
-                              <TableRow key={fixture.Id} className="hover:bg-muted/50">
-                                <TableCell>
-                                  <div className="font-medium">
-                                    {isToday(fixture.Date) ? 
-                                      <span className="text-primary">Today</span> : 
-                                      formatDate(fixture.Date)}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="font-medium">{fixture.HomeTeam || 'TBD'} vs {fixture.AwayTeam || 'TBD'}</div>
-                                </TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.Venue || 'TBD'}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.DivisionName || 'N/A'}</TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex items-center justify-end gap-1">
-                                    <Clock className="h-3 w-3 text-muted-foreground" />
-                                    <span>{fixture.StartTime || 'TBD'}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Link to={`/match/${fixture.Id}`} className="text-primary hover:text-primary/80 transition-colors">
-                                    <ArrowUpRight className="h-4 w-4" />
-                                  </Link>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                        <ResponsiveTable
+                          data={allTabUpcomingFixtures.map(fixture => ({
+                            ...fixture,
+                            Teams: `${fixture.HomeTeam} vs ${fixture.AwayTeam}`
+                          }))}
+                          columns={upcomingColumns}
+                          keyField="Id"
+                          superCompact={isMobile}
+                        />
                       ) : (
                         emptyFixturesMessage
                       )}
@@ -263,7 +330,6 @@ const Fixtures = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Completed Fixtures / Results */}
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -274,42 +340,15 @@ const Fixtures = () => {
                   <CardContent>
                     <ScrollArea className="h-full max-h-[400px]">
                       {allTabCompletedFixtures.length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Teams</TableHead>
-                              <TableHead>Result</TableHead>
-                              <TableHead className="hidden md:table-cell">Division</TableHead>
-                              <TableHead className="w-[50px]"></TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {allTabCompletedFixtures.map((fixture) => (
-                              <TableRow key={fixture.Id} className="hover:bg-muted/50">
-                                <TableCell>
-                                  <div className="font-medium">
-                                    {formatDate(fixture.Date)}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="font-medium">
-                                    <span className={fixture.HomeTeamWon ? "font-bold" : ""}>{fixture.HomeTeam || 'TBD'}</span>
-                                    {" vs "}
-                                    <span className={fixture.AwayTeamWon ? "font-bold" : ""}>{fixture.AwayTeam || 'TBD'}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>{fixture.ScoreDescription || 'No result'}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.DivisionName || 'N/A'}</TableCell>
-                                <TableCell>
-                                  <Link to={`/match/${fixture.Id}`} className="text-primary hover:text-primary/80 transition-colors">
-                                    <ArrowUpRight className="h-4 w-4" />
-                                  </Link>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                        <ResponsiveTable
+                          data={allTabCompletedFixtures.map(fixture => ({
+                            ...fixture,
+                            Teams: `${fixture.HomeTeam} vs ${fixture.AwayTeam}`
+                          }))}
+                          columns={completedColumns}
+                          keyField="Id"
+                          superCompact={isMobile}
+                        />
                       ) : (
                         emptyFixturesMessage
                       )}
@@ -329,47 +368,15 @@ const Fixtures = () => {
                   <CardContent>
                     <ScrollArea className="h-full max-h-[600px]">
                       {paginatedFixtures.length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Teams</TableHead>
-                              <TableHead className="hidden md:table-cell">Venue</TableHead>
-                              <TableHead className="hidden md:table-cell">Division</TableHead>
-                              <TableHead className="text-right">Time</TableHead>
-                              <TableHead className="w-[50px]"></TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {paginatedFixtures.map((fixture) => (
-                              <TableRow key={fixture.Id} className="hover:bg-muted/50">
-                                <TableCell>
-                                  <div className="font-medium">
-                                    {isToday(fixture.Date) ? 
-                                      <span className="text-primary">Today</span> : 
-                                      formatDate(fixture.Date)}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="font-medium">{fixture.HomeTeam || 'TBD'} vs {fixture.AwayTeam || 'TBD'}</div>
-                                </TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.Venue || 'TBD'}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.DivisionName || 'N/A'}</TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex items-center justify-end gap-1">
-                                    <Clock className="h-3 w-3 text-muted-foreground" />
-                                    <span>{fixture.StartTime || 'TBD'}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Link to={`/match/${fixture.Id}`} className="text-primary hover:text-primary/80 transition-colors">
-                                    <ArrowUpRight className="h-4 w-4" />
-                                  </Link>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                        <ResponsiveTable
+                          data={paginatedFixtures.map(fixture => ({
+                            ...fixture,
+                            Teams: `${fixture.HomeTeam} vs ${fixture.AwayTeam}`
+                          }))}
+                          columns={upcomingColumns}
+                          keyField="Id"
+                          superCompact={isMobile}
+                        />
                       ) : (
                         <div className="py-8 text-center text-muted-foreground">
                           No upcoming fixtures found
@@ -391,44 +398,15 @@ const Fixtures = () => {
                   <CardContent>
                     <ScrollArea className="h-full max-h-[600px]">
                       {paginatedFixtures.length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Teams</TableHead>
-                              <TableHead>Result</TableHead>
-                              <TableHead className="hidden md:table-cell">Division</TableHead>
-                              <TableHead className="hidden md:table-cell">Venue</TableHead>
-                              <TableHead className="w-[50px]"></TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {paginatedFixtures.map((fixture) => (
-                              <TableRow key={fixture.Id} className="hover:bg-muted/50">
-                                <TableCell>
-                                  <div className="font-medium">
-                                    {formatDate(fixture.Date)}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="font-medium">
-                                    <span className={fixture.HomeTeamWon ? "font-bold" : ""}>{fixture.HomeTeam || 'TBD'}</span>
-                                    {" vs "}
-                                    <span className={fixture.AwayTeamWon ? "font-bold" : ""}>{fixture.AwayTeam || 'TBD'}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>{fixture.ScoreDescription || 'No result'}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.DivisionName || 'N/A'}</TableCell>
-                                <TableCell className="hidden md:table-cell">{fixture.Venue || 'TBD'}</TableCell>
-                                <TableCell>
-                                  <Link to={`/match/${fixture.Id}`} className="text-primary hover:text-primary/80 transition-colors">
-                                    <ArrowUpRight className="h-4 w-4" />
-                                  </Link>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                        <ResponsiveTable
+                          data={paginatedFixtures.map(fixture => ({
+                            ...fixture,
+                            Teams: `${fixture.HomeTeam} vs ${fixture.AwayTeam}`
+                          }))}
+                          columns={completedColumns}
+                          keyField="Id"
+                          superCompact={isMobile}
+                        />
                       ) : (
                         <div className="py-8 text-center text-muted-foreground">
                           No results found
@@ -453,27 +431,22 @@ const Fixtures = () => {
               </PaginationItem>
               
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                // Show first page, last page, current page, and 1 page before and after current
                 let pageToShow;
                 if (totalPages <= 5) {
-                  // Show all pages if 5 or fewer
                   pageToShow = i + 1;
                 } else if (currentPage <= 3) {
-                  // Near the beginning
                   if (i < 4) {
                     pageToShow = i + 1;
                   } else {
                     pageToShow = totalPages;
                   }
                 } else if (currentPage >= totalPages - 2) {
-                  // Near the end
                   if (i === 0) {
                     pageToShow = 1;
                   } else {
                     pageToShow = totalPages - (4 - i);
                   }
                 } else {
-                  // In the middle
                   if (i === 0) {
                     pageToShow = 1;
                   } else if (i === 4) {
@@ -505,7 +478,7 @@ const Fixtures = () => {
             </PaginationContent>
           </Pagination>
         )}
-      </div>
+      </ResponsiveContainer>
     </MainLayout>
   );
 };
