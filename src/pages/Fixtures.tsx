@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -138,6 +139,26 @@ const Fixtures = () => {
       setOpenDateSections(initialOpenState);
     }
   }, [paginatedDates]);
+
+  useEffect(() => {
+    // Initialize all division sections to collapsed state
+    const initialDivisionState: Record<string, boolean> = {};
+    
+    paginatedDates.forEach(date => {
+      const dateFixtures = fixturesByDate[date];
+      const fixturesByDivision = getFixturesByDivision(dateFixtures);
+      const divisions = Object.keys(fixturesByDivision);
+      
+      divisions.forEach(division => {
+        const divisionKey = `${date}-${division}`;
+        initialDivisionState[divisionKey] = false;
+      });
+    });
+    
+    if (Object.keys(openDivisionSections).length === 0) {
+      setOpenDivisionSections(initialDivisionState);
+    }
+  }, [paginatedDates, fixturesByDate]);
 
   const toggleDateSection = (date: string) => {
     setOpenDateSections(prev => ({
