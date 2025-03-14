@@ -13,6 +13,25 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
     teams: []
   };
   
+  // Extract match venue and result if available
+  if (data.Venue) {
+    displayData.venue = data.Venue;
+  }
+  
+  if (data.Result) {
+    displayData.result = data.Result;
+  }
+  
+  // Extract match date from Configuration if available
+  if (data.Configuration && data.Configuration.Team1InningsStartTime) {
+    try {
+      const dateString = data.Configuration.Team1InningsStartTime.split(' ')[0];
+      displayData.date = dateString;
+    } catch (error) {
+      console.error("Error parsing date:", error);
+    }
+  }
+  
   // Extract teams first
   if (data.Teams && data.Teams.Team) {
     const teamsData = Array.isArray(data.Teams.Team) ? 
@@ -79,7 +98,7 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
     teams.forEach(team => {
       if (!team) return;
       
-      // Safe access to team properties
+      // Get team name
       const teamName = typeof team === 'object' && 'name' in team ? team.name : '';
       
       // Find team ID from Teams data

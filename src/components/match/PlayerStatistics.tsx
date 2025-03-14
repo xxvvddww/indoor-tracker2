@@ -26,7 +26,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
 
   if (!displayInfo.playerStats || Object.keys(displayInfo.playerStats).length === 0) {
     return (
-      <div className="text-center py-8">
+      <div className="text-center py-4">
         <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
       </div>
     );
@@ -34,6 +34,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
 
   return (
     <div className="space-y-4">
+      <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
       {Object.keys(displayInfo.playerStats).map((teamId) => (
         <div key={teamId} className="space-y-2 mb-4">
           <div className="flex items-center gap-2">
