@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
@@ -21,7 +22,11 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
   
   useEffect(() => {
     console.log("MatchOverview rendering with displayInfo:", displayInfo);
-  }, [displayInfo]);
+    console.log("MatchOverview has matchData:", !!matchData);
+    if (matchData) {
+      console.log("MatchData keys:", Object.keys(matchData));
+    }
+  }, [displayInfo, matchData]);
 
   // Show message if we have match data but no meaningful display information
   const hasNoUsefulInfo = matchData && 
@@ -47,9 +52,9 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       {/* This component extracts data from matchData and updates displayInfo */}
       <DataExtractor displayInfo={displayInfo} matchData={matchData} />
       
-      {/* Display Raw Match Data for now */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Raw Match Data</h3>
+      {/* Display Raw Match Data */}
+      <div className="space-y-4 w-full">
+        <h3 className="text-lg font-medium">Match Data</h3>
         <ScrollArea className={`${isMobile ? 'h-[300px]' : 'h-[600px]'} rounded-md border`}>
           <div className="p-4">
             <pre className="whitespace-pre-wrap break-words text-xxs sm:text-xs">
