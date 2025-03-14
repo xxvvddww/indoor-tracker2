@@ -1,14 +1,14 @@
+
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchTeams, fetchFixtures, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
+import { fetchTeams, fetchFixtures, fetchPlayerStats, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
 import MainLayout from "../components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Users, Search, TrendingUp, Award, Calendar, User, Shield, ChevronUp, ChevronDown } from 'lucide-react';
-import { Team, Fixture } from '../types/cricket';
+import { Users, Search, Trophy, Shield, ChevronUp, ChevronDown } from 'lucide-react';
+import { Team, Fixture, Player } from '../types/cricket';
 import LoadingSpinner from '../components/ui/loading-spinner';
 
 const Teams = () => {
@@ -26,6 +26,12 @@ const Teams = () => {
   const { data: fixtures, isLoading: fixturesLoading, error: fixturesError } = useQuery({
     queryKey: ['fixtures', DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID],
     queryFn: () => fetchFixtures(DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID),
+  });
+
+  // Fetch player stats to determine players per team
+  const { data: players, isLoading: playersLoading } = useQuery({
+    queryKey: ['playerStats', DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID],
+    queryFn: () => fetchPlayerStats(DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID),
   });
 
   // Team statistics calculation
@@ -49,56 +55,50 @@ const Teams = () => {
         let wins = 0;
         let losses = 0;
         let draws = 0;
-        let runsScored = 0;
-        let runsConceded = 0;
+        let skinsWon = 0;
         let lastFiveResults: string[] = [];
 
-        teamFixtures.forEach(fixture => {
-          if (fixture.CompletionStatus === 'Completed') {
-            const isHomeTeam = fixture.HomeTeamId === team.Id;
-            const homeScore = parseInt(fixture.HomeTeamScore || '0');
-            const awayScore = parseInt(fixture.AwayTeamScore || '0');
+        // Track completed matches for last 5
+        const completedFixtures = teamFixtures
+          .filter(fixture => fixture.CompletionStatus === 'Completed')
+          .sort((a, b) => {
+            const dateA = new Date(a.Date || '');
+            const dateB = new Date(b.Date || '');
+            return dateB.getTime() - dateA.getTime(); // Sort descending
+          });
 
-            // Add runs
-            if (isHomeTeam) {
-              runsScored += homeScore;
-              runsConceded += awayScore;
-            } else {
-              runsScored += awayScore;
-              runsConceded += homeScore;
-            }
+        completedFixtures.forEach(fixture => {
+          const isHomeTeam = fixture.HomeTeamId === team.Id;
+          const homeScore = parseInt(fixture.HomeTeamScore || '0');
+          const awayScore = parseInt(fixture.AwayTeamScore || '0');
 
-            // Determine match result
-            if (homeScore === awayScore) {
-              draws++;
-              lastFiveResults.push('D');
-            } else if ((isHomeTeam && homeScore > awayScore) || (!isHomeTeam && awayScore > homeScore)) {
-              wins++;
-              lastFiveResults.push('W');
-            } else {
-              losses++;
-              lastFiveResults.push('L');
-            }
+          // Determine match result
+          if (homeScore === awayScore) {
+            draws++;
+            lastFiveResults.push('D');
+          } else if ((isHomeTeam && homeScore > awayScore) || (!isHomeTeam && awayScore > homeScore)) {
+            wins++;
+            lastFiveResults.push('W');
+            // Assuming a skin is won for each win
+            skinsWon++;
+          } else {
+            losses++;
+            lastFiveResults.push('L');
           }
         });
 
-        // Get the most recent 5 results (reversed to show newest last)
-        lastFiveResults = lastFiveResults.slice(-5).reverse();
+        // Get the most recent 5 results (already sorted)
+        lastFiveResults = lastFiveResults.slice(0, 5);
 
         // Calculate win percentage
         const winPercentage = completedMatches > 0 
           ? ((wins / completedMatches) * 100).toFixed(1) 
           : '0.0';
 
-        // Calculate run rate
-        const runRate = completedMatches > 0 
-          ? (runsScored / completedMatches).toFixed(1) 
-          : '0.0';
-
-        // Calculate net run rate safely
-        const netRunRate = completedMatches > 0 
-          ? ((runsScored - runsConceded) / completedMatches).toFixed(2)
-          : '0.00';
+        // Count players for this team
+        const teamPlayers = players ? players.filter(
+          player => player.TeamName === team.Name
+        ).length : 0;
 
         return {
           ...team,
@@ -108,11 +108,9 @@ const Teams = () => {
           losses,
           draws,
           winPercentage,
-          runsScored,
-          runsConceded,
-          runRate,
           lastFiveResults,
-          netRunRate
+          skinsWon,
+          playerCount: teamPlayers
         };
       } catch (error) {
         console.error(`Error calculating stats for team ${team.Name}:`, error);
@@ -125,15 +123,13 @@ const Teams = () => {
           losses: 0,
           draws: 0,
           winPercentage: '0.0',
-          runsScored: 0,
-          runsConceded: 0,
-          runRate: '0.0',
           lastFiveResults: [],
-          netRunRate: '0.00'
+          skinsWon: 0,
+          playerCount: 0
         };
       }
     });
-  }, [teams, fixtures]);
+  }, [teams, fixtures, players]);
 
   // Filtering teams based on search query
   const filteredTeams = useMemo(() => {
@@ -161,8 +157,11 @@ const Teams = () => {
           const divB = b.DivisionName || '';
           comparison = divA.localeCompare(divB);
           break;
-        case 'Matches':
-          comparison = a.totalMatches - b.totalMatches;
+        case 'Players':
+          comparison = a.playerCount - b.playerCount;
+          break;
+        case 'Games':
+          comparison = a.completedMatches - b.completedMatches;
           break;
         case 'Wins':
           comparison = a.wins - b.wins;
@@ -170,17 +169,11 @@ const Teams = () => {
         case 'Losses':
           comparison = a.losses - b.losses;
           break;
-        case 'Draws':
-          comparison = a.draws - b.draws;
-          break;
         case 'Win%':
           comparison = parseFloat(a.winPercentage) - parseFloat(b.winPercentage);
           break;
-        case 'RunRate':
-          comparison = parseFloat(a.runRate) - parseFloat(b.runRate);
-          break;
-        case 'NetRunRate':
-          comparison = parseFloat(a.netRunRate) - parseFloat(b.netRunRate);
+        case 'Skins':
+          comparison = a.skinsWon - b.skinsWon;
           break;
         default:
           comparison = 0;
@@ -208,29 +201,29 @@ const Teams = () => {
       : <ChevronDown className="h-4 w-4 ml-1 inline" />;
   };
 
-  // Render result badge
+  // Render result badge with improved styling
   const renderResultBadge = (result: string) => {
     switch (result) {
       case 'W':
-        return <Badge variant="default" className="bg-green-500">W</Badge>;
+        return <Badge variant="default" className="bg-green-500 min-w-8 h-8 flex items-center justify-center text-base font-semibold">W</Badge>;
       case 'L':
-        return <Badge variant="outline" className="text-red-500 border-red-500">L</Badge>;
+        return <Badge variant="outline" className="text-red-500 border-red-500 min-w-8 h-8 flex items-center justify-center text-base font-semibold">L</Badge>;
       case 'D':
-        return <Badge variant="secondary">D</Badge>;
+        return <Badge variant="secondary" className="min-w-8 h-8 flex items-center justify-center text-base font-semibold">D</Badge>;
       default:
-        return null;
+        return <Badge variant="outline" className="min-w-8 h-8 flex items-center justify-center opacity-50">-</Badge>;
     }
   };
 
   // Check if data is still loading
-  const isLoading = teamsLoading || fixturesLoading;
+  const isLoading = teamsLoading || fixturesLoading || playersLoading;
 
   // Generate mock data for demonstration when API fails
   const mockTeams = [
-    { Id: "1", Name: "Marlboro Men", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 5, losses: 2, draws: 1, winPercentage: "62.5", runsScored: 450, runsConceded: 380, runRate: "56.3", netRunRate: "8.75", lastFiveResults: ["W", "W", "L", "W", "D"] },
-    { Id: "2", Name: "Tri-Hards", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 6, losses: 1, draws: 1, winPercentage: "75.0", runsScored: 520, runsConceded: 410, runRate: "65.0", netRunRate: "13.75", lastFiveResults: ["W", "W", "W", "L", "W"] },
-    { Id: "3", Name: "Thunder Spirits", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 4, losses: 3, draws: 1, winPercentage: "50.0", runsScored: 480, runsConceded: 470, runRate: "60.0", netRunRate: "1.25", lastFiveResults: ["L", "W", "W", "L", "W"] },
-    { Id: "4", Name: "Cricket Masters", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 7, losses: 1, draws: 0, winPercentage: "87.5", runsScored: 560, runsConceded: 430, runRate: "70.0", netRunRate: "16.25", lastFiveResults: ["W", "W", "W", "W", "L"] },
+    { Id: "1", Name: "Marlboro Men", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 5, losses: 2, draws: 1, winPercentage: "62.5", playerCount: 12, skinsWon: 15, lastFiveResults: ["W", "W", "L", "W", "D"] },
+    { Id: "2", Name: "Tri-Hards", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 6, losses: 1, draws: 1, winPercentage: "75.0", playerCount: 14, skinsWon: 18, lastFiveResults: ["W", "W", "W", "L", "W"] },
+    { Id: "3", Name: "Thunder Spirits", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 4, losses: 3, draws: 1, winPercentage: "50.0", playerCount: 11, skinsWon: 12, lastFiveResults: ["L", "W", "W", "L", "W"] },
+    { Id: "4", Name: "Cricket Masters", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 7, losses: 1, draws: 0, winPercentage: "87.5", playerCount: 15, skinsWon: 21, lastFiveResults: ["W", "W", "W", "W", "L"] },
   ];
 
   // Use fixture data directly if teams API fails but fixtures API succeeds
@@ -251,16 +244,6 @@ const Teams = () => {
     : (teamsError 
         ? new Set(mockTeams.map(t => t.DivisionName).filter(Boolean)).size 
         : (teams?.length ? new Set(teams.map(t => t.DivisionName).filter(Boolean)).size : 0));
-    
-  const totalMatches = fixturesError 
-    ? mockTeams.reduce((sum, team) => sum + team.totalMatches, 0) / 2 
-    : (fixtures?.length || 0);
-  
-  const avgRunRate = useFixturesForTeams
-    ? (teamStats.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / teamStats.length).toFixed(2)
-    : (teamsError 
-        ? (mockTeams.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / mockTeams.length).toFixed(2) 
-        : (teamStats?.length ? (teamStats.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / teamStats.length).toFixed(2) : "0.00"));
 
   return (
     <MainLayout>
@@ -279,7 +262,7 @@ const Teams = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Quick Stats Cards */}
           <Card>
             <CardContent className="pt-6">
@@ -312,25 +295,11 @@ const Teams = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center space-x-2">
-                <Calendar className="h-10 w-10 text-primary p-2 border rounded-full" />
+                <Trophy className="h-10 w-10 text-primary p-2 border rounded-full" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Matches</p>
+                  <p className="text-sm text-muted-foreground">Teams with 100% Win Rate</p>
                   <h3 className="text-2xl font-bold">
-                    {isLoading ? <LoadingSpinner size={4} /> : totalMatches}
-                  </h3>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="h-10 w-10 text-primary p-2 border rounded-full" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Avg. Run Rate</p>
-                  <h3 className="text-2xl font-bold">
-                    {isLoading ? <LoadingSpinner size={4} /> : avgRunRate}
+                    {isLoading ? <LoadingSpinner size={4} /> : displayTeams.filter(t => parseFloat(t.winPercentage) === 100).length}
                   </h3>
                 </div>
               </div>
@@ -399,34 +368,28 @@ const Teams = () => {
                         Team {renderSortIcon('Name')}
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer" 
-                        onClick={() => handleSort('Division')}
+                        className="cursor-pointer text-center" 
+                        onClick={() => handleSort('Players')}
                       >
-                        Division {renderSortIcon('Division')}
+                        Players {renderSortIcon('Players')}
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer text-center" 
-                        onClick={() => handleSort('Matches')}
+                        onClick={() => handleSort('Games')}
                       >
-                        MP {renderSortIcon('Matches')}
+                        Games {renderSortIcon('Games')}
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer text-center" 
                         onClick={() => handleSort('Wins')}
                       >
-                        W {renderSortIcon('Wins')}
+                        Wins {renderSortIcon('Wins')}
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer text-center" 
                         onClick={() => handleSort('Losses')}
                       >
-                        L {renderSortIcon('Losses')}
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer text-center" 
-                        onClick={() => handleSort('Draws')}
-                      >
-                        D {renderSortIcon('Draws')}
+                        Losses {renderSortIcon('Losses')}
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer text-center" 
@@ -436,15 +399,9 @@ const Teams = () => {
                       </TableHead>
                       <TableHead 
                         className="cursor-pointer text-center" 
-                        onClick={() => handleSort('RunRate')}
+                        onClick={() => handleSort('Skins')}
                       >
-                        RR {renderSortIcon('RunRate')}
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer text-center" 
-                        onClick={() => handleSort('NetRunRate')}
-                      >
-                        NRR {renderSortIcon('NetRunRate')}
+                        Skins Won {renderSortIcon('Skins')}
                       </TableHead>
                       <TableHead className="text-center">
                         Last 5
@@ -455,23 +412,23 @@ const Teams = () => {
                     {displayTeams.map((team) => (
                       <TableRow key={team.Id}>
                         <TableCell className="font-medium">{team.Name}</TableCell>
-                        <TableCell>{team.DivisionName || '-'}</TableCell>
+                        <TableCell className="text-center">{team.playerCount || '-'}</TableCell>
                         <TableCell className="text-center">{team.completedMatches}</TableCell>
                         <TableCell className="text-center">{team.wins}</TableCell>
                         <TableCell className="text-center">{team.losses}</TableCell>
-                        <TableCell className="text-center">{team.draws}</TableCell>
                         <TableCell className="text-center">{team.winPercentage}%</TableCell>
-                        <TableCell className="text-center">{team.runRate}</TableCell>
-                        <TableCell className="text-center">
-                          <span className={parseFloat(team.netRunRate) >= 0 ? "text-green-600" : "text-red-600"}>
-                            {team.netRunRate}
-                          </span>
-                        </TableCell>
+                        <TableCell className="text-center">{team.skinsWon}</TableCell>
                         <TableCell>
-                          <div className="flex justify-center gap-1">
-                            {team.lastFiveResults.map((result, idx) => (
-                              <span key={idx}>{renderResultBadge(result)}</span>
-                            ))}
+                          <div className="flex justify-center gap-1.5">
+                            {team.lastFiveResults && team.lastFiveResults.length > 0 ? (
+                              team.lastFiveResults.map((result, idx) => (
+                                <span key={idx}>{renderResultBadge(result)}</span>
+                              ))
+                            ) : (
+                              Array(5).fill(0).map((_, idx) => (
+                                <span key={idx}>{renderResultBadge('')}</span>
+                              ))
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -481,7 +438,7 @@ const Teams = () => {
               </div>
             </CardContent>
             <CardFooter className="text-sm text-muted-foreground">
-              MP: Matches Played | W: Wins | L: Losses | D: Draws | RR: Run Rate | NRR: Net Run Rate
+              Statistics based on completed matches | Win% = Wins ÷ Games × 100
             </CardFooter>
           </Card>
         )}
