@@ -144,133 +144,138 @@ const Stats = () => {
               />
             </div>
             
-            <Tabs defaultValue="all" className="w-full md:w-auto" onValueChange={(value) => {
-              setActiveTab(value);
-              setCurrentPage(1); // Reset to first page on tab change
-            }}>
+            <Tabs 
+              defaultValue="all" 
+              value={activeTab}
+              onValueChange={(value) => {
+                setActiveTab(value);
+                setCurrentPage(1); // Reset to first page on tab change
+              }}
+              className="w-full md:w-auto"
+            >
               <TabsList>
                 <TabsTrigger value="all">All Players</TabsTrigger>
                 <TabsTrigger value="batsmen">Batsmen</TabsTrigger>
                 <TabsTrigger value="bowlers">Bowlers</TabsTrigger>
               </TabsList>
+              
+              <div className="p-0">
+                <div className="overflow-x-auto">
+                  <TabsContent value="all" className="mt-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Player</TableHead>
+                          <TableHead>Team</TableHead>
+                          <TableHead className="text-right">Games</TableHead>
+                          <TableHead className="text-right">Runs</TableHead>
+                          <TableHead className="text-right">Avg</TableHead>
+                          <TableHead className="text-right">S/R</TableHead>
+                          <TableHead className="text-right">Wickets</TableHead>
+                          <TableHead className="text-right">Bowling Avg</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {paginatedPlayers.length > 0 ? (
+                          paginatedPlayers.map((player) => (
+                            <TableRow key={player.Id}>
+                              <TableCell className="font-medium">{player.UserName}</TableCell>
+                              <TableCell>{player.TeamName}</TableCell>
+                              <TableCell className="text-right">{player.Games}</TableCell>
+                              <TableCell className="text-right">{player.RunsScored}</TableCell>
+                              <TableCell className="text-right">{getBattingAverage(player)}</TableCell>
+                              <TableCell className="text-right">{getStrikeRate(player)}</TableCell>
+                              <TableCell className="text-right">{player.Wickets}</TableCell>
+                              <TableCell className="text-right">{getBowlingAverage(player)}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={8} className="text-center py-6">
+                              No players found. Try adjusting your search or filters.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TabsContent>
+
+                  <TabsContent value="batsmen" className="mt-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Player</TableHead>
+                          <TableHead>Team</TableHead>
+                          <TableHead className="text-right">Games</TableHead>
+                          <TableHead className="text-right">Runs</TableHead>
+                          <TableHead className="text-right">Avg</TableHead>
+                          <TableHead className="text-right">S/R</TableHead>
+                          <TableHead className="text-right">Balls Faced</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {sortByRuns(paginatedPlayers).length > 0 ? (
+                          sortByRuns(paginatedPlayers).map((player) => (
+                            <TableRow key={player.Id}>
+                              <TableCell className="font-medium">{player.UserName}</TableCell>
+                              <TableCell>{player.TeamName}</TableCell>
+                              <TableCell className="text-right">{player.Games}</TableCell>
+                              <TableCell className="text-right">{player.RunsScored}</TableCell>
+                              <TableCell className="text-right">{getBattingAverage(player)}</TableCell>
+                              <TableCell className="text-right">{getStrikeRate(player)}</TableCell>
+                              <TableCell className="text-right">{player.BallsFaced}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-6">
+                              No batsmen found. Try adjusting your search or filters.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TabsContent>
+
+                  <TabsContent value="bowlers" className="mt-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Player</TableHead>
+                          <TableHead>Team</TableHead>
+                          <TableHead className="text-right">Games</TableHead>
+                          <TableHead className="text-right">Overs</TableHead>
+                          <TableHead className="text-right">Wickets</TableHead>
+                          <TableHead className="text-right">Runs Conceded</TableHead>
+                          <TableHead className="text-right">Bowling Avg</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {sortByWickets(paginatedPlayers).length > 0 ? (
+                          sortByWickets(paginatedPlayers).map((player) => (
+                            <TableRow key={player.Id}>
+                              <TableCell className="font-medium">{player.UserName}</TableCell>
+                              <TableCell>{player.TeamName}</TableCell>
+                              <TableCell className="text-right">{player.Games}</TableCell>
+                              <TableCell className="text-right">{player.Overs}</TableCell>
+                              <TableCell className="text-right">{player.Wickets}</TableCell>
+                              <TableCell className="text-right">{player.RunsConceded}</TableCell>
+                              <TableCell className="text-right">{getBowlingAverage(player)}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-6">
+                              No bowlers found. Try adjusting your search or filters.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TabsContent>
+                </div>
+              </div>
             </Tabs>
-          </div>
-          
-          <div className="p-0">
-            <div className="overflow-x-auto">
-              <TabsContent value="all" className="mt-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Player</TableHead>
-                      <TableHead>Team</TableHead>
-                      <TableHead className="text-right">Games</TableHead>
-                      <TableHead className="text-right">Runs</TableHead>
-                      <TableHead className="text-right">Avg</TableHead>
-                      <TableHead className="text-right">S/R</TableHead>
-                      <TableHead className="text-right">Wickets</TableHead>
-                      <TableHead className="text-right">Bowling Avg</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedPlayers.length > 0 ? (
-                      paginatedPlayers.map((player) => (
-                        <TableRow key={player.Id}>
-                          <TableCell className="font-medium">{player.UserName}</TableCell>
-                          <TableCell>{player.TeamName}</TableCell>
-                          <TableCell className="text-right">{player.Games}</TableCell>
-                          <TableCell className="text-right">{player.RunsScored}</TableCell>
-                          <TableCell className="text-right">{getBattingAverage(player)}</TableCell>
-                          <TableCell className="text-right">{getStrikeRate(player)}</TableCell>
-                          <TableCell className="text-right">{player.Wickets}</TableCell>
-                          <TableCell className="text-right">{getBowlingAverage(player)}</TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-6">
-                          No players found. Try adjusting your search or filters.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TabsContent>
-
-              <TabsContent value="batsmen" className="mt-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Player</TableHead>
-                      <TableHead>Team</TableHead>
-                      <TableHead className="text-right">Games</TableHead>
-                      <TableHead className="text-right">Runs</TableHead>
-                      <TableHead className="text-right">Avg</TableHead>
-                      <TableHead className="text-right">S/R</TableHead>
-                      <TableHead className="text-right">Balls Faced</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortByRuns(paginatedPlayers).length > 0 ? (
-                      sortByRuns(paginatedPlayers).map((player) => (
-                        <TableRow key={player.Id}>
-                          <TableCell className="font-medium">{player.UserName}</TableCell>
-                          <TableCell>{player.TeamName}</TableCell>
-                          <TableCell className="text-right">{player.Games}</TableCell>
-                          <TableCell className="text-right">{player.RunsScored}</TableCell>
-                          <TableCell className="text-right">{getBattingAverage(player)}</TableCell>
-                          <TableCell className="text-right">{getStrikeRate(player)}</TableCell>
-                          <TableCell className="text-right">{player.BallsFaced}</TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-6">
-                          No batsmen found. Try adjusting your search or filters.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TabsContent>
-
-              <TabsContent value="bowlers" className="mt-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Player</TableHead>
-                      <TableHead>Team</TableHead>
-                      <TableHead className="text-right">Games</TableHead>
-                      <TableHead className="text-right">Overs</TableHead>
-                      <TableHead className="text-right">Wickets</TableHead>
-                      <TableHead className="text-right">Runs Conceded</TableHead>
-                      <TableHead className="text-right">Bowling Avg</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortByWickets(paginatedPlayers).length > 0 ? (
-                      sortByWickets(paginatedPlayers).map((player) => (
-                        <TableRow key={player.Id}>
-                          <TableCell className="font-medium">{player.UserName}</TableCell>
-                          <TableCell>{player.TeamName}</TableCell>
-                          <TableCell className="text-right">{player.Games}</TableCell>
-                          <TableCell className="text-right">{player.Overs}</TableCell>
-                          <TableCell className="text-right">{player.Wickets}</TableCell>
-                          <TableCell className="text-right">{player.RunsConceded}</TableCell>
-                          <TableCell className="text-right">{getBowlingAverage(player)}</TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-6">
-                          No bowlers found. Try adjusting your search or filters.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TabsContent>
-            </div>
           </div>
           
           {filteredPlayers.length > playersPerPage && (
