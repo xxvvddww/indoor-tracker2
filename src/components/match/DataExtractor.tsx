@@ -103,7 +103,7 @@ export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, match
         // First check if we have MatchSummary data
         if (matchData.MatchSummary?.team) {
           const summaryTeams = Array.isArray(matchData.MatchSummary.team) ? 
-            matchData.MatchSummary.team : [matchData.MatchSummary.team] || [];
+            matchData.MatchSummary.team : matchData.MatchSummary.team ? [matchData.MatchSummary.team] : [];
             
           summaryTeams.forEach(team => {
             if (!team || !team.name) return;
@@ -162,16 +162,6 @@ export const DataExtractor: React.FC<DataExtractorProps> = ({ displayInfo, match
                 });
               }
             });
-          });
-        }
-        
-        // If still no player stats, add empty player lists to each team
-        if (Object.keys(displayInfo.playerStats).length === 0) {
-          teams.forEach(team => {
-            displayInfo.playerStats![team.Id] = {
-              name: team.Name,
-              players: []
-            };
           });
         }
       }
