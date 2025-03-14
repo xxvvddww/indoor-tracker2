@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -530,7 +529,6 @@ const Index = () => {
                       
                       <div className="flex items-center gap-2 mb-4">
                         <Filter className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Division:</span>
                         <ToggleGroup 
                           type="single" 
                           value={activeDivision}
