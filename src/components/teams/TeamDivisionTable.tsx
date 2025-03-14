@@ -51,8 +51,7 @@ const TeamDivisionTable = ({
     <Collapsible 
       open={isOpen}
       onOpenChange={handleToggle}
-      className={`${compactMode ? 'border-0' : 'border'} rounded-lg overflow-hidden`}
-      preserveState={true}
+      className={`${compactMode ? 'border-0 mb-3 border-2 border-gray-300 dark:border-gray-700' : 'border'} rounded-lg overflow-hidden`}
     >
       <CollapsibleTrigger 
         className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}
@@ -78,19 +77,19 @@ const TeamDivisionTable = ({
                   Team {renderSortIcon('Name')}
                 </TableHead>
                 <TableHead 
-                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1' : ''}`}
+                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1 w-[30px]' : ''}`}
                   onClick={() => onSort('Players')}
                 >
                   {compactMode ? 'Pl' : 'Players'} {renderSortIcon('Players')}
                 </TableHead>
                 <TableHead 
-                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1' : ''}`}
+                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1 w-[30px]' : ''}`}
                   onClick={() => onSort('Games')}
                 >
                   {compactMode ? 'G' : 'Games'} {renderSortIcon('Games')}
                 </TableHead>
                 <TableHead 
-                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1' : ''}`}
+                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1 w-[30px]' : ''}`}
                   onClick={() => onSort('Wins')}
                 >
                   {compactMode ? 'W' : 'Wins'} {renderSortIcon('Wins')}
@@ -104,7 +103,7 @@ const TeamDivisionTable = ({
                   </TableHead>
                 )}
                 <TableHead 
-                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1' : ''}`}
+                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1 w-[30px]' : ''}`}
                   onClick={() => onSort('Win%')}
                 >
                   {compactMode ? '%' : 'Win%'} {renderSortIcon('Win%')}
@@ -126,25 +125,25 @@ const TeamDivisionTable = ({
                     {team.Name}
                   </TableCell>
                   <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                    {team.playerCount || '-'}
+                    {team.Players || '-'}
                   </TableCell>
                   <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                    {team.completedMatches}
+                    {team.Games || 0}
                   </TableCell>
                   <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                    {team.wins}
+                    {team.Wins || 0}
                   </TableCell>
                   {!compactMode && (
                     <TableCell className="text-center">
-                      {team.losses}
+                      {team.Losses || 0}
                     </TableCell>
                   )}
                   <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                    {compactMode ? parseFloat(team.winPercentage).toFixed(0) : team.winPercentage}%
+                    {compactMode ? parseFloat(team.WinPercentage?.toString() || '0').toFixed(0) : team.WinPercentage || 0}%
                   </TableCell>
                   {!compactMode && (
                     <TableCell className="text-center">
-                      {team.skinsWon}
+                      {team.SkinsWon || 0}
                     </TableCell>
                   )}
                 </TableRow>

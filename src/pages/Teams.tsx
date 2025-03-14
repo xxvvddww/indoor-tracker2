@@ -33,17 +33,27 @@ const Teams = () => {
   return (
     <MainLayout>
       <div className={`space-y-${compactMode ? '2' : '6'}`}>
-        <SearchHeader 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
+        {!compactMode && (
+          <SearchHeader 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+        )}
         
-        <TeamStats
-          isLoading={isLoading}
-          totalTeams={totalTeams}
-          uniqueDivisions={uniqueDivisions}
-          displayTeams={displayTeams}
-        />
+        {!compactMode && (
+          <TeamStats
+            isLoading={isLoading}
+            totalTeams={totalTeams}
+            uniqueDivisions={uniqueDivisions}
+            displayTeams={displayTeams}
+          />
+        )}
+        
+        {compactMode && (
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-xl font-bold tracking-tight">Teams</h1>
+          </div>
+        )}
         
         {isLoading && <LoadingCard />}
         

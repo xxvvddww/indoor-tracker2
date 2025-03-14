@@ -54,7 +54,7 @@ const TeamStats = ({ isLoading, totalTeams, uniqueDivisions, displayTeams }: Tea
             <div>
               <p className={`${compactMode ? 'text-xxs' : 'text-sm'} text-muted-foreground truncate`}>{compactMode ? "100% Wins" : "Teams with 100% Win Rate"}</p>
               <h3 className={`${compactMode ? 'text-lg' : 'text-2xl'} font-bold`}>
-                {isLoading ? <LoadingSpinner size={compactMode ? 3 : 4} /> : displayTeams.filter(t => parseFloat(t.winPercentage) === 100).length}
+                {isLoading ? <LoadingSpinner size={compactMode ? 3 : 4} /> : displayTeams.filter(t => parseFloat(t.WinPercentage?.toString() || '0') === 100).length}
               </h3>
             </div>
           </div>
