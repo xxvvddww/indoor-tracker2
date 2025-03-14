@@ -4,7 +4,7 @@ import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { fetchFixtures } from '../services/cricketApi';
 import { Fixture } from '../types/cricket';
-import { ArrowUpRight, Filter, Calendar, Shield } from "lucide-react";
+import { ArrowUpRight, Filter, Calendar } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -24,7 +24,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { formatDate } from '@/utils/dateFormatters';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Badge } from '@/components/ui/badge';
 
 const Fixtures = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
@@ -289,9 +288,6 @@ const Fixtures = () => {
                                 <Calendar className="h-3 w-3 text-primary mr-1.5" />
                                 <span className="font-semibold text-xs">{date}</span>
                               </div>
-                              <span className="text-[0.65rem] text-muted-foreground">
-                                {dateFixtures.length} {dateFixtures.length === 1 ? 'match' : 'matches'}
-                              </span>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <div className="space-y-0.5 py-1">
@@ -308,12 +304,8 @@ const Fixtures = () => {
                                     >
                                       <CollapsibleTrigger className="w-full flex justify-between items-center p-1 bg-gray-900/40 hover:bg-gray-900/60">
                                         <div className="flex items-center">
-                                          <Shield className="h-2.5 w-2.5 text-primary mr-1" />
                                           <span className="font-medium text-[0.7rem]">{division}</span>
                                         </div>
-                                        <Badge variant="outline" className="h-3.5 text-[0.6rem] py-0 px-1.5">
-                                          {fixturesByDivision[division].length}
-                                        </Badge>
                                       </CollapsibleTrigger>
                                       <CollapsibleContent>
                                         <ResponsiveTable
