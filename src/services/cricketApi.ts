@@ -283,33 +283,73 @@ export const fetchMatchDetails = async (fixtureId: string): Promise<MatchDetails
 export const fetchTeams = async (leagueId: string = DEFAULT_LEAGUE_ID, seasonId: string = CURRENT_SEASON_ID): Promise<Team[]> => {
   try {
     console.log(`Fetching teams with leagueId: ${leagueId}, seasonId: ${seasonId}`);
-    const response = await axios.get(`${API_BASE_URL}`, {
-      params: {
-        Type: "teams",
-        LeagueId: leagueId,
-        SeasonId: seasonId
-      },
-      responseType: 'text'
-    });
     
-    console.log('Teams API response received. Length:', response.data.length);
-    const parsed = processXmlResponse(response.data, 'Team');
-    console.log('Parsed teams count:', parsed && parsed.Team ? parsed.Team.length : 0);
+    // First try the teams endpoint
+    try {
+      const response = await axios.get(`${API_BASE_URL}`, {
+        params: {
+          Type: "teams",
+          LeagueId: leagueId,
+          SeasonId: seasonId
+        },
+        responseType: 'text'
+      });
+      
+      console.log('Teams API response received. Length:', response.data.length);
+      const parsed = processXmlResponse(response.data, 'Team');
+      console.log('Parsed teams count:', parsed && parsed.Team ? parsed.Team.length : 0);
+      
+      if (parsed && parsed.Team && parsed.Team.length > 0) {
+        const teams = parsed.Team as Team[];
+        toast.success(`Loaded ${teams.length} teams`);
+        return teams;
+      }
+    } catch (teamsError) {
+      console.error("Error fetching teams from teams endpoint:", teamsError);
+      // We'll fall through to the fixtures method below
+    }
     
-    if (parsed === null) {
-      toast.warning("No teams available for the selected season");
+    // If teams endpoint fails or returns no data, extract teams from fixtures
+    console.log("Attempting to extract teams from fixtures data");
+    const fixtures = await fetchFixtures(leagueId, seasonId);
+    
+    if (fixtures.length === 0) {
+      toast.warning("No teams or fixtures available for the selected season");
       return [];
     }
     
-    const teams = parsed && parsed.Team ? parsed.Team as Team[] : [];
+    // Extract unique teams from fixtures
+    const teamsMap = new Map<string, Team>();
     
-    if (teams.length === 0) {
-      toast.info("No teams found for the selected season and league");
+    fixtures.forEach(fixture => {
+      if (fixture.HomeTeamId && fixture.HomeTeam) {
+        teamsMap.set(fixture.HomeTeamId, {
+          Id: fixture.HomeTeamId,
+          Name: fixture.HomeTeam,
+          DivisionName: fixture.DivisionName || ''
+        });
+      }
+      
+      if (fixture.AwayTeamId && fixture.AwayTeam) {
+        teamsMap.set(fixture.AwayTeamId, {
+          Id: fixture.AwayTeamId,
+          Name: fixture.AwayTeam,
+          DivisionName: fixture.DivisionName || ''
+        });
+      }
+    });
+    
+    const extractedTeams = Array.from(teamsMap.values());
+    console.log(`Extracted ${extractedTeams.length} teams from fixtures data`);
+    
+    if (extractedTeams.length > 0) {
+      toast.success(`Loaded ${extractedTeams.length} teams from fixtures data`);
+      return extractedTeams;
     } else {
-      toast.success(`Loaded ${teams.length} teams`);
+      toast.warning("No teams found in fixture data");
+      return [];
     }
     
-    return teams;
   } catch (error) {
     console.error("Error fetching teams:", error);
     toast.error("Failed to load teams. Please try again later.");

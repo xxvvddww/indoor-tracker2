@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTeams, fetchFixtures, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
@@ -226,7 +225,7 @@ const Teams = () => {
   // Check if data is still loading
   const isLoading = teamsLoading || fixturesLoading;
 
-  // Mock data for demonstration when API fails
+  // Generate mock data for demonstration when API fails
   const mockTeams = [
     { Id: "1", Name: "Marlboro Men", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 5, losses: 2, draws: 1, winPercentage: "62.5", runsScored: 450, runsConceded: 380, runRate: "56.3", netRunRate: "8.75", lastFiveResults: ["W", "W", "L", "W", "D"] },
     { Id: "2", Name: "Tri-Hards", DivisionName: "Div 2", totalMatches: 10, completedMatches: 8, wins: 6, losses: 1, draws: 1, winPercentage: "75.0", runsScored: 520, runsConceded: 410, runRate: "65.0", netRunRate: "13.75", lastFiveResults: ["W", "W", "W", "L", "W"] },
@@ -234,19 +233,34 @@ const Teams = () => {
     { Id: "4", Name: "Cricket Masters", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 7, losses: 1, draws: 0, winPercentage: "87.5", runsScored: 560, runsConceded: 430, runRate: "70.0", netRunRate: "16.25", lastFiveResults: ["W", "W", "W", "W", "L"] },
   ];
 
-  // Use mock data if API returns error
-  const displayTeams = teamsError ? mockTeams : sortedTeams;
-  const totalTeams = teamsError ? mockTeams.length : (teams?.length || 0);
-  const uniqueDivisions = teamsError ? 
-    new Set(mockTeams.map(t => t.DivisionName).filter(Boolean)).size : 
-    (teams?.length ? new Set(teams.map(t => t.DivisionName).filter(Boolean)).size : 0);
-  const totalMatches = fixturesError ? 
-    mockTeams.reduce((sum, team) => sum + team.totalMatches, 0) / 2 : 
-    (fixtures?.length || 0);
+  // Use fixture data directly if teams API fails but fixtures API succeeds
+  const useFixturesForTeams = teamsError && !fixturesLoading && fixtures && fixtures.length > 0;
+
+  // Determine which data to display
+  const displayTeams = useFixturesForTeams 
+    ? teamStats // Use the stats calculated from fixtures
+    : (teamsError ? mockTeams : sortedTeams);
+    
+  // Calculate statistics for display
+  const totalTeams = useFixturesForTeams 
+    ? teamStats.length 
+    : (teamsError ? mockTeams.length : (teams?.length || 0));
+    
+  const uniqueDivisions = useFixturesForTeams
+    ? new Set(teamStats.map(t => t.DivisionName).filter(Boolean)).size
+    : (teamsError 
+        ? new Set(mockTeams.map(t => t.DivisionName).filter(Boolean)).size 
+        : (teams?.length ? new Set(teams.map(t => t.DivisionName).filter(Boolean)).size : 0));
+    
+  const totalMatches = fixturesError 
+    ? mockTeams.reduce((sum, team) => sum + team.totalMatches, 0) / 2 
+    : (fixtures?.length || 0);
   
-  const avgRunRate = teamsError ? 
-    (mockTeams.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / mockTeams.length).toFixed(2) :
-    (teamStats?.length ? (teamStats.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / teamStats.length).toFixed(2) : "0.00");
+  const avgRunRate = useFixturesForTeams
+    ? (teamStats.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / teamStats.length).toFixed(2)
+    : (teamsError 
+        ? (mockTeams.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / mockTeams.length).toFixed(2) 
+        : (teamStats?.length ? (teamStats.reduce((sum, team) => sum + parseFloat(team.runRate), 0) / teamStats.length).toFixed(2) : "0.00"));
 
   return (
     <MainLayout>
@@ -335,7 +349,7 @@ const Teams = () => {
           </Card>
         )}
         
-        {teamsError && !isLoading && (
+        {teamsError && !isLoading && !useFixturesForTeams && (
           <Card className="border-yellow-500">
             <CardHeader>
               <CardTitle className="text-yellow-600">API Error</CardTitle>
@@ -348,7 +362,7 @@ const Teams = () => {
           </Card>
         )}
         
-        {!isLoading && !teamsError && teams && teams.length === 0 && (
+        {!isLoading && displayTeams.length === 0 && (
           <Card>
             <CardHeader>
               <CardTitle>No Teams Found</CardTitle>
@@ -368,7 +382,7 @@ const Teams = () => {
                 <span>Team Rankings</span>
               </CardTitle>
               <CardDescription>
-                {teamsError ? 
+                {teamsError && !useFixturesForTeams ? 
                   "Sample data for demonstration purposes" : 
                   "Team performance statistics for the current season"}
               </CardDescription>
