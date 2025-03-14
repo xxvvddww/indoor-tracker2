@@ -3,8 +3,6 @@ import React from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import { useTeamData } from '@/hooks/use-team-data';
 import { useIsMobile } from '@/hooks/use-mobile';
-import SearchHeader from '../components/teams/SearchHeader';
-import TeamStats from '../components/teams/TeamStats';
 import TeamDivisionList from '../components/teams/TeamDivisionList';
 import TeamErrorCard from '../components/teams/TeamErrorCard';
 import TeamEmptyState from '../components/teams/TeamEmptyState';
@@ -14,8 +12,6 @@ const Teams = () => {
   const { 
     isLoading, 
     teamsError, 
-    searchQuery, 
-    setSearchQuery, 
     sortColumn, 
     sortDirection, 
     handleSort, 
@@ -33,22 +29,6 @@ const Teams = () => {
   return (
     <MainLayout>
       <div className={`space-y-${compactMode ? '2' : '6'}`}>
-        {!compactMode && (
-          <SearchHeader 
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        )}
-        
-        {!compactMode && (
-          <TeamStats
-            isLoading={isLoading}
-            totalTeams={totalTeams}
-            uniqueDivisions={uniqueDivisions}
-            displayTeams={displayTeams}
-          />
-        )}
-        
         {compactMode && (
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-xl font-bold tracking-tight">Teams</h1>

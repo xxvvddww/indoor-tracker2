@@ -51,7 +51,7 @@ const TeamDivisionTable = ({
     <Collapsible 
       open={isOpen}
       onOpenChange={handleToggle}
-      className={`${compactMode ? 'border-0 mb-3 border-2 border-gray-300 dark:border-gray-700' : 'border'} rounded-lg overflow-hidden`}
+      className="border-2 border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden mb-3"
     >
       <CollapsibleTrigger 
         className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}
@@ -77,75 +77,62 @@ const TeamDivisionTable = ({
                   Team {renderSortIcon('Name')}
                 </TableHead>
                 <TableHead 
-                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1 w-[30px]' : ''}`}
-                  onClick={() => onSort('Players')}
-                >
-                  {compactMode ? 'Pl' : 'Players'} {renderSortIcon('Players')}
-                </TableHead>
-                <TableHead 
-                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1 w-[30px]' : ''}`}
+                  className="cursor-pointer text-center w-[30px] py-1 px-1"
                   onClick={() => onSort('Games')}
                 >
-                  {compactMode ? 'G' : 'Games'} {renderSortIcon('Games')}
+                  G {renderSortIcon('Games')}
                 </TableHead>
                 <TableHead 
-                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1 w-[30px]' : ''}`}
+                  className="cursor-pointer text-center w-[30px] py-1 px-1"
                   onClick={() => onSort('Wins')}
                 >
-                  {compactMode ? 'W' : 'Wins'} {renderSortIcon('Wins')}
+                  W {renderSortIcon('Wins')}
                 </TableHead>
-                {!compactMode && (
-                  <TableHead 
-                    className="cursor-pointer text-center" 
-                    onClick={() => onSort('Losses')}
-                  >
-                    Losses {renderSortIcon('Losses')}
-                  </TableHead>
-                )}
                 <TableHead 
-                  className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1 w-[30px]' : ''}`}
+                  className="cursor-pointer text-center w-[30px] py-1 px-1"
+                  onClick={() => onSort('Losses')}
+                >
+                  L {renderSortIcon('Losses')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer text-center w-[30px] py-1 px-1"
+                  onClick={() => onSort('Draws')}
+                >
+                  D {renderSortIcon('Draws')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer text-center w-[30px] py-1 px-1"
                   onClick={() => onSort('Win%')}
                 >
-                  {compactMode ? '%' : 'Win%'} {renderSortIcon('Win%')}
+                  % {renderSortIcon('Win%')}
                 </TableHead>
-                {!compactMode && (
-                  <TableHead 
-                    className="cursor-pointer text-center" 
-                    onClick={() => onSort('Skins')}
-                  >
-                    Skins Won {renderSortIcon('Skins')}
-                  </TableHead>
-                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {teams.map((team) => (
                 <TableRow key={team.Id} className={compactMode ? 'h-8' : ''}>
-                  <TableCell className={`font-medium truncate ${compactMode ? 'py-1 px-1' : ''}`}>
+                  <TableCell className="font-medium truncate py-1 px-1">
                     {team.Name}
                   </TableCell>
-                  <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                    {team.Players || '-'}
+                  <TableCell className="text-center py-1 px-1">
+                    {team.completedMatches || team.Games || 0}
                   </TableCell>
-                  <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                    {team.Games || 0}
+                  <TableCell className="text-center py-1 px-1">
+                    {team.Wins || team.wins || 0}
                   </TableCell>
-                  <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                    {team.Wins || 0}
+                  <TableCell className="text-center py-1 px-1">
+                    {team.Losses || team.losses || 0}
                   </TableCell>
-                  {!compactMode && (
-                    <TableCell className="text-center">
-                      {team.Losses || 0}
-                    </TableCell>
-                  )}
-                  <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                    {compactMode ? parseFloat(team.WinPercentage?.toString() || '0').toFixed(0) : team.WinPercentage || 0}%
+                  <TableCell className="text-center py-1 px-1">
+                    {team.Draws || team.draws || 0}
                   </TableCell>
-                  {!compactMode && (
-                    <TableCell className="text-center">
-                      {team.SkinsWon || 0}
-                    </TableCell>
-                  )}
+                  <TableCell className="text-center py-1 px-1">
+                    {team.WinPercentage 
+                      ? (typeof team.WinPercentage === 'string' ? parseFloat(team.WinPercentage).toFixed(0) : team.WinPercentage.toFixed(0)) 
+                      : team.winPercentage 
+                        ? parseFloat(team.winPercentage).toFixed(0) 
+                        : '0'}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

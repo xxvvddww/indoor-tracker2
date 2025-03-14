@@ -1,3 +1,4 @@
+
 export interface Fixture {
   Id: string;
   Date: string;
@@ -56,6 +57,19 @@ export interface Team {
   QuotientRatio?: string;
   DivisionId?: string;
   DivisionName?: string;
+  // Add properties that are used in our components
+  Games?: number;
+  Wins?: number;
+  Losses?: number;
+  Draws?: number;
+  WinPercentage?: string | number;
+  SkinsWon?: number;
+  Players?: number;
+  playerCount?: number;
+  completedMatches?: number;
+  totalMatches?: number;
+  winPercentage?: string;
+  skinsWon?: number;
 }
 
 export interface MatchConfiguration {
