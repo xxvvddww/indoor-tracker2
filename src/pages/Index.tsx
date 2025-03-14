@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -156,10 +155,14 @@ const Index = () => {
     loadData();
   }, [seasonId]);
     
-  const recentFixtures = fixtures
+  const mostRecentDate = fixtures
     .filter(fixture => !isFutureDate(fixture.Date) && fixture.CompletionStatus === "Completed")
     .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime())
-    .slice(0, 5);
+    .map(fixture => fixture.Date)[0];
+
+  const recentFixtures = fixtures
+    .filter(fixture => fixture.Date === mostRecentDate && fixture.CompletionStatus === "Completed")
+    .sort((a, b) => new Date(b.Date).getTime() - new Date(a.Date).getTime());
   
   const topBatsmen = [...players]
     .sort((a, b) => parseInt(b.RunsScored) - parseInt(a.RunsScored))
@@ -204,7 +207,6 @@ const Index = () => {
   const mostRunsPlayer = topBatsmen.length > 0 ? topBatsmen[0] : null;
   const mostWicketsPlayer = topBowlers.length > 0 ? topBowlers[0] : null;
 
-  // Recent results table columns
   const recentResultsColumns = [
     {
       key: "teams",
@@ -215,12 +217,6 @@ const Index = () => {
           {row.DivisionName && <span className="text-xxs text-muted-foreground">{row.DivisionName}</span>}
         </div>
       ),
-    },
-    {
-      key: "Date",
-      header: "Date",
-      render: (value: string) => <span className="text-xs">{formatCompactDate(value)}</span>,
-      hideOnMobile: false,
     },
     {
       key: "result",
@@ -261,7 +257,6 @@ const Index = () => {
         ) : renderEmptyState() || (
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-              {/* Card 1: Active Players */}
               <ResponsiveCard 
                 className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800"
               >
@@ -279,7 +274,6 @@ const Index = () => {
                 </div>
               </ResponsiveCard>
               
-              {/* Card 2: Completed Matches */}
               <ResponsiveCard 
                 className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800"
               >
@@ -297,7 +291,6 @@ const Index = () => {
                 </div>
               </ResponsiveCard>
               
-              {/* Card 3: Most Wickets */}
               <ResponsiveCard 
                 className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-800"
               >
@@ -328,7 +321,6 @@ const Index = () => {
                 </div>
               </ResponsiveCard>
               
-              {/* Card 4: Most Runs */}
               <ResponsiveCard 
                 className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-800"
               >
@@ -372,6 +364,11 @@ const Index = () => {
                       <div className="flex items-center">
                         <Calendar className="h-5 w-5 text-primary mr-2" />
                         <span className="font-semibold">Recent Results</span>
+                        {mostRecentDate && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {formatDate(mostRecentDate)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </CollapsibleTrigger>
@@ -392,8 +389,7 @@ const Index = () => {
                             {recentFixtures.map((fixture) => (
                               <div key={fixture.Id} className="bg-background/30 p-3 rounded-md border">
                                 <p className="text-xs text-muted-foreground">
-                                  {formatCompactDate(fixture.Date)}
-                                  {fixture.DivisionName && <span> • {fixture.DivisionName}</span>}
+                                  {fixture.DivisionName && <span>{fixture.DivisionName}</span>}
                                 </p>
                                 <div className="flex justify-between items-center mt-1">
                                   <p className="font-medium">
