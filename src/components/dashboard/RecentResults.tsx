@@ -92,13 +92,13 @@ export const RecentResults = ({
     <Collapsible 
       open={expandedSection === "recentResults"} 
       onOpenChange={() => toggleSection("recentResults")}
-      className="border border-gray-700 rounded-lg overflow-hidden bg-background/30"
+      className="border rounded-lg shadow-sm bg-slate-950/30 dark:bg-slate-950/30"
     >
       <CollapsibleTrigger className="w-full">
-        <div className="flex justify-between items-center p-2">
+        <div className="flex justify-between items-center p-4 h-14">
           <div className="flex items-center">
-            <Calendar className="h-4 w-4 text-primary mr-1.5" />
-            <span className="font-semibold text-sm">Recent Results</span>
+            <Calendar className="h-5 w-5 text-indigo-400 mr-2" />
+            <span className="font-semibold">Recent Results</span>
             {mostRecentDate && (
               <span className="ml-1.5 text-xs text-muted-foreground">
                 {formatDate(mostRecentDate)}

@@ -17,10 +17,10 @@ export const WatchLive = ({ expandedSection, toggleSection }: WatchLiveProps) =>
     <Collapsible 
       open={expandedSection === "watchLive"} 
       onOpenChange={() => toggleSection("watchLive")}
-      className="border rounded-lg shadow-sm"
+      className="border rounded-lg shadow-sm bg-slate-950/30 dark:bg-slate-950/30"
     >
       <CollapsibleTrigger className="w-full">
-        <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center p-4 h-14">
           <div className="flex items-center">
             <PlayCircle className="h-5 w-5 text-red-500 mr-2" />
             <span className="font-semibold">Watch Live</span>

@@ -18,7 +18,7 @@ interface TeamDivisionTableProps {
 const TeamDivisionTable = ({ 
   divisionName, 
   teams, 
-  initialOpen = false,  // Changed default from true to false
+  initialOpen = false,
   preserveOpenState = false 
 }: TeamDivisionTableProps) => {
   const [isOpen, setIsOpen] = useState(initialOpen);
@@ -42,7 +42,7 @@ const TeamDivisionTable = ({
       className="border border-gray-700 dark:border-gray-700 rounded-lg overflow-hidden my-4 bg-background/30"
     >
       <CollapsibleTrigger 
-        className={`flex items-center justify-between w-full ${compactMode ? 'p-1.5' : 'p-3'} bg-muted/10 hover:bg-muted/20 transition-colors`}
+        className={`flex items-center justify-between w-full ${compactMode ? 'p-1.5' : 'p-3'} bg-muted/10 hover:bg-muted/20 transition-colors h-14`}
         showArrow={false}
       >
         <div className="flex items-center gap-2 font-medium text-xs">

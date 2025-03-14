@@ -53,12 +53,12 @@ export const TopPerformers = ({
     <Collapsible 
       open={expandedSection === "topPlayers"} 
       onOpenChange={() => toggleSection("topPlayers")}
-      className="border rounded-lg shadow-sm"
+      className="border rounded-lg shadow-sm bg-slate-950/30 dark:bg-slate-950/30"
     >
       <CollapsibleTrigger className="w-full">
-        <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center p-4 h-14">
           <div className="flex items-center">
-            <BarChart3 className="h-5 w-5 text-primary mr-2" />
+            <BarChart3 className="h-5 w-5 text-indigo-400 mr-2" />
             <span className="font-semibold">Top Performers</span>
           </div>
         </div>
