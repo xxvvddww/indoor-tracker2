@@ -74,6 +74,7 @@ const processXmlResponse = (xmlString: string, rootTag: string): any => {
 // API functions
 export const fetchFixtures = async (leagueId: string = "", seasonId: string = CURRENT_SEASON_ID): Promise<Fixture[]> => {
   try {
+    console.log(`Fetching fixtures with seasonId: ${seasonId}`);
     const response = await axios.get(`${API_BASE_URL}`, {
       params: {
         Type: "fixtures",
@@ -83,7 +84,9 @@ export const fetchFixtures = async (leagueId: string = "", seasonId: string = CU
       responseType: 'text'
     });
     
+    console.log('Fixtures API response:', response.data.substring(0, 200) + '...');
     const parsed = processXmlResponse(response.data, 'Fixture');
+    console.log('Parsed fixtures:', parsed);
     return parsed && parsed.Fixture ? parsed.Fixture as Fixture[] : [];
   } catch (error) {
     console.error("Error fetching fixtures:", error);
@@ -93,6 +96,7 @@ export const fetchFixtures = async (leagueId: string = "", seasonId: string = CU
 
 export const fetchPlayerStats = async (leagueId: string = "", seasonId: string = CURRENT_SEASON_ID): Promise<Player[]> => {
   try {
+    console.log(`Fetching player stats with seasonId: ${seasonId}`);
     const response = await axios.get(`${API_BASE_URL}`, {
       params: {
         Type: "statistics",
@@ -102,7 +106,9 @@ export const fetchPlayerStats = async (leagueId: string = "", seasonId: string =
       responseType: 'text'
     });
     
+    console.log('Player stats API response:', response.data.substring(0, 200) + '...');
     const parsed = processXmlResponse(response.data, 'Item');
+    console.log('Parsed player stats:', parsed);
     return parsed as Player[];
   } catch (error) {
     console.error("Error fetching player stats:", error);
@@ -112,6 +118,7 @@ export const fetchPlayerStats = async (leagueId: string = "", seasonId: string =
 
 export const fetchMatchDetails = async (fixtureId: string): Promise<MatchDetails | null> => {
   try {
+    console.log(`Fetching match details for fixture: ${fixtureId}`);
     const response = await axios.get(`${API_BASE_URL}`, {
       params: {
         Type: "Scoresheet",
@@ -120,7 +127,9 @@ export const fetchMatchDetails = async (fixtureId: string): Promise<MatchDetails
       responseType: 'text'
     });
     
+    console.log('Match details API response:', response.data.substring(0, 200) + '...');
     const parsed = processXmlResponse(response.data, 'Statistics');
+    console.log('Parsed match details:', parsed);
     return parsed && parsed.Statistics ? parsed.Statistics as MatchDetails : null;
   } catch (error) {
     console.error("Error fetching match details:", error);

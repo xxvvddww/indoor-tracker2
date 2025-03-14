@@ -1,7 +1,7 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Award, Users, Calendar, BarChart3, Settings, Home } from "lucide-react";
+import { Award, Users, Calendar, BarChart3, Settings, Home, Menu, X } from "lucide-react";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -9,10 +9,20 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const isActive = (path: string) => {
     return location.pathname === path ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50";
   };
+
+  const navItems = [
+    { path: "/", label: "Dashboard", icon: Home },
+    { path: "/fixtures", label: "Fixtures & Results", icon: Calendar },
+    { path: "/standings", label: "Team Standings", icon: Award },
+    { path: "/teams", label: "Teams", icon: Users },
+    { path: "/stats", label: "Player Statistics", icon: BarChart3 },
+    { path: "/settings", label: "Settings", icon: Settings },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -26,60 +36,17 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
         <nav className="p-2">
           <ul className="space-y-1">
-            <li>
-              <Link 
-                to="/" 
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive('/')}`}
-              >
-                <Home className="h-4 w-4" />
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/fixtures" 
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive('/fixtures')}`}
-              >
-                <Calendar className="h-4 w-4" />
-                Fixtures & Results
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/standings" 
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive('/standings')}`}
-              >
-                <Award className="h-4 w-4" />
-                Team Standings
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/teams" 
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive('/teams')}`}
-              >
-                <Users className="h-4 w-4" />
-                Teams
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/stats" 
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive('/stats')}`}
-              >
-                <BarChart3 className="h-4 w-4" />
-                Player Statistics
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/settings" 
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive('/settings')}`}
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
-            </li>
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <Link 
+                  to={item.path} 
+                  className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive(item.path)}`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
       </div>
@@ -91,25 +58,41 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <Award className="h-6 w-6 text-primary" />
             <h1 className="font-bold text-xl">Cricket Tracker</h1>
           </div>
-          <button className="p-2">
-            <span className="sr-only">Open menu</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+          <button 
+            className="p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed top-16 left-0 right-0 bottom-0 bg-background z-10 overflow-y-auto">
+          <nav className="p-4">
+            <ul className="space-y-2">
+              {navItems.map((item) => (
+                <li key={item.path}>
+                  <Link 
+                    to={item.path} 
+                    className={`flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors ${isActive(item.path)}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+      )}
       
       {/* Main content */}
       <div className="flex-1 flex flex-col">
