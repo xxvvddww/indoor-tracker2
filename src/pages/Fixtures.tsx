@@ -33,12 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { cn } from '@/lib/utils';
 
 const Fixtures = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
@@ -194,13 +189,6 @@ const Fixtures = () => {
       )
     },
     {
-      key: "DivisionName",
-      header: "Div",
-      hideOnMobile: !isMobile,
-      className: "w-14",
-      render: (value: string) => <span className="text-xxs">{value || 'N/A'}</span>
-    },
-    {
       key: "StartTime",
       header: "Time",
       className: "w-12 text-right",
@@ -225,37 +213,55 @@ const Fixtures = () => {
 
   const completedColumns = [
     {
-      key: "Teams",
-      header: "Teams",
-      render: (_: any, row: Fixture) => (
-        <div className="font-medium text-xs">
-          <span className={row.HomeTeamWon ? "font-bold" : ""}>{row.HomeTeam || 'TBD'}</span>
-          {" vs "}
-          <span className={row.AwayTeamWon ? "font-bold" : ""}>{row.AwayTeam || 'TBD'}</span>
-        </div>
+      key: "HomeTeam",
+      header: "Home",
+      render: (value: string, row: Fixture) => (
+        <span className={cn(
+          "text-xs",
+          row.HomeTeamWon && "text-green-500 dark:text-green-400 font-medium"
+        )}>
+          {value || 'TBD'}
+        </span>
+      )
+    },
+    {
+      key: "vs",
+      header: "",
+      className: "w-6 text-center",
+      render: () => <span className="text-xxs text-muted-foreground">vs</span>
+    },
+    {
+      key: "AwayTeam",
+      header: "Away",
+      render: (value: string, row: Fixture) => (
+        <span className={cn(
+          "text-xs",
+          row.AwayTeamWon && "text-green-500 dark:text-green-400 font-medium"
+        )}>
+          {value || 'TBD'}
+        </span>
       )
     },
     {
       key: "ScoreDescription",
       header: "Result",
-      className: "w-20",
-      render: (value: string) => <span className="text-xxs">{value || 'No result'}</span>
-    },
-    {
-      key: "actions",
-      header: "",
-      className: "w-6",
-      render: (_: any, row: Fixture) => (
-        <Link to={`/match/${row.Id}`} className="text-primary hover:text-primary/80 transition-colors">
-          <ArrowUpRight className="h-3 w-3" />
-        </Link>
+      className: "w-16 text-right",
+      render: (value: string, row: Fixture) => (
+        <div className="flex items-center justify-end gap-1">
+          <span className="text-xxs">
+            {value || `${row.HomeTeamScore} - ${row.AwayTeamScore}`}
+          </span>
+          <Link to={`/match/${row.Id}`} className="text-primary ml-1">
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
       )
     }
   ];
 
   return (
     <MainLayout>
-      <ResponsiveContainer className="space-y-4 animate-fade-in">
+      <ResponsiveContainer className="space-y-3 animate-fade-in">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold tracking-tight">Fixtures & Results</h1>
           <div className="relative w-32 sm:w-64">
@@ -283,7 +289,7 @@ const Fixtures = () => {
             {activeTab !== 'all' && (
               <div className="flex items-center gap-1 w-full sm:w-auto">
                 <Select value={dateFilter} onValueChange={handleDateFilterChange}>
-                  <SelectTrigger className="w-full sm:w-[140px] h-8 text-xs">
+                  <SelectTrigger className="w-full sm:w-[120px] h-7 text-xs">
                     <SelectValue placeholder="Filter date" />
                   </SelectTrigger>
                   <SelectContent>
@@ -298,7 +304,7 @@ const Fixtures = () => {
                 {dateFilter === "custom" && (
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="flex gap-1 h-8 text-xs px-2">
+                      <Button variant="outline" className="flex gap-1 h-7 text-xs px-2">
                         <CalendarIcon className="h-3 w-3" />
                         {selectedDate ? formatDate(selectedDate.toISOString()) : "Pick date"}
                       </Button>
@@ -318,7 +324,7 @@ const Fixtures = () => {
           </div>
           
           {loading ? (
-            <div className="flex justify-center items-center h-40">
+            <div className="flex justify-center items-center h-32">
               <LoadingSpinner size={6} />
             </div>
           ) : error ? (
@@ -327,16 +333,16 @@ const Fixtures = () => {
             </div>
           ) : (
             <>
-              <TabsContent value="all" className="space-y-4 mt-0">
-                <Card className="overflow-hidden">
-                  <CardHeader className="pb-2 pt-3 px-3">
+              <TabsContent value="all" className="space-y-3 mt-0">
+                <Card className="overflow-hidden border border-gray-700 bg-background/30">
+                  <CardHeader className="pb-1 pt-2 px-3">
                     <CardTitle className="flex items-center gap-1 text-sm">
                       <Calendar className="h-3.5 w-3.5" />
                       Upcoming Fixtures
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ScrollArea className="h-full max-h-[300px]">
+                    <ScrollArea className="h-full max-h-[250px]">
                       {allTabUpcomingFixtures.length > 0 ? (
                         <ResponsiveTable
                           data={allTabUpcomingFixtures.map(fixture => ({
@@ -346,6 +352,7 @@ const Fixtures = () => {
                           columns={upcomingColumns}
                           keyField="Id"
                           superCompact={true}
+                          darkMode={true}
                         />
                       ) : (
                         emptyFixturesMessage
@@ -354,24 +361,22 @@ const Fixtures = () => {
                   </CardContent>
                 </Card>
                 
-                <Card className="overflow-hidden">
-                  <CardHeader className="pb-2 pt-3 px-3">
+                <Card className="overflow-hidden border border-gray-700 bg-background/30">
+                  <CardHeader className="pb-1 pt-2 px-3">
                     <CardTitle className="flex items-center gap-1 text-sm">
                       <Trophy className="h-3.5 w-3.5" />
                       Results
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ScrollArea className="h-full max-h-[300px]">
+                    <ScrollArea className="h-full max-h-[250px]">
                       {allTabCompletedFixtures.length > 0 ? (
                         <ResponsiveTable
-                          data={allTabCompletedFixtures.map(fixture => ({
-                            ...fixture,
-                            Teams: `${fixture.HomeTeam} vs ${fixture.AwayTeam}`
-                          }))}
+                          data={allTabCompletedFixtures}
                           columns={completedColumns}
                           keyField="Id"
                           superCompact={true}
+                          darkMode={true}
                         />
                       ) : (
                         emptyFixturesMessage
@@ -382,8 +387,8 @@ const Fixtures = () => {
               </TabsContent>
               
               <TabsContent value="upcoming" className="mt-0">
-                <Card className="overflow-hidden">
-                  <CardHeader className="pb-2 pt-3 px-3">
+                <Card className="overflow-hidden border border-gray-700 bg-background/30">
+                  <CardHeader className="pb-1 pt-2 px-3">
                     <CardTitle className="flex items-center gap-1 text-sm">
                       <Calendar className="h-3.5 w-3.5" />
                       Upcoming Fixtures
@@ -400,6 +405,7 @@ const Fixtures = () => {
                           columns={upcomingColumns}
                           keyField="Id"
                           superCompact={true}
+                          darkMode={true}
                         />
                       ) : (
                         <div className="py-4 text-center text-muted-foreground text-sm">
@@ -412,8 +418,8 @@ const Fixtures = () => {
               </TabsContent>
               
               <TabsContent value="completed" className="mt-0">
-                <Card className="overflow-hidden">
-                  <CardHeader className="pb-2 pt-3 px-3">
+                <Card className="overflow-hidden border border-gray-700 bg-background/30">
+                  <CardHeader className="pb-1 pt-2 px-3">
                     <CardTitle className="flex items-center gap-1 text-sm">
                       <Trophy className="h-3.5 w-3.5" />
                       Results
@@ -423,13 +429,11 @@ const Fixtures = () => {
                     <ScrollArea className="h-full max-h-[400px]">
                       {paginatedFixtures.length > 0 ? (
                         <ResponsiveTable
-                          data={paginatedFixtures.map(fixture => ({
-                            ...fixture,
-                            Teams: `${fixture.HomeTeam} vs ${fixture.AwayTeam}`
-                          }))}
+                          data={paginatedFixtures}
                           columns={completedColumns}
                           keyField="Id"
                           superCompact={true}
+                          darkMode={true}
                         />
                       ) : (
                         <div className="py-4 text-center text-muted-foreground text-sm">
@@ -445,7 +449,7 @@ const Fixtures = () => {
         </Tabs>
         
         {!loading && getFixturesForCurrentTab().length > itemsPerPage && activeTab !== 'all' && (
-          <Pagination className="mt-4">
+          <Pagination className="mt-3">
             <PaginationContent className="h-6">
               <PaginationItem>
                 <PaginationPrevious 

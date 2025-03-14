@@ -48,13 +48,13 @@ export function ResponsiveTable({
 
   return (
     <div className={`${compactMode ? "super-compact-table overflow-x-auto -mx-1" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
-      <Table className={compactMode ? "text-xxs" : ""}>
+      <Table className={compactMode ? "text-xxs border-collapse" : ""}>
         <TableHeader>
-          <TableRow className={compactMode ? "h-7" : ""}>
+          <TableRow className={compactMode ? "h-6" : ""}>
             {visibleColumns.map((column) => (
               <TableHead 
                 key={column.key} 
-                className={`${compactMode ? "py-1 px-1" : ""} ${column.className || ""}`}
+                className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${column.className || ""}`}
               >
                 {column.header}
               </TableHead>
@@ -65,12 +65,12 @@ export function ResponsiveTable({
           {data.map((row, rowIndex) => (
             <TableRow 
               key={getRowKey(row, rowIndex)} 
-              className={`${compactMode ? "h-7" : ""} ${getRowClass(row, rowIndex)}`}
+              className={`${compactMode ? "h-6" : ""} ${getRowClass(row, rowIndex)}`}
             >
               {visibleColumns.map((column) => (
                 <TableCell 
                   key={`${getRowKey(row, rowIndex)}-${column.key}`} 
-                  className={`${compactMode ? "py-1 px-1 text-xs" : ""} ${column.className || ""}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${column.className || ""}`}
                 >
                   {column.render 
                     ? column.render(row[column.key], row) 
