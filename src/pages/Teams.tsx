@@ -53,7 +53,6 @@ const Teams = () => {
         let losses = 0;
         let draws = 0;
         let skinsWon = 0;
-        let lastFiveResults: string[] = [];
 
         const completedFixtures = teamFixtures
           .filter(fixture => fixture.CompletionStatus === 'Completed')
@@ -70,18 +69,13 @@ const Teams = () => {
 
           if (homeScore === awayScore) {
             draws++;
-            lastFiveResults.push('D');
           } else if ((isHomeTeam && homeScore > awayScore) || (!isHomeTeam && awayScore > homeScore)) {
             wins++;
-            lastFiveResults.push('W');
             skinsWon++;
           } else {
             losses++;
-            lastFiveResults.push('L');
           }
         });
-
-        lastFiveResults = lastFiveResults.slice(0, 5);
 
         const winPercentage = completedMatches > 0 
           ? ((wins / completedMatches) * 100).toFixed(1) 
@@ -99,7 +93,6 @@ const Teams = () => {
           losses,
           draws,
           winPercentage,
-          lastFiveResults,
           skinsWon,
           playerCount: teamPlayers
         };
@@ -113,7 +106,6 @@ const Teams = () => {
           losses: 0,
           draws: 0,
           winPercentage: '0.0',
-          lastFiveResults: [],
           skinsWon: 0,
           playerCount: 0
         };
@@ -223,12 +215,16 @@ const Teams = () => {
   };
 
   const handleSort = (column: string) => {
+    const currentOpenState = { ...openDivisions };
+    
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortColumn(column);
       setSortDirection('asc');
     }
+    
+    setOpenDivisions(currentOpenState);
   };
 
   const renderSortIcon = (column: string) => {
@@ -467,9 +463,6 @@ const Teams = () => {
                                   Skins Won {renderSortIcon('Skins')}
                                 </TableHead>
                               )}
-                              <TableHead className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
-                                {compactMode ? 'L5' : 'Last 5'}
-                              </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -500,19 +493,6 @@ const Teams = () => {
                                     {team.skinsWon}
                                   </TableCell>
                                 )}
-                                <TableCell className={compactMode ? 'py-1 px-1' : ''}>
-                                  <div className="flex justify-center gap-1">
-                                    {team.lastFiveResults && team.lastFiveResults.length > 0 ? (
-                                      team.lastFiveResults.map((result, idx) => (
-                                        <span key={idx}>{renderResultBadge(result)}</span>
-                                      ))
-                                    ) : (
-                                      Array(5).fill(0).map((_, idx) => (
-                                        <span key={idx}>{renderResultBadge('')}</span>
-                                      ))
-                                    )}
-                                  </div>
-                                </TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
