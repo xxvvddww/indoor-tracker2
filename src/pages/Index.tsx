@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import { fetchFixtures, fetchPlayerStats, getCurrentSeasonId, DEFAULT_LEAGUE_ID } from "../services/cricketApi";
@@ -38,9 +37,8 @@ const formatDate = (dateString: string) => {
     
     const date = new Date(dateString);
     
-    // Check if date is valid
     if (isNaN(date.getTime())) {
-      return dateString; // Return the original string if not a valid date
+      return dateString;
     }
     
     return new Intl.DateTimeFormat('en-AU', {
@@ -63,7 +61,6 @@ const formatCompactDate = (dateString: string) => {
     
     const date = new Date(dateString);
     
-    // Check if date is valid
     if (isNaN(date.getTime())) {
       return dateString;
     }
@@ -84,12 +81,11 @@ const isToday = (dateString: string) => {
 
 const isFutureDate = (dateString: string) => {
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set to start of day
+  today.setHours(0, 0, 0, 0);
   const date = new Date(dateString);
   return date > today;
 };
 
-// Calculate batting average (runs / times out)
 const calculateBattingAverage = (player: Player) => {
   const runsScored = parseInt(player.RunsScored);
   const timesOut = parseInt(player.TimesOut);
@@ -100,7 +96,6 @@ const calculateBattingAverage = (player: Player) => {
   return average.toFixed(2);
 };
 
-// Calculate bowling average (runs conceded / wickets)
 const calculateBowlingAverage = (player: Player) => {
   const runsConceded = parseInt(player.RunsConceded);
   const wickets = parseInt(player.Wickets);
@@ -111,18 +106,13 @@ const calculateBowlingAverage = (player: Player) => {
   return average.toFixed(2);
 };
 
-// Calculate performance trend (simplified version)
 const calculatePerformanceTrend = (player: Player) => {
-  // For demo purposes - in reality you'd compare to previous periods
   const runsScored = parseInt(player.RunsScored);
   const wickets = parseInt(player.Wickets);
   
-  // Simplified logic: if runs > 100 or wickets > 5, it's trending up
   if (runsScored > 100 || wickets > 5) {
     return "up";
-  } 
-  // Simplified logic: if runs < 20 and games > 3, it's trending down
-  else if (runsScored < 20 && parseInt(player.Games) > 3) {
+  } else if (runsScored < 20 && parseInt(player.Games) > 3) {
     return "down";
   }
   
@@ -164,7 +154,6 @@ const Index = () => {
     loadData();
   }, [seasonId]);
   
-  // Process data for dashboard display
   const upcomingFixture = fixtures
     .filter(fixture => isFutureDate(fixture.Date))
     .sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())[0];
@@ -188,7 +177,6 @@ const Index = () => {
     ? Math.round((completedMatchesCount / totalMatchesCount) * 100) 
     : 0;
     
-  // Find standout player (simplified logic for demo)
   const standoutPlayer = players.length > 0 
     ? players.reduce((best, current) => {
         const bestScore = parseInt(best.RunsScored) + parseInt(best.Wickets) * 20;
@@ -197,7 +185,6 @@ const Index = () => {
       })
     : null;
     
-  // Toggle section expansion
   const toggleSection = (section: string) => {
     if (expandedSection === section) {
       setExpandedSection(null);
@@ -226,7 +213,6 @@ const Index = () => {
     return null;
   };
 
-  // Helper to render trend indicator
   const renderTrendIndicator = (trend: "up" | "down" | "neutral") => {
     if (trend === "up") {
       return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -260,9 +246,7 @@ const Index = () => {
           </div>
         ) : renderEmptyState() || (
           <div className="space-y-6">
-            {/* KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              {/* Season Progress */}
               <ResponsiveCard 
                 className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800"
               >
@@ -280,7 +264,6 @@ const Index = () => {
                 </div>
               </ResponsiveCard>
               
-              {/* Total Players */}
               <ResponsiveCard 
                 className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800"
               >
@@ -298,7 +281,6 @@ const Index = () => {
                 </div>
               </ResponsiveCard>
               
-              {/* Completed Matches */}
               <ResponsiveCard 
                 className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800"
               >
@@ -316,7 +298,6 @@ const Index = () => {
                 </div>
               </ResponsiveCard>
               
-              {/* Upcoming Matches */}
               <ResponsiveCard 
                 className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-800"
               >
@@ -335,9 +316,7 @@ const Index = () => {
               </ResponsiveCard>
             </div>
             
-            {/* Main Content Sections */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Left Column - Next Match */}
               <div className="md:col-span-1 space-y-4">
                 {upcomingFixture ? (
                   <ResponsiveCard 
@@ -392,7 +371,6 @@ const Index = () => {
                   </ResponsiveCard>
                 )}
                 
-                {/* Recent Results Section */}
                 <Collapsible 
                   open={expandedSection === "recentResults"} 
                   onOpenChange={() => toggleSection("recentResults")}
@@ -450,9 +428,7 @@ const Index = () => {
                 </Collapsible>
               </div>
               
-              {/* Middle & Right Columns - Player Stats & Insights */}
               <div className="md:col-span-2 space-y-4">
-                {/* Standout Player Section */}
                 {standoutPlayer && (
                   <ResponsiveCard 
                     className="border-l-4 border-l-amber-500 shadow-md"
@@ -503,7 +479,6 @@ const Index = () => {
                   </ResponsiveCard>
                 )}
                 
-                {/* Top Players Section */}
                 <Collapsible 
                   open={expandedSection === "topPlayers"} 
                   onOpenChange={() => toggleSection("topPlayers")}
@@ -602,7 +577,6 @@ const Index = () => {
                   </CollapsibleContent>
                 </Collapsible>
                 
-                {/* Interesting Facts/Insights */}
                 <ResponsiveCard 
                   className="border-l-4 border-l-purple-500 shadow-md"
                   title={
@@ -614,7 +588,6 @@ const Index = () => {
                 >
                   <div className="p-1">
                     <div className="space-y-2">
-                      {/* Dynamic insights based on data */}
                       {topBatsmen.length > 0 && (
                         <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
                           <div className="flex">
