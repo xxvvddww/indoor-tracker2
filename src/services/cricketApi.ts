@@ -164,16 +164,35 @@ export const fetchFixtures = async (leagueId: string = DEFAULT_LEAGUE_ID, season
       
       // Map XML properties to our expected fixture properties
       const mappedFixtures = fixtures.map(fixture => {
-        // Add mapping for missing properties
+        // Map DateTime to Date and StartTime
+        let fixtureDate = '';
+        let startTime = '';
+        
+        if (fixture.DateTime) {
+          const dateTimeParts = fixture.DateTime.split(' ');
+          fixtureDate = dateTimeParts[0] || '';
+          startTime = dateTimeParts[1] || '';
+        }
+        
+        // Use venue information from API response
+        const venue = fixture.VenueName || fixture.PlayingAreaName || '';
+        
+        // Calculate completion status and score
+        const homeScore = fixture.HomeTeamScore || '0';
+        const awayScore = fixture.AwayTeamScore || '0';
+        const isCompleted = !!(fixture.HomeTeamScore && fixture.AwayTeamScore);
+        const homeTeamWon = parseInt(homeScore) > parseInt(awayScore);
+        const awayTeamWon = parseInt(awayScore) > parseInt(homeScore);
+        
         return {
           ...fixture,
-          Date: fixture.DateTime ? fixture.DateTime.split(' ')[0] : '',
-          StartTime: fixture.DateTime ? fixture.DateTime.split(' ')[1] : '',
-          Venue: fixture.VenueName || fixture.PlayingAreaName || '',
-          CompletionStatus: fixture.HomeTeamScore && fixture.AwayTeamScore ? 'Completed' : 'Scheduled',
-          HomeTeamWon: parseInt(fixture.HomeTeamScore || '0') > parseInt(fixture.AwayTeamScore || '0'),
-          AwayTeamWon: parseInt(fixture.AwayTeamScore || '0') > parseInt(fixture.HomeTeamScore || '0'),
-          ScoreDescription: `${fixture.HomeTeamScore || '0'} - ${fixture.AwayTeamScore || '0'}`
+          Date: fixtureDate || fixture.Date || '',
+          StartTime: startTime || fixture.StartTime || '',
+          Venue: venue || fixture.Venue || '',
+          CompletionStatus: isCompleted ? 'Completed' : 'Scheduled',
+          HomeTeamWon: homeTeamWon,
+          AwayTeamWon: awayTeamWon,
+          ScoreDescription: `${homeScore} - ${awayScore}`
         };
       });
       

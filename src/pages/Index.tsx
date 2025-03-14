@@ -10,13 +10,28 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-AU', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
+  try {
+    if (!dateString || dateString.trim() === '') {
+      return 'N/A';
+    }
+    
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return the original string if not a valid date
+    }
+    
+    return new Intl.DateTimeFormat('en-AU', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(date);
+  } catch (error) {
+    console.error("Error formatting date:", error, "for date string:", dateString);
+    return dateString || 'N/A';
+  }
 };
 
 const isToday = (dateString: string) => {

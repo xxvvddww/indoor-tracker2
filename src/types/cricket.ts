@@ -1,4 +1,3 @@
-
 export interface Fixture {
   Id: string;
   Date: string;
@@ -17,6 +16,12 @@ export interface Fixture {
   DivisionName: string;
   Round: string;
   FixtureType: string;
+  // XML API fields
+  DateTime?: string;
+  VenueName?: string;
+  PlayingAreaName?: string;
+  HomeTeamScore?: string;
+  AwayTeamScore?: string;
 }
 
 export interface Player {
