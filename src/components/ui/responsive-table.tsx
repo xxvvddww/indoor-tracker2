@@ -59,7 +59,7 @@ export function ResponsiveTable({
   if (resultsMode) tableClassName += "results-table ";
 
   return (
-    <div className={`${compactMode ? "super-compact-table overflow-x-auto w-full" : ""} ${resultsMode ? "-mx-0 px-0" : "-mx-0"} ${ultraCompact ? "ultra-compact-table" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
+    <div className={`${compactMode ? "super-compact-table overflow-x-auto w-full" : ""} ${resultsMode ? "" : ""} ${ultraCompact ? "ultra-compact-table" : ""} ${darkMode ? "bg-background/30 rounded-md" : ""} ${className}`}>
       <Table className={tableClassName}>
         {!hideHeader && (
           <TableHeader>
@@ -67,7 +67,7 @@ export function ResponsiveTable({
               {visibleColumns.map((column) => (
                 <TableHead 
                   key={column.key} 
-                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-0 px-1 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-0 px-2 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                 >
                   {column.header}
                 </TableHead>
@@ -84,7 +84,7 @@ export function ResponsiveTable({
               {visibleColumns.map((column) => (
                 <TableCell 
                   key={`${getRowKey(row, rowIndex)}-${column.key}`} 
-                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1 px-1 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1 px-2 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                 >
                   {column.render 
                     ? column.render(row[column.key], row) 

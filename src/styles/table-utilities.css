@@ -27,11 +27,11 @@
   }
   
   .results-table th {
-    @apply py-0 px-1 font-normal text-muted-foreground;
+    @apply py-0 px-2 font-normal text-muted-foreground;
   }
   
   .results-table td {
-    @apply py-1 px-1;
+    @apply py-1 px-2;
   }
   
   .results-table tr {
