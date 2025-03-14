@@ -28,6 +28,21 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   console.log("Rendering PlayerStatistics with displayInfo:", displayInfo);
   console.log("Player stats:", displayInfo.playerStats ? Object.keys(displayInfo.playerStats).length : "none");
 
+  // Display winner badge at the top if available
+  const WinnerDisplay = () => {
+    if (displayInfo.winner) {
+      return (
+        <div className="flex items-center gap-2 mb-4 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
+          <Trophy className="h-4 w-4 text-amber-500" />
+          <p className="text-sm">
+            <span className="font-medium">Winner:</span> {displayInfo.winner}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Check if we have teams but no player stats
   if (!displayInfo.playerStats || Object.keys(displayInfo.playerStats).length === 0) {
     console.log("No player statistics available in displayInfo");
@@ -37,6 +52,9 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       return (
         <div className="space-y-4">
           <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
+          
+          {/* Always show winner at top */}
+          <WinnerDisplay />
           
           {displayInfo.teams.map((team) => (
             <div key={team.id} className="space-y-2 mb-4">
@@ -60,6 +78,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     
     return (
       <div className="text-center py-4">
+        <WinnerDisplay />
         <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
       </div>
     );
@@ -75,6 +94,9 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     return (
       <div className="space-y-4">
         <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
+        
+        {/* Always show winner at top */}
+        <WinnerDisplay />
         
         {Object.keys(displayInfo.playerStats).map((teamId) => (
           <div key={teamId} className="space-y-2 mb-4">
@@ -102,11 +124,14 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     <div className="space-y-4">
       <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
       
+      {/* Always show winner at top */}
+      <WinnerDisplay />
+      
       {/* Man of the Match display */}
       {displayInfo.manOfMatch && (
         <div className="flex items-center gap-2 mb-4 p-2 bg-amber-500/10 rounded-md border border-amber-500/20">
           <Trophy className="h-4 w-4 text-amber-500" />
-          <p className="text-sm">{displayInfo.manOfMatch}</p>
+          <p className="text-sm"><span className="font-medium">Player of the Match:</span> {displayInfo.manOfMatch}</p>
         </div>
       )}
       
