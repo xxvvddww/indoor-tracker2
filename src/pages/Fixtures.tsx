@@ -4,7 +4,7 @@ import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { fetchFixtures } from '../services/cricketApi';
 import { Fixture } from '../types/cricket';
-import { ArrowUpRight, Filter, Calendar } from "lucide-react";
+import { ArrowUpRight, Filter, Calendar, Shield } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -24,6 +24,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { formatDate } from '@/utils/dateFormatters';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Badge } from '@/components/ui/badge';
 
 const Fixtures = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
@@ -32,6 +33,7 @@ const Fixtures = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [openDateSections, setOpenDateSections] = useState<Record<string, boolean>>({});
+  const [openDivisionSections, setOpenDivisionSections] = useState<Record<string, boolean>>({});
   const isMobile = useIsMobile();
   const itemsPerPage = 20;
 
@@ -98,6 +100,18 @@ const Fixtures = () => {
   const paginatedDates = sortedDates.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.max(1, Math.ceil(sortedDates.length / itemsPerPage));
 
+  // Group fixtures by division within each date
+  const getFixturesByDivision = (dateFixtures: Fixture[]) => {
+    return dateFixtures.reduce((acc, fixture) => {
+      const divisionName = fixture.DivisionName || 'No Division';
+      if (!acc[divisionName]) {
+        acc[divisionName] = [];
+      }
+      acc[divisionName].push(fixture);
+      return acc;
+    }, {} as Record<string, Fixture[]>);
+  };
+
   // Initialize open state for date sections
   useEffect(() => {
     if (paginatedDates.length > 0 && Object.keys(openDateSections).length === 0) {
@@ -116,9 +130,17 @@ const Fixtures = () => {
     }));
   };
 
+  const toggleDivisionSection = (divisionKey: string) => {
+    setOpenDivisionSections(prev => ({
+      ...prev,
+      [divisionKey]: !prev[divisionKey]
+    }));
+  };
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     setOpenDateSections({}); // Reset open sections when changing page
+    setOpenDivisionSections({}); // Reset division sections too
     window.scrollTo(0, 0);
   };
 
@@ -129,7 +151,7 @@ const Fixtures = () => {
       className: "text-left w-1/3",
       render: (value: string, row: Fixture) => (
         <span className={cn(
-          "text-[0.65rem]",
+          "text-[0.65rem] whitespace-nowrap",
           row.HomeTeamWon && "text-green-500 dark:text-green-400 font-medium"
         )}>
           {value || 'TBD'}
@@ -148,7 +170,7 @@ const Fixtures = () => {
       className: "text-left w-1/3",
       render: (value: string, row: Fixture) => (
         <span className={cn(
-          "text-[0.65rem]",
+          "text-[0.65rem] whitespace-nowrap",
           row.AwayTeamWon && "text-green-500 dark:text-green-400 font-medium"
         )}>
           {value || 'TBD'}
@@ -185,6 +207,7 @@ const Fixtures = () => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
                 setOpenDateSections({});
+                setOpenDivisionSections({});
               }}
               className="pr-8 h-7 text-xs"
             />
@@ -212,34 +235,67 @@ const Fixtures = () => {
                 <ScrollArea className="h-full max-h-[500px]">
                   {paginatedDates.length > 0 ? (
                     <div className="space-y-1 px-1 py-1">
-                      {paginatedDates.map(date => (
-                        <Collapsible 
-                          key={date}
-                          open={!!openDateSections[date]}
-                          onOpenChange={() => toggleDateSection(date)}
-                          className="border border-gray-800 rounded-md overflow-hidden"
-                        >
-                          <CollapsibleTrigger className="w-full flex justify-between items-center p-1.5 bg-background/50 hover:bg-background/70">
-                            <div className="flex items-center">
-                              <Calendar className="h-3 w-3 text-primary mr-1.5" />
-                              <span className="font-semibold text-xs">{date}</span>
-                            </div>
-                            <span className="text-[0.65rem] text-muted-foreground">
-                              {fixturesByDate[date].length} {fixturesByDate[date].length === 1 ? 'match' : 'matches'}
-                            </span>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <ResponsiveTable
-                              data={fixturesByDate[date]}
-                              columns={resultColumns}
-                              keyField="Id"
-                              resultsMode={true}
-                              darkMode={true}
-                              hideHeader={true}
-                            />
-                          </CollapsibleContent>
-                        </Collapsible>
-                      ))}
+                      {paginatedDates.map(date => {
+                        const dateFixtures = fixturesByDate[date];
+                        const fixturesByDivision = getFixturesByDivision(dateFixtures);
+                        const divisionsForDate = Object.keys(fixturesByDivision);
+                        
+                        return (
+                          <Collapsible 
+                            key={date}
+                            open={!!openDateSections[date]}
+                            onOpenChange={() => toggleDateSection(date)}
+                            className="border border-gray-800 rounded-md overflow-hidden"
+                          >
+                            <CollapsibleTrigger className="w-full flex justify-between items-center p-1.5 bg-background/50 hover:bg-background/70">
+                              <div className="flex items-center">
+                                <Calendar className="h-3 w-3 text-primary mr-1.5" />
+                                <span className="font-semibold text-xs">{date}</span>
+                              </div>
+                              <span className="text-[0.65rem] text-muted-foreground">
+                                {dateFixtures.length} {dateFixtures.length === 1 ? 'match' : 'matches'}
+                              </span>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="space-y-0.5 py-1">
+                                {divisionsForDate.map(division => {
+                                  const divisionKey = `${date}-${division}`;
+                                  const isOpen = openDivisionSections[divisionKey] !== false; // Default to open
+                                  
+                                  return (
+                                    <Collapsible 
+                                      key={divisionKey}
+                                      open={isOpen}
+                                      onOpenChange={() => toggleDivisionSection(divisionKey)}
+                                      className="border border-gray-800/60 rounded mx-1 overflow-hidden"
+                                    >
+                                      <CollapsibleTrigger className="w-full flex justify-between items-center p-1 bg-gray-900/40 hover:bg-gray-900/60">
+                                        <div className="flex items-center">
+                                          <Shield className="h-2.5 w-2.5 text-primary mr-1" />
+                                          <span className="font-medium text-[0.7rem]">{division}</span>
+                                        </div>
+                                        <Badge variant="outline" className="h-3.5 text-[0.6rem] py-0 px-1.5">
+                                          {fixturesByDivision[division].length}
+                                        </Badge>
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent>
+                                        <ResponsiveTable
+                                          data={fixturesByDivision[division]}
+                                          columns={resultColumns}
+                                          keyField="Id"
+                                          resultsMode={true}
+                                          darkMode={true}
+                                          hideHeader={true}
+                                        />
+                                      </CollapsibleContent>
+                                    </Collapsible>
+                                  );
+                                })}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="py-4 text-center text-muted-foreground text-sm">
