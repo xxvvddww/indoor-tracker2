@@ -1,11 +1,10 @@
 
 import { Fixture } from "@/types/cricket";
 import { formatDate } from "@/utils/dateFormatters";
-import { Calendar, ArrowUpRight } from "lucide-react";
+import { Calendar, ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface RecentResultsProps {
@@ -42,60 +41,45 @@ export const RecentResults = ({
     return orderA - orderB;
   });
 
-  const recentResultsColumns = [
-    {
-      key: "HomeTeam",
-      header: "Match",
-      render: (value: string, row: Fixture) => (
+  // Render match function
+  const renderMatch = (fixture: Fixture) => (
+    <div key={fixture.Id} className="flex justify-between items-center py-1 border-b border-gray-800 last:border-0">
+      <div className="flex-1">
         <span className={cn(
-          "text-[0.6rem] font-medium",
-          row.HomeTeamWon && "text-green-500 dark:text-green-400"
+          "team-name text-[0.6rem]",
+          fixture.HomeTeamWon && "team-name-winner"
         )}>
-          {value}
+          {fixture.HomeTeam}
         </span>
-      ),
-    },
-    {
-      key: "vs",
-      header: "vs",
-      className: "w-6 text-center",
-      render: () => <span className="text-[0.6rem] text-muted-foreground">vs</span>,
-    },
-    {
-      key: "AwayTeam",
-      header: "Away",
-      render: (value: string, row: Fixture) => (
+      </div>
+      <div className="flex-none px-1 text-[0.6rem] text-muted-foreground">vs</div>
+      <div className="flex-1">
         <span className={cn(
-          "text-[0.6rem] font-medium",
-          row.AwayTeamWon && "text-green-500 dark:text-green-400"
+          "team-name text-[0.6rem]",
+          fixture.AwayTeamWon && "team-name-winner"
         )}>
-          {value}
+          {fixture.AwayTeam}
         </span>
-      ),
-    },
-    {
-      key: "ScoreDescription",
-      header: "Result",
-      className: "w-16 text-right",
-      render: (value: string, row: Fixture) => (
-        <div className="flex items-center justify-end gap-0.5">
-          <span className="text-[0.6rem]">{value || `${row.HomeTeamScore}-${row.AwayTeamScore}`}</span>
-          <Link to={`/match/${row.Id}`} className="text-primary ml-0.5">
-            <ArrowUpRight className="h-2.5 w-2.5" />
-          </Link>
-        </div>
-      ),
-    },
-  ];
+      </div>
+      <div className="flex-none flex items-center justify-end">
+        <span className="text-[0.6rem] whitespace-nowrap">
+          {fixture.ScoreDescription || `${fixture.HomeTeamScore}-${fixture.AwayTeamScore}`}
+        </span>
+        <Link to={`/match/${fixture.Id}`} className="text-primary ml-0.5">
+          <ArrowUpRight className="h-2.5 w-2.5" />
+        </Link>
+      </div>
+    </div>
+  );
 
   return (
     <Collapsible 
       open={expandedSection === "recentResults"} 
       onOpenChange={() => toggleSection("recentResults")}
-      className="border border-gray-700 rounded-lg overflow-hidden bg-background/30"
+      className="border border-gray-700 rounded-lg overflow-hidden dark-results-container"
     >
       <CollapsibleTrigger className="w-full">
-        <div className="flex justify-between items-center p-2">
+        <div className="flex justify-between items-center p-2 dark-results-header">
           <div className="flex items-center">
             <Calendar className="h-4 w-4 text-primary mr-1.5" />
             <span className="font-semibold text-sm">Recent Results</span>
@@ -105,28 +89,27 @@ export const RecentResults = ({
               </span>
             )}
           </div>
+          {expandedSection === "recentResults" ? (
+            <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          )}
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="px-0 pb-2">
         {orderedDivisions.length > 0 ? (
-          <div className="space-y-1">
+          <div className="space-y-1 p-2">
             {orderedDivisions.map(division => (
               <div key={division} className="space-y-0.5">
-                <h3 className="text-[0.65rem] font-semibold px-2 py-0.5 bg-muted/10">
+                <h3 className="text-[0.65rem] font-semibold px-2 py-0.5 bg-[#1e293b] rounded-sm">
                   {division}
                 </h3>
-                <ResponsiveTable
-                  data={fixturesByDivision[division]}
-                  columns={recentResultsColumns}
-                  keyField="Id"
-                  superCompact={true}
-                  ultraCompact={true}
-                  darkMode={true}
-                  className="px-1"
-                />
+                <div className="px-2">
+                  {fixturesByDivision[division].map(renderMatch)}
+                </div>
               </div>
             ))}
-            <div className="text-center mt-1">
+            <div className="text-center mt-2">
               <Link 
                 to="/fixtures" 
                 className="text-[0.65rem] text-primary hover:underline inline-flex items-center"

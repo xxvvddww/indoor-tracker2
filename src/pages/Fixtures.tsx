@@ -4,7 +4,7 @@ import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { fetchFixtures } from '../services/cricketApi';
 import { Fixture } from '../types/cricket';
-import { ArrowUpRight, Filter, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowUpRight, Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -138,55 +138,38 @@ const Fixtures = () => {
     window.scrollTo(0, 0);
   };
 
-  const resultColumns = [
-    {
-      key: "HomeTeam",
-      header: "Home",
-      className: "text-left w-1/3 single-line-cell",
-      render: (value: string, row: Fixture) => (
-        <span className={cn(
-          "text-[0.65rem]",
-          row.HomeTeamWon && "text-green-500 dark:text-green-400 font-medium"
-        )}>
-          {value || 'TBD'}
-        </span>
-      )
-    },
-    {
-      key: "vs",
-      header: "",
-      className: "w-6 text-center px-0",
-      render: () => <span className="text-[0.65rem] text-muted-foreground">vs</span>
-    },
-    {
-      key: "AwayTeam",
-      header: "Away",
-      className: "text-left w-1/3 single-line-cell",
-      render: (value: string, row: Fixture) => (
-        <span className={cn(
-          "text-[0.65rem]",
-          row.AwayTeamWon && "text-green-500 dark:text-green-400 font-medium"
-        )}>
-          {value || 'TBD'}
-        </span>
-      )
-    },
-    {
-      key: "Result",
-      header: "Result",
-      className: "w-16 text-right",
-      render: (value: string, row: Fixture) => (
-        <div className="flex items-center justify-end gap-0.5">
-          <span className="text-[0.65rem] whitespace-nowrap">
-            {row.HomeTeamScore}-{row.AwayTeamScore}
+  // Custom match display using JSX instead of ResponsiveTable
+  const renderMatch = (fixture: Fixture) => {
+    return (
+      <div key={fixture.Id} className="flex justify-between items-center py-1.5 border-b border-gray-800 last:border-0">
+        <div className="flex-1 flex items-center">
+          <span className={cn(
+            "team-name",
+            fixture.HomeTeamWon && "team-name-winner"
+          )}>
+            {fixture.HomeTeam || 'TBD'}
           </span>
-          <Link to={`/match/${row.Id}`} className="text-primary ml-0.5">
+        </div>
+        <div className="flex-none px-1 text-[0.65rem] text-muted-foreground">vs</div>
+        <div className="flex-1 flex items-center">
+          <span className={cn(
+            "team-name",
+            fixture.AwayTeamWon && "team-name-winner"
+          )}>
+            {fixture.AwayTeam || 'TBD'}
+          </span>
+        </div>
+        <div className="flex-none flex items-center justify-end">
+          <span className="score-display">
+            {fixture.ScoreDescription || `${fixture.HomeTeamScore}-${fixture.AwayTeamScore}`}
+          </span>
+          <Link to={`/match/${fixture.Id}`} className="text-primary ml-0.5">
             <ArrowUpRight className="h-2.5 w-2.5" />
           </Link>
         </div>
-      )
-    }
-  ];
+      </div>
+    );
+  };
 
   return (
     <MainLayout>
@@ -205,7 +188,6 @@ const Fixtures = () => {
               }}
               className="pr-8 h-7 text-xs"
             />
-            <Filter className="absolute right-2 top-1.5 h-3 w-3 text-muted-foreground" />
           </div>
         </div>
         
@@ -219,16 +201,16 @@ const Fixtures = () => {
           </div>
         ) : (
           <>
-            <Card className="border border-gray-700 bg-background/30">
-              <CardHeader className="pb-0.5 pt-1.5 px-2">
-                <CardTitle className="flex items-center gap-1 text-xs">
+            <Card className="dark-results-container">
+              <CardHeader className="pb-0.5 pt-2 px-4 dark-results-header">
+                <CardTitle className="flex items-center gap-1 text-base">
                   Results by Date
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <ScrollArea className="h-full max-h-[500px]">
                   {paginatedDates.length > 0 ? (
-                    <div className="space-y-1 px-1 py-1">
+                    <div className="space-y-1 p-2">
                       {paginatedDates.map(date => (
                         <Collapsible 
                           key={date}
@@ -236,7 +218,7 @@ const Fixtures = () => {
                           onOpenChange={() => toggleDateSection(date)}
                           className="border border-gray-800 rounded-md overflow-hidden"
                         >
-                          <CollapsibleTrigger className="w-full flex justify-between items-center p-1.5 bg-background/50 hover:bg-background/70">
+                          <CollapsibleTrigger className="w-full flex justify-between items-center p-1.5 dark-results-date">
                             <div className="flex items-center">
                               <Calendar className="h-3 w-3 text-primary mr-1.5" />
                               <span className="font-semibold text-xs">{date}</span>
@@ -262,7 +244,7 @@ const Fixtures = () => {
                                       open={openDivisionSections[sectionKey] !== false} // Default to open
                                       onOpenChange={() => toggleDivisionSection(sectionKey)}
                                     >
-                                      <CollapsibleTrigger className="w-full text-left division-header flex justify-between items-center">
+                                      <CollapsibleTrigger className="w-full text-left division-header">
                                         <span>{division}</span>
                                         {openDivisionSections[sectionKey] === false ? (
                                           <ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
@@ -271,15 +253,9 @@ const Fixtures = () => {
                                         )}
                                       </CollapsibleTrigger>
                                       <CollapsibleContent>
-                                        <ResponsiveTable
-                                          data={fixturesByDateAndDivision[date][division]}
-                                          columns={resultColumns}
-                                          keyField="Id"
-                                          resultsMode={true}
-                                          darkMode={true}
-                                          hideHeader={true}
-                                          className="single-line-results"
-                                        />
+                                        <div className="px-2">
+                                          {fixturesByDateAndDivision[date][division].map(renderMatch)}
+                                        </div>
                                       </CollapsibleContent>
                                     </Collapsible>
                                   </div>
