@@ -13,20 +13,26 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
     teams: []
   };
   
-  // Extract match venue and result if available
-  if (data.Venue) {
-    displayData.venue = data.Venue;
-  }
-  
-  if (data.Result) {
-    displayData.result = data.Result;
+  // Extract match venue from Teams data if available
+  if (data.Teams && data.Teams.Team) {
+    const teamsData = Array.isArray(data.Teams.Team) ? 
+      data.Teams.Team : [data.Teams.Team];
+    
+    // Try to get venue from the first team's VenueName if available
+    if (teamsData[0] && teamsData[0].VenueName) {
+      displayData.venue = teamsData[0].VenueName;
+    }
   }
   
   // Extract match date from Configuration if available
-  if (data.Configuration && data.Configuration.Team1InningsStartTime) {
+  if (data.Configuration) {
     try {
-      const dateString = data.Configuration.Team1InningsStartTime.split(' ')[0];
-      displayData.date = dateString;
+      // In MatchDetails type, Team1InningsStartTime doesn't exist, but we can check if it exists at runtime
+      const startTimeStr = (data.Configuration as any).Team1InningsStartTime;
+      if (startTimeStr && typeof startTimeStr === 'string') {
+        const dateString = startTimeStr.split(' ')[0];
+        displayData.date = dateString;
+      }
     } catch (error) {
       console.error("Error parsing date:", error);
     }
@@ -57,12 +63,15 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
           displayData.winner = teamsData[0].Name;
           displayData.winnerId = teamsData[0].Id;
           if (displayData.teams) displayData.teams[0].isWinner = true;
+          displayData.result = `${teamsData[0].Name} won by ${team1Score - team2Score} runs`;
         } else if (team2Score > team1Score) {
           displayData.winner = teamsData[1].Name;
           displayData.winnerId = teamsData[1].Id;
           if (displayData.teams) displayData.teams[1].isWinner = true;
+          displayData.result = `${teamsData[1].Name} won by ${team2Score - team1Score} runs`;
         } else {
           displayData.winner = "Draw";
+          displayData.result = "Match ended in a draw";
         }
       }
     } else if (teamsData[0]?.Points && teamsData[1]?.Points) {
@@ -74,12 +83,15 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
         displayData.winner = teamsData[0].Name;
         displayData.winnerId = teamsData[0].Id;
         if (displayData.teams) displayData.teams[0].isWinner = true;
+        displayData.result = `${teamsData[0].Name} won by ${team1Points - team2Points} points`;
       } else if (team2Points > team1Points) {
         displayData.winner = teamsData[1].Name;
         displayData.winnerId = teamsData[1].Id;
         if (displayData.teams) displayData.teams[1].isWinner = true;
+        displayData.result = `${teamsData[1].Name} won by ${team2Points - team1Points} points`;
       } else {
         displayData.winner = "Draw";
+        displayData.result = "Match ended in a draw";
       }
     }
   }
