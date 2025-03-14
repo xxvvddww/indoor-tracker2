@@ -12,9 +12,6 @@ const Teams = () => {
   const { 
     isLoading, 
     teamsError, 
-    sortColumn, 
-    sortDirection, 
-    handleSort, 
     openDivisions,
     sortedDivisions, 
     displayTeams, 
@@ -44,9 +41,6 @@ const Teams = () => {
         {Object.keys(teamsByDivision).length > 0 && (
           <TeamDivisionList
             sortedDivisions={sortedDivisions}
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={handleSort}
             hasError={!!teamsError}
             openDivisions={openDivisions}
           />

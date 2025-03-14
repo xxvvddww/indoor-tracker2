@@ -8,18 +8,12 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TeamDivisionListProps {
   sortedDivisions: [string, Team[]][];
-  sortColumn: string;
-  sortDirection: 'asc' | 'desc';
-  onSort: (column: string) => void;
   hasError: boolean;
   openDivisions: Record<string, boolean>;
 }
 
 const TeamDivisionList = ({ 
   sortedDivisions, 
-  sortColumn, 
-  sortDirection, 
-  onSort, 
   hasError,
   openDivisions
 }: TeamDivisionListProps) => {
@@ -48,9 +42,6 @@ const TeamDivisionList = ({
               key={division}
               divisionName={division}
               teams={divisionTeams}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              onSort={onSort}
               initialOpen={openDivisions[division] || false}
               preserveOpenState={true}
             />

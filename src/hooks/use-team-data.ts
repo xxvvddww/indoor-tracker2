@@ -1,4 +1,3 @@
-
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTeams, fetchFixtures, fetchPlayerStats, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
@@ -6,8 +5,8 @@ import { Team, Fixture, Player } from '../types/cricket';
 
 export function useTeamData() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortColumn, setSortColumn] = useState('Name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortColumn] = useState('Win%');
+  const [sortDirection] = useState<'asc' | 'desc'>('desc');
   const [openDivisions, setOpenDivisions] = useState<Record<string, boolean>>({});
 
   const { data: teams, isLoading: teamsLoading, error: teamsError } = useQuery({
@@ -118,40 +117,13 @@ export function useTeamData() {
     return [...filteredTeams].sort((a, b) => {
       let comparison = 0;
       
-      switch (sortColumn) {
-        case 'Name':
-          comparison = a.Name.localeCompare(b.Name);
-          break;
-        case 'Division':
-          const divA = a.DivisionName || '';
-          const divB = b.DivisionName || '';
-          comparison = divA.localeCompare(divB);
-          break;
-        case 'Players':
-          comparison = a.playerCount - b.playerCount;
-          break;
-        case 'Games':
-          comparison = a.completedMatches - b.completedMatches;
-          break;
-        case 'Wins':
-          comparison = a.wins - b.wins;
-          break;
-        case 'Losses':
-          comparison = a.losses - b.losses;
-          break;
-        case 'Win%':
-          comparison = parseFloat(a.winPercentage) - parseFloat(b.winPercentage);
-          break;
-        case 'Skins':
-          comparison = a.skinsWon - b.skinsWon;
-          break;
-        default:
-          comparison = 0;
-      }
+      const aWinPct = parseFloat(a.winPercentage || '0');
+      const bWinPct = parseFloat(b.winPercentage || '0');
+      comparison = bWinPct - aWinPct; // Default descending order
       
-      return sortDirection === 'asc' ? comparison : -comparison;
+      return comparison;
     });
-  }, [filteredTeams, sortColumn, sortDirection]);
+  }, [filteredTeams]);
 
   const teamsByDivision = useMemo(() => {
     if (!sortedTeams.length) return {};
@@ -164,6 +136,14 @@ export function useTeamData() {
         divisions[divisionName] = [];
       }
       divisions[divisionName].push(team);
+    });
+    
+    Object.keys(divisions).forEach(division => {
+      divisions[division].sort((a, b) => {
+        const aWinPct = parseFloat(a.winPercentage || '0');
+        const bWinPct = parseFloat(b.winPercentage || '0');
+        return bWinPct - aWinPct;
+      });
     });
     
     return divisions;
@@ -206,15 +186,6 @@ export function useTeamData() {
     }));
   }, []);
 
-  const handleSort = useCallback((column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  }, [sortColumn, sortDirection]);
-
   const isLoading = teamsLoading || fixturesLoading || playersLoading;
 
   const mockTeams = [
@@ -223,6 +194,8 @@ export function useTeamData() {
     { Id: "3", Name: "Thunder Spirits", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 4, losses: 3, draws: 1, winPercentage: "50.0", playerCount: 11, skinsWon: 12 },
     { Id: "4", Name: "Cricket Masters", DivisionName: "Div 1", totalMatches: 10, completedMatches: 8, wins: 7, losses: 1, draws: 0, winPercentage: "87.5", playerCount: 15, skinsWon: 21 },
   ];
+
+  mockTeams.sort((a, b) => parseFloat(b.winPercentage) - parseFloat(a.winPercentage));
 
   const useFixturesForTeams = teamsError && !fixturesLoading && fixtures && fixtures.length > 0;
 
@@ -248,7 +221,6 @@ export function useTeamData() {
     setSearchQuery,
     sortColumn,
     sortDirection,
-    handleSort,
     openDivisions,
     toggleDivision,
     teamStats,

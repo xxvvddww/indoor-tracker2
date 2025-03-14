@@ -10,9 +10,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 interface TeamDivisionTableProps {
   divisionName: string;
   teams: Team[];
-  sortColumn: string;
-  sortDirection: 'asc' | 'desc';
-  onSort: (column: string) => void;
   initialOpen?: boolean;
   preserveOpenState?: boolean;
 }
@@ -20,9 +17,6 @@ interface TeamDivisionTableProps {
 const TeamDivisionTable = ({ 
   divisionName, 
   teams, 
-  sortColumn, 
-  sortDirection, 
-  onSort,
   initialOpen = true,
   preserveOpenState = false 
 }: TeamDivisionTableProps) => {
@@ -39,19 +33,12 @@ const TeamDivisionTable = ({
   const handleToggle = useCallback(() => {
     setIsOpen(prev => !prev);
   }, []);
-  
-  const renderSortIcon = useCallback((column: string) => {
-    if (sortColumn !== column) return null;
-    return sortDirection === 'asc' 
-      ? <ChevronUp className="h-4 w-4 ml-1 inline" /> 
-      : <ChevronDown className="h-4 w-4 ml-1 inline" />;
-  }, [sortColumn, sortDirection]);
 
   return (
     <Collapsible 
       open={isOpen}
       onOpenChange={handleToggle}
-      className="border-2 border-gray-400 dark:border-gray-600 rounded-lg overflow-hidden mb-3"
+      className="border-2 border-gray-400 dark:border-gray-600 rounded-lg overflow-hidden my-5"
     >
       <CollapsibleTrigger 
         className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}
@@ -70,41 +57,23 @@ const TeamDivisionTable = ({
           <Table className={compactMode ? 'text-xxs' : ''}>
             <TableHeader className="sticky top-0 bg-card">
               <TableRow className={compactMode ? 'h-8' : ''}>
-                <TableHead 
-                  className={`cursor-pointer ${compactMode ? 'w-[100px] py-1 px-1' : 'w-[180px]'}`}
-                  onClick={() => onSort('Name')}
-                >
-                  Team {renderSortIcon('Name')}
+                <TableHead className={`${compactMode ? 'w-[100px] py-1 px-1' : 'w-[180px]'}`}>
+                  Team
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer text-center w-[30px] py-1 px-1"
-                  onClick={() => onSort('Games')}
-                >
-                  G {renderSortIcon('Games')}
+                <TableHead className="text-center w-[30px] py-1 px-1">
+                  G
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer text-center w-[30px] py-1 px-1"
-                  onClick={() => onSort('Wins')}
-                >
-                  W {renderSortIcon('Wins')}
+                <TableHead className="text-center w-[30px] py-1 px-1">
+                  W
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer text-center w-[30px] py-1 px-1"
-                  onClick={() => onSort('Losses')}
-                >
-                  L {renderSortIcon('Losses')}
+                <TableHead className="text-center w-[30px] py-1 px-1">
+                  L
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer text-center w-[30px] py-1 px-1"
-                  onClick={() => onSort('Draws')}
-                >
-                  D {renderSortIcon('Draws')}
+                <TableHead className="text-center w-[30px] py-1 px-1">
+                  D
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer text-center w-[30px] py-1 px-1"
-                  onClick={() => onSort('Win%')}
-                >
-                  % {renderSortIcon('Win%')}
+                <TableHead className="text-center w-[30px] py-1 px-1">
+                  %
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -128,10 +97,10 @@ const TeamDivisionTable = ({
                   </TableCell>
                   <TableCell className="text-center py-1 px-1">
                     {team.WinPercentage 
-                      ? (typeof team.WinPercentage === 'string' ? parseFloat(team.WinPercentage).toFixed(0) : team.WinPercentage.toFixed(0)) 
+                      ? (typeof team.WinPercentage === 'string' ? parseInt(team.WinPercentage) : Math.round(team.WinPercentage)) 
                       : (team as any).winPercentage 
-                        ? parseFloat((team as any).winPercentage).toFixed(0) 
-                        : '0'}
+                        ? Math.round(parseFloat((team as any).winPercentage))
+                        : 0}%
                   </TableCell>
                 </TableRow>
               ))}
