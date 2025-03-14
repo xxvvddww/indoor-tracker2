@@ -12,7 +12,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const isActive = (path: string) => {
-    return location.pathname === path ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50";
+    return location.pathname === path 
+      ? "bg-secondary text-white border-l-2 border-success" 
+      : "text-muted-foreground hover:text-white hover:bg-secondary/50";
   };
 
   const navItems = [
@@ -27,10 +29,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <div className="w-64 border-r bg-card hidden md:block">
-        <div className="p-4 border-b">
+      <div className="w-64 bg-background border-r border-secondary hidden md:block">
+        <div className="p-4 border-b border-secondary">
           <div className="flex items-center gap-2">
-            <Award className="h-6 w-6 text-primary" />
+            <Award className="h-6 w-6 text-success" />
             <h1 className="font-bold text-xl">Cricket Tracker</h1>
           </div>
         </div>
@@ -52,10 +54,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </div>
       
       {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-background border-b z-10">
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-background border-b border-secondary z-10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <Award className="h-6 w-6 text-primary" />
+            <Award className="h-6 w-6 text-success" />
             <h1 className="font-bold text-xl">Cricket Tracker</h1>
           </div>
           <button 
