@@ -72,13 +72,13 @@ const processXmlResponse = (xmlString: string, rootTag: string): any => {
 };
 
 // API functions
-export const fetchFixtures = async (leagueId: string = "", seasonId: string = CURRENT_SEASON_ID): Promise<Fixture[]> => {
+export const fetchFixtures = async (leagueId: string = "0", seasonId: string = CURRENT_SEASON_ID): Promise<Fixture[]> => {
   try {
     console.log(`Fetching fixtures with seasonId: ${seasonId}`);
     const response = await axios.get(`${API_BASE_URL}`, {
       params: {
         Type: "fixtures",
-        LeagueId: leagueId,
+        LeagueId: leagueId || "0", // Use "0" as default if empty
         SeasonId: seasonId
       },
       responseType: 'text'
@@ -94,13 +94,13 @@ export const fetchFixtures = async (leagueId: string = "", seasonId: string = CU
   }
 };
 
-export const fetchPlayerStats = async (leagueId: string = "", seasonId: string = CURRENT_SEASON_ID): Promise<Player[]> => {
+export const fetchPlayerStats = async (leagueId: string = "0", seasonId: string = CURRENT_SEASON_ID): Promise<Player[]> => {
   try {
     console.log(`Fetching player stats with seasonId: ${seasonId}`);
     const response = await axios.get(`${API_BASE_URL}`, {
       params: {
         Type: "statistics",
-        LeagueId: leagueId,
+        LeagueId: leagueId || "0", // Use "0" as default if empty
         SeasonId: seasonId
       },
       responseType: 'text'
