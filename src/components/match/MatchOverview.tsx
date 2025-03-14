@@ -1,10 +1,11 @@
+
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
 import PlayerStatistics from './PlayerStatistics';
 import DataExtractor from './DataExtractor';
 import { ResponsiveContainer } from '../ui/responsive-container';
-import { Calendar, Trophy } from 'lucide-react';
+import { AlertCircle, Calendar, MapPin, Trophy, Users } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card } from "@/components/ui/card";
 
@@ -55,23 +56,52 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
         {/* Match summary section */}
         <Card className="p-4">
           <div className="space-y-4">
-            {/* Match date */}
-            {displayInfo.date ? (
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary" />
-                <span className="text-sm">{displayInfo.date}</span>
-              </div>
-            ) : null}
+            {/* Match date and venue */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {displayInfo.date ? (
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <span className="text-sm">{displayInfo.date}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm">Date not available</span>
+                </div>
+              )}
+              
+              {displayInfo.venue ? (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span className="text-sm">{displayInfo.venue}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-sm">Venue not available</span>
+                </div>
+              )}
+            </div>
             
-            {/* Match winner */}
+            {/* Match result */}
             {displayInfo.winner ? (
               <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
                 <Trophy className="h-4 w-4 text-green-500" />
                 <p className="text-sm">
                   <span className="font-medium">Winner:</span> {displayInfo.winner}
+                  {displayInfo.result && displayInfo.result !== `${displayInfo.winner} won` && (
+                    <span className="ml-1">({displayInfo.result.replace(`${displayInfo.winner} won`, '').trim()})</span>
+                  )}
                 </p>
               </div>
-            ) : null}
+            ) : (
+              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
+                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  No result information available
+                </p>
+              </div>
+            )}
             
             {/* Man of the match */}
             {displayInfo.manOfMatch && (
