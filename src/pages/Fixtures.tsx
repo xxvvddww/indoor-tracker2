@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -20,28 +19,58 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-AU', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
+  try {
+    // Check if the date string is valid
+    if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
+      return "Date unavailable";
+    }
+    
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-AU', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(date);
+  } catch (error) {
+    console.error("Error formatting date:", dateString, error);
+    return "Date unavailable";
+  }
 };
 
 const isToday = (dateString: string) => {
-  const today = new Date();
-  const date = new Date(dateString);
-  return date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
+  try {
+    // Check if the date string is valid
+    if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
+      return false;
+    }
+    
+    const today = new Date();
+    const date = new Date(dateString);
+    return date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+  } catch (error) {
+    console.error("Error checking if date is today:", dateString, error);
+    return false;
+  }
 };
 
 const isFutureDate = (dateString: string) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set to start of day
-  const date = new Date(dateString);
-  return date > today;
+  try {
+    // Check if the date string is valid
+    if (!dateString || dateString === "" || isNaN(Date.parse(dateString))) {
+      return false;
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day
+    const date = new Date(dateString);
+    return date > today;
+  } catch (error) {
+    console.error("Error checking if date is in future:", dateString, error);
+    return false;
+  }
 };
 
 const Fixtures = () => {
