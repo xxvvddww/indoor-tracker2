@@ -2,7 +2,8 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Fixtures from "./pages/Fixtures";
@@ -11,23 +12,39 @@ import Teams from "./pages/Teams";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 import MatchDetails from "./pages/MatchDetails";
+import { ThemeProvider } from "./context/ThemeContext";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
-  <TooltipProvider>
-    <Toaster />
-    <Sonner />
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/fixtures" element={<Fixtures />} />
-      <Route path="/standings" element={<Standings />} />
-      <Route path="/teams" element={<Teams />} />
-      <Route path="/stats" element={<Stats />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/match/:id" element={<MatchDetails />} />
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  </TooltipProvider>
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/fixtures" element={<Fixtures />} />
+            <Route path="/standings" element={<Standings />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/stats" element={<Stats />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/match/:id" element={<MatchDetails />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
 );
 
 export default App;

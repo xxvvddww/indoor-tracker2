@@ -38,7 +38,7 @@ const TeamDivisionTable = ({
     <Collapsible 
       open={isOpen}
       onOpenChange={handleToggle}
-      className={`relative rounded-lg overflow-hidden my-4 ${isOpen ? 'moving-border' : 'border-2 border-gray-400 dark:border-gray-600'}`}
+      className="border-2 border-gray-400 dark:border-gray-600 rounded-lg overflow-hidden my-4"
     >
       <CollapsibleTrigger 
         className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}

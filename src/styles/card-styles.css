@@ -1,77 +1,79 @@
 
-/* Card Styles */
-.card-hover {
-  @apply hover:translate-y-[-2px] hover:shadow-lg transition-all duration-300;
-}
-
-.card-modern {
-  @apply bg-gradient-to-br from-background to-background/80 border shadow-md dark:shadow-none;
-  position: relative;
-  overflow: hidden;
-}
-
-.card-modern::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, 
-    theme('colors.purple.400'),
-    theme('colors.blue.400'),
-    theme('colors.cyan.400')
-  );
-  z-index: 1;
-  opacity: 0.7;
-}
-
-.card-modern:hover::before {
-  opacity: 1;
-}
-
-.card-modern:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 
-              0 8px 10px -6px rgba(0, 0, 0, 0.1);
-}
-
-.card-stats {
-  @apply rounded-xl shadow-sm transition-all duration-300;
-}
-
-.card-stats:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
-              0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.card-glow {
-  @apply border-none shadow-none relative overflow-hidden;
-  background: radial-gradient(
-    800px circle at var(--mouse-x) var(--mouse-y), 
-    rgba(255, 255, 255, 0.1),
-    transparent 40%
-  );
-}
-
-.card-glow::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: radial-gradient(
-    600px circle at var(--mouse-x) var(--mouse-y), 
-    rgba(120, 100, 255, 0.15),
-    transparent 40%
-  );
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.card-glow:hover::after {
-  opacity: 1;
-}
-
-.card-glass {
-  @apply bg-white/10 backdrop-blur-md border-white/20;
+@layer components {
+  /* Card Styles */
+  .card-hover {
+    @apply hover:translate-y-[-2px] hover:shadow-lg transition-all duration-300;
+  }
+  
+  .card-modern {
+    @apply bg-gradient-to-br from-background to-background/80 border shadow-md dark:shadow-none;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      theme('colors.purple.400'),
+      theme('colors.blue.400'),
+      theme('colors.cyan.400')
+    );
+    z-index: 1;
+    opacity: 0.7;
+  }
+  
+  .card-modern:hover::before {
+    opacity: 1;
+  }
+  
+  .card-modern:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 
+                0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-stats {
+    @apply rounded-xl shadow-sm transition-all duration-300;
+  }
+  
+  .card-stats:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+                0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .card-glow {
+    @apply border-none shadow-none relative overflow-hidden;
+    background: radial-gradient(
+      800px circle at var(--mouse-x) var(--mouse-y), 
+      rgba(255, 255, 255, 0.1),
+      transparent 40%
+    );
+  }
+  
+  .card-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(
+      600px circle at var(--mouse-x) var(--mouse-y), 
+      rgba(120, 100, 255, 0.15),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .card-glow:hover::after {
+    opacity: 1;
+  }
+  
+  .card-glass {
+    @apply bg-white/10 backdrop-blur-md border-white/20;
+  }
 }
