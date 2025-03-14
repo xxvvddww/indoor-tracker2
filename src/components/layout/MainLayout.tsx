@@ -3,6 +3,7 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Award, Users, Calendar, BarChart3, Settings, Home, Menu, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -36,11 +37,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <div className="w-64 bg-background border-r border-secondary hidden md:block">
-        <div className="p-4 border-b border-secondary">
+        <div className="p-4 border-b border-secondary flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Award className="h-6 w-6 text-success" />
             <h1 className="font-bold text-xl">Cricket Tracker</h1>
           </div>
+          <ThemeToggle />
         </div>
         <nav className="p-2">
           <ul className="space-y-1">
@@ -66,17 +68,20 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <Award className="h-5 w-5 text-success" />
             <h1 className="font-bold text-base">Cricket Tracker</h1>
           </div>
-          <button 
-            className="p-1 rounded-md hover:bg-secondary/50 transition-colors"
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button 
+              className="p-1 rounded-md hover:bg-secondary/50 transition-colors"
+              onClick={toggleMobileMenu}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
