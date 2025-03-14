@@ -71,15 +71,20 @@ export const processMatchData = (data: MatchDetails | null): DisplayableMatchInf
       data.MatchSummary.team : [data.MatchSummary.team];
     
     teams.forEach(team => {
-      if (team.id && team.name) {
+      // Fix for type error: Check if team has id property before using it
+      const teamId = 'id' in team ? team.id : '';
+      const teamName = 'name' in team ? team.name : '';
+      
+      if (teamId && teamName) {
         const players = Array.isArray(team.player) ? team.player : team.player ? [team.player] : [];
         
         if (!displayData.playerStats) {
           displayData.playerStats = {};
         }
         
-        displayData.playerStats[team.id] = {
-          name: team.name,
+        // Fix for type error: Use safe access to teamId
+        displayData.playerStats[teamId as string] = {
+          name: teamName,
           players: players.map(player => ({
             Name: player.Name || 'Unknown',
             RS: player.RS || '0',  // Runs scored
