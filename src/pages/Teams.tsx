@@ -11,12 +11,14 @@ import { Team, Fixture, Player } from '../types/cricket';
 import LoadingSpinner from '../components/ui/loading-spinner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Teams = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState('Name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [openDivisions, setOpenDivisions] = useState<Record<string, boolean>>({});
+  const isMobile = useIsMobile();
 
   const { data: teams, isLoading: teamsLoading, error: teamsError } = useQuery({
     queryKey: ['teams', DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID],
@@ -237,15 +239,18 @@ const Teams = () => {
   };
 
   const renderResultBadge = (result: string) => {
+    const size = isMobile ? "w-4 h-4" : "w-6 h-6";
+    const fontSize = isMobile ? "text-[9px]" : "text-xs";
+    
     switch (result) {
       case 'W':
-        return <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold text-xs">W</div>;
+        return <div className={`${size} rounded-full bg-green-500 flex items-center justify-center text-white font-semibold ${fontSize}`}>W</div>;
       case 'L':
-        return <div className="w-6 h-6 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 font-semibold text-xs">L</div>;
+        return <div className={`${size} rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 font-semibold ${fontSize}`}>L</div>;
       case 'D':
-        return <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold text-xs">D</div>;
+        return <div className={`${size} rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold ${fontSize}`}>D</div>;
       default:
-        return <div className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 text-xs">-</div>;
+        return <div className={`${size} rounded-full border border-gray-200 flex items-center justify-center text-gray-400 ${fontSize}`}>-</div>;
     }
   };
 
@@ -274,16 +279,22 @@ const Teams = () => {
         ? new Set(mockTeams.map(t => t.DivisionName).filter(Boolean)).size 
         : (teams?.length ? new Set(teams.map(t => t.DivisionName).filter(Boolean)).size : 0));
 
+  const getCompactLayout = () => {
+    return isMobile;
+  };
+
+  const compactMode = getCompactLayout();
+
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className={`space-y-${compactMode ? '2' : '6'}`}>
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold tracking-tight">Teams</h1>
+          <h1 className={`${compactMode ? 'text-xl' : 'text-3xl'} font-bold tracking-tight`}>Teams</h1>
           
-          <div className="relative w-72">
+          <div className={`relative ${compactMode ? 'w-36' : 'w-72'}`}>
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search teams or divisions..."
+              placeholder={compactMode ? "Search..." : "Search teams or divisions..."}
               className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -291,43 +302,43 @@ const Teams = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="pt-6">
+        <div className={`grid grid-cols-3 gap-${compactMode ? '1' : '4'}`}>
+          <Card className={compactMode ? 'p-0' : ''}>
+            <CardContent className={compactMode ? 'p-2 pt-2' : 'pt-6'}>
               <div className="flex items-center space-x-2">
-                <Users className="h-10 w-10 text-primary p-2 border rounded-full" />
+                <Users className={`${compactMode ? 'h-7 w-7' : 'h-10 w-10'} text-primary p-1 border rounded-full`} />
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Teams</p>
-                  <h3 className="text-2xl font-bold">
-                    {isLoading ? <LoadingSpinner size={4} /> : totalTeams}
+                  <p className={`${compactMode ? 'text-xxs' : 'text-sm'} text-muted-foreground`}>Total Teams</p>
+                  <h3 className={`${compactMode ? 'text-lg' : 'text-2xl'} font-bold`}>
+                    {isLoading ? <LoadingSpinner size={compactMode ? 3 : 4} /> : totalTeams}
                   </h3>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="pt-6">
+          <Card className={compactMode ? 'p-0' : ''}>
+            <CardContent className={compactMode ? 'p-2 pt-2' : 'pt-6'}>
               <div className="flex items-center space-x-2">
-                <Shield className="h-10 w-10 text-primary p-2 border rounded-full" />
+                <Shield className={`${compactMode ? 'h-7 w-7' : 'h-10 w-10'} text-primary p-1 border rounded-full`} />
                 <div>
-                  <p className="text-sm text-muted-foreground">Divisions</p>
-                  <h3 className="text-2xl font-bold">
-                    {isLoading ? <LoadingSpinner size={4} /> : uniqueDivisions}
+                  <p className={`${compactMode ? 'text-xxs' : 'text-sm'} text-muted-foreground`}>Divisions</p>
+                  <h3 className={`${compactMode ? 'text-lg' : 'text-2xl'} font-bold`}>
+                    {isLoading ? <LoadingSpinner size={compactMode ? 3 : 4} /> : uniqueDivisions}
                   </h3>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="pt-6">
+          <Card className={compactMode ? 'p-0' : ''}>
+            <CardContent className={compactMode ? 'p-2 pt-2' : 'pt-6'}>
               <div className="flex items-center space-x-2">
-                <Trophy className="h-10 w-10 text-primary p-2 border rounded-full" />
+                <Trophy className={`${compactMode ? 'h-7 w-7' : 'h-10 w-10'} text-primary p-1 border rounded-full`} />
                 <div>
-                  <p className="text-sm text-muted-foreground">Teams with 100% Win Rate</p>
-                  <h3 className="text-2xl font-bold">
-                    {isLoading ? <LoadingSpinner size={4} /> : displayTeams.filter(t => parseFloat(t.winPercentage) === 100).length}
+                  <p className={`${compactMode ? 'text-xxs' : 'text-sm'} text-muted-foreground truncate`}>{compactMode ? "100% Wins" : "Teams with 100% Win Rate"}</p>
+                  <h3 className={`${compactMode ? 'text-lg' : 'text-2xl'} font-bold`}>
+                    {isLoading ? <LoadingSpinner size={compactMode ? 3 : 4} /> : displayTeams.filter(t => parseFloat(t.winPercentage) === 100).length}
                   </h3>
                 </div>
               </div>
@@ -372,100 +383,124 @@ const Teams = () => {
         )}
         
         {Object.keys(teamsByDivision).length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                <span>Team Rankings</span>
-              </CardTitle>
-              <CardDescription>
-                {teamsError && !useFixturesForTeams ? 
-                  "Sample data for demonstration purposes" : 
-                  "Team performance statistics for the current season"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
+          <Card className={compactMode ? 'p-0 border-0 shadow-none' : ''}>
+            {!compactMode && (
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  <span>Team Rankings</span>
+                </CardTitle>
+                <CardDescription>
+                  {teamsError && !useFixturesForTeams ? 
+                    "Sample data for demonstration purposes" : 
+                    "Team performance statistics for the current season"}
+                </CardDescription>
+              </CardHeader>
+            )}
+            <CardContent className={compactMode ? 'p-0' : ''}>
+              <div className={`space-y-${compactMode ? '1' : '6'}`}>
                 {sortedDivisions.map(([division, divisionTeams]) => (
                   <Collapsible 
                     key={division}
                     open={openDivisions[division]}
                     onOpenChange={() => toggleDivision(division)}
-                    className="border rounded-lg overflow-hidden"
+                    className={`${compactMode ? 'border-0' : 'border'} rounded-lg overflow-hidden`}
                   >
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-2 font-medium text-lg">
-                        <Shield className="h-5 w-5 text-primary" />
+                    <CollapsibleTrigger className={`flex items-center justify-between w-full ${compactMode ? 'p-2' : 'p-4'} bg-muted/30 hover:bg-muted/50 transition-colors`}>
+                      <div className="flex items-center gap-2 font-medium text-sm">
+                        <Shield className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'} text-primary`} />
                         <span>{division}</span>
-                        <Badge variant="outline">{divisionTeams.length} Teams</Badge>
+                        <Badge variant="outline" className={compactMode ? 'text-xxs py-0 px-1' : ''}>{divisionTeams.length} Teams</Badge>
                       </div>
                       {openDivisions[division] ? 
-                        <ChevronUp className="h-5 w-5" /> : 
-                        <ChevronDown className="h-5 w-5" />}
+                        <ChevronUp className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'}`} /> : 
+                        <ChevronDown className={`${compactMode ? 'h-4 w-4' : 'h-5 w-5'}`} />}
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="overflow-x-auto">
-                        <Table>
+                        <Table className={compactMode ? 'text-xxs' : ''}>
                           <TableHeader className="sticky top-0 bg-card">
-                            <TableRow>
+                            <TableRow className={compactMode ? 'h-8' : ''}>
                               <TableHead 
-                                className="cursor-pointer w-[180px]" 
+                                className={`cursor-pointer ${compactMode ? 'w-[100px] py-1 px-1' : 'w-[180px]'}`}
                                 onClick={() => handleSort('Name')}
                               >
                                 Team {renderSortIcon('Name')}
                               </TableHead>
                               <TableHead 
-                                className="cursor-pointer text-center" 
+                                className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1' : ''}`}
                                 onClick={() => handleSort('Players')}
                               >
-                                Players {renderSortIcon('Players')}
+                                {compactMode ? 'Pl' : 'Players'} {renderSortIcon('Players')}
                               </TableHead>
                               <TableHead 
-                                className="cursor-pointer text-center" 
+                                className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1' : ''}`}
                                 onClick={() => handleSort('Games')}
                               >
-                                Games {renderSortIcon('Games')}
+                                {compactMode ? 'G' : 'Games'} {renderSortIcon('Games')}
                               </TableHead>
                               <TableHead 
-                                className="cursor-pointer text-center" 
+                                className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1' : ''}`}
                                 onClick={() => handleSort('Wins')}
                               >
-                                Wins {renderSortIcon('Wins')}
+                                {compactMode ? 'W' : 'Wins'} {renderSortIcon('Wins')}
                               </TableHead>
+                              {!compactMode && (
+                                <TableHead 
+                                  className="cursor-pointer text-center" 
+                                  onClick={() => handleSort('Losses')}
+                                >
+                                  Losses {renderSortIcon('Losses')}
+                                </TableHead>
+                              )}
                               <TableHead 
-                                className="cursor-pointer text-center" 
-                                onClick={() => handleSort('Losses')}
-                              >
-                                Losses {renderSortIcon('Losses')}
-                              </TableHead>
-                              <TableHead 
-                                className="cursor-pointer text-center" 
+                                className={`cursor-pointer text-center ${compactMode ? 'py-1 px-1' : ''}`}
                                 onClick={() => handleSort('Win%')}
                               >
-                                Win% {renderSortIcon('Win%')}
+                                {compactMode ? '%' : 'Win%'} {renderSortIcon('Win%')}
                               </TableHead>
-                              <TableHead 
-                                className="cursor-pointer text-center" 
-                                onClick={() => handleSort('Skins')}
-                              >
-                                Skins Won {renderSortIcon('Skins')}
-                              </TableHead>
-                              <TableHead className="text-center">
-                                Last 5
+                              {!compactMode && (
+                                <TableHead 
+                                  className="cursor-pointer text-center" 
+                                  onClick={() => handleSort('Skins')}
+                                >
+                                  Skins Won {renderSortIcon('Skins')}
+                                </TableHead>
+                              )}
+                              <TableHead className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
+                                {compactMode ? 'L5' : 'Last 5'}
                               </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {divisionTeams.map((team) => (
-                              <TableRow key={team.Id}>
-                                <TableCell className="font-medium">{team.Name}</TableCell>
-                                <TableCell className="text-center">{team.playerCount || '-'}</TableCell>
-                                <TableCell className="text-center">{team.completedMatches}</TableCell>
-                                <TableCell className="text-center">{team.wins}</TableCell>
-                                <TableCell className="text-center">{team.losses}</TableCell>
-                                <TableCell className="text-center">{team.winPercentage}%</TableCell>
-                                <TableCell className="text-center">{team.skinsWon}</TableCell>
-                                <TableCell>
+                              <TableRow key={team.Id} className={compactMode ? 'h-8' : ''}>
+                                <TableCell className={`font-medium truncate ${compactMode ? 'py-1 px-1' : ''}`}>
+                                  {team.Name}
+                                </TableCell>
+                                <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
+                                  {team.playerCount || '-'}
+                                </TableCell>
+                                <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
+                                  {team.completedMatches}
+                                </TableCell>
+                                <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
+                                  {team.wins}
+                                </TableCell>
+                                {!compactMode && (
+                                  <TableCell className="text-center">
+                                    {team.losses}
+                                  </TableCell>
+                                )}
+                                <TableCell className={`text-center ${compactMode ? 'py-1 px-1' : ''}`}>
+                                  {compactMode ? parseFloat(team.winPercentage).toFixed(0) : team.winPercentage}%
+                                </TableCell>
+                                {!compactMode && (
+                                  <TableCell className="text-center">
+                                    {team.skinsWon}
+                                  </TableCell>
+                                )}
+                                <TableCell className={compactMode ? 'py-1 px-1' : ''}>
                                   <div className="flex justify-center gap-1">
                                     {team.lastFiveResults && team.lastFiveResults.length > 0 ? (
                                       team.lastFiveResults.map((result, idx) => (
@@ -488,9 +523,11 @@ const Teams = () => {
                 ))}
               </div>
             </CardContent>
-            <CardFooter className="text-sm text-muted-foreground">
-              Statistics based on completed matches | Win% = Wins ÷ Games × 100
-            </CardFooter>
+            {!compactMode && (
+              <CardFooter className="text-sm text-muted-foreground">
+                Statistics based on completed matches | Win% = Wins ÷ Games × 100
+              </CardFooter>
+            )}
           </Card>
         )}
       </div>

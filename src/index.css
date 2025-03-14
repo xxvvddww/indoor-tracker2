@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -166,6 +167,24 @@
   .mobile-table th, 
   .mobile-table td {
     @apply p-1 sm:p-2;
+  }
+  
+  /* Super compact mobile view */
+  .super-compact-table th,
+  .super-compact-table td {
+    @apply p-0 text-xxs;
+  }
+  
+  .super-compact-table {
+    @apply text-xxs;
+  }
+  
+  .super-compact-layout {
+    @apply space-y-1 p-0;
+  }
+  
+  .super-compact-card {
+    @apply p-1 border-0 shadow-none;
   }
 }
 
