@@ -25,9 +25,39 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { key: "Econ", header: "Econ", hideOnMobile: true },
   ];
 
+  console.log("Rendering PlayerStatistics with displayInfo:", displayInfo);
+  console.log("Player stats:", displayInfo.playerStats ? Object.keys(displayInfo.playerStats).length : "none");
+
   // Check if we have teams but no player stats
   if (!displayInfo.playerStats || Object.keys(displayInfo.playerStats).length === 0) {
     console.log("No player statistics available in displayInfo");
+    
+    // If we have teams data but no player stats, still show the teams
+    if (displayInfo.teams && displayInfo.teams.length > 0) {
+      return (
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
+          
+          {displayInfo.teams.map((team) => (
+            <div key={team.id} className="space-y-2 mb-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-medium">
+                  {team.name}
+                  {displayInfo.winnerId === team.id && (
+                    <Badge variant="outline" className="ml-2 bg-amber-500/20 text-amber-400 border-amber-500">
+                      Winner
+                    </Badge>
+                  )}
+                </h3>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">No player data available for this team</p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
     return (
       <div className="text-center py-4">
         <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
@@ -43,8 +73,25 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   if (!hasActualPlayers) {
     console.log("No actual players in any team");
     return (
-      <div className="text-center py-4">
-        <p className="text-sm text-muted-foreground">No player statistics available for this match</p>
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium mb-2">Player Statistics</h3>
+        
+        {Object.keys(displayInfo.playerStats).map((teamId) => (
+          <div key={teamId} className="space-y-2 mb-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-medium">
+                {displayInfo.playerStats![teamId].name}
+                {displayInfo.winnerId === teamId && (
+                  <Badge variant="outline" className="ml-2 bg-amber-500/20 text-amber-400 border-amber-500">
+                    Winner
+                  </Badge>
+                )}
+              </h3>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">No player data available for this team</p>
+          </div>
+        ))}
       </div>
     );
   }

@@ -8,7 +8,7 @@ import { ensureTeamStats } from './teamStatsInitializer';
 /**
  * Extracts player statistics from match data using the best available data source
  */
-export const extractPlayerStats = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo): void => {
+export const extractPlayerStatsFromMatch = (matchData: MatchDetails, displayInfo: DisplayableMatchInfo): void => {
   if (!matchData.Teams?.Team) {
     console.log("No teams data available, cannot extract player stats");
     return;
