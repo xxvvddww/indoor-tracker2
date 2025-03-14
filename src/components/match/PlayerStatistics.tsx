@@ -17,9 +17,9 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
   const playerColumns = [
     { key: "Name", header: "Player", className: "font-medium" },
     { key: "RS", header: "Runs", hideOnMobile: false },
-    { key: "OB", header: "Overs", hideOnMobile: true },
     { key: "RC", header: "R Con", hideOnMobile: false },
     { key: "Wkts", header: "Wickets", hideOnMobile: false },
+    { key: "OB", header: "Overs", hideOnMobile: true },
     { key: "SR", header: "S/R", hideOnMobile: true },
     { key: "Econ", header: "Econ", hideOnMobile: true },
   ];
@@ -98,7 +98,16 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
               
               {hasTeamPlayers ? (
                 <ResponsiveTable 
-                  data={teamStats.players} 
+                  data={teamStats.players.map(player => ({
+                    ...player,
+                    // Ensure values are strings for display
+                    RS: player.RS || '0',
+                    OB: player.OB || '0', 
+                    RC: player.RC || '0',
+                    Wkts: player.Wkts || '0',
+                    SR: player.SR || '0',
+                    Econ: player.Econ || '0'
+                  }))} 
                   columns={playerColumns}
                   superCompact={isMobile}
                   ultraCompact={false}
