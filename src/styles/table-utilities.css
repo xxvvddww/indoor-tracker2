@@ -1,0 +1,15 @@
+
+@layer components {
+  .super-compact-card {
+    @apply p-1;
+  }
+  
+  .super-compact-table {
+    @apply text-xxs;
+  }
+  
+  .super-compact-table th, 
+  .super-compact-table td {
+    @apply py-1 px-1;
+  }
+}

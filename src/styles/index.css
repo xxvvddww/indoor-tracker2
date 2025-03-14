@@ -1,0 +1,8 @@
+
+@import './base.css';
+@tailwind components;
+@tailwind utilities;
+@import './card-styles.css';
+@import './animations.css';
+@import './text-utilities.css';
+@import './table-utilities.css';
