@@ -37,19 +37,21 @@ const TeamDivisionTable = ({
   
   // Calculate team points with enhanced algorithm
   const teamsWithPoints = teams.map(team => {
-    // Points calculation: 6 points for win, 2 points for draw, 1 point per skin
-    const wins = parseInt(team.Wins || '0');
-    const draws = parseInt(team.Draws || '0');
-    const skins = parseInt(team.skinsWon || '0');
+    // First, ensure we have numeric values for calculations
+    const wins = parseInt(team.Wins || team.wins?.toString() || '0');
+    const draws = parseInt(team.Draws || team.draws?.toString() || '0');
+    const losses = parseInt(team.Losses || team.losses?.toString() || '0');
+    const skins = parseInt(team.skinsWon?.toString() || team.Skins || '0');
     
+    // Points calculation: 6 points for win, 2 points for draw, 1 point per skin
     const points = (wins * 6) + (draws * 2) + skins;
     
     return {
       ...team,
-      Wins: team.Wins || '0',
-      Losses: team.Losses || '0',
-      Draws: team.Draws || '0',
-      Points: points
+      Wins: wins.toString(),
+      Losses: losses.toString(),
+      Draws: draws.toString(),
+      Points: points.toString()
     };
   });
 
@@ -124,6 +126,8 @@ const TeamDivisionTable = ({
                   <TableCell className="text-center py-0.5 px-0.5">
                     {team.WinPercentage 
                       ? (typeof team.WinPercentage === 'string' ? parseInt(team.WinPercentage) : Math.round(team.WinPercentage)) 
+                      : team.winPercentage
+                      ? Math.round(parseFloat(team.winPercentage))
                       : 0}%
                   </TableCell>
                 </TableRow>
