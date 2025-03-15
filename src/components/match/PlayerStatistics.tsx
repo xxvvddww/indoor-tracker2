@@ -212,24 +212,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
 
   return (
     <div className="space-y-4">
-      {/* Match score display */}
-      {displayInfo.teams && displayInfo.teams.length >= 2 && (
-        <div className="p-3 bg-muted/10 rounded-md border border-muted/20 mb-4">
-          <h3 className="text-sm font-medium mb-2">Match Score</h3>
-          <div className="flex justify-between items-center">
-            <div className="flex flex-col">
-              <span className="font-medium">{displayInfo.teams[0].name}</span>
-              <span className="text-2xl font-bold">{displayInfo.teams[0].score || "?"}</span>
-            </div>
-            <div className="text-muted-foreground">vs</div>
-            <div className="flex flex-col items-end">
-              <span className="font-medium">{displayInfo.teams[1].name}</span>
-              <span className="text-2xl font-bold">{displayInfo.teams[1].score || "?"}</span>
-            </div>
-          </div>
-        </div>
-      )}
-      
       {/* Show teams with player stats */}
       {(!displayInfo.teams || displayInfo.teams.length === 0) ? (
         <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
@@ -256,8 +238,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                     )}
                   </h3>
                 </div>
-                <div className="flex items-center gap-2">
-                  {team.score && <span className="text-sm font-medium mr-2">{team.score}</span>}
+                <div>
                   {isOpen ? (
                     <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
                   ) : (

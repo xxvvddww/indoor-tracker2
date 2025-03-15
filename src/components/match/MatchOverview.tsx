@@ -174,7 +174,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
         </div>
       )}
       
-      {/* Player statistics */}
+      {/* Player statistics with hideScoreBox prop */}
       <div>
         <PlayerStatistics displayInfo={displayInfo} />
       </div>
