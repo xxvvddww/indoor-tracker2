@@ -18,24 +18,36 @@ interface MatchOverviewProps {
 export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, matchData }) => {
   const isMobile = useIsMobile();
   
+  // Calculate team scores from player statistics
+  const calculateTeamScores = () => {
+    if (!displayInfo.playerStats || !displayInfo.teams) return;
+    
+    displayInfo.teams.forEach(team => {
+      if (displayInfo.playerStats && displayInfo.playerStats[team.id]) {
+        const teamPlayers = displayInfo.playerStats[team.id].players;
+        let totalRuns = 0;
+        
+        teamPlayers.forEach(player => {
+          const runs = parseInt(player.RS || '0');
+          if (!isNaN(runs)) {
+            totalRuns += runs;
+          }
+        });
+        
+        // Update team score
+        team.score = totalRuns.toString();
+      }
+    });
+  };
+  
   useEffect(() => {
     console.log("MatchOverview rendering with displayInfo:", displayInfo);
     console.log("MatchOverview has matchData:", !!matchData);
     if (matchData) {
       console.log("MatchData keys:", Object.keys(matchData));
       
-      // Extract scores if available and add to teams
-      if (displayInfo.teams && displayInfo.teams.length > 0) {
-        // Add score to home team
-        if (matchData.HomeTeamScore !== undefined) {
-          displayInfo.teams[0].score = matchData.HomeTeamScore;
-        }
-        
-        // Add score to away team if available
-        if (displayInfo.teams.length > 1 && matchData.AwayTeamScore !== undefined) {
-          displayInfo.teams[1].score = matchData.AwayTeamScore;
-        }
-      }
+      // Calculate team scores based on player statistics
+      calculateTeamScores();
     }
   }, [displayInfo, matchData]);
 
@@ -78,6 +90,21 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       
       {/* Display summary information at the top */}
       <div className="space-y-4 w-full">
+        {/* Team scores section */}
+        {displayInfo.teams && displayInfo.teams.length > 0 && (
+          <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
+            <div className="flex-1 text-center">
+              <p className="text-sm font-medium">{displayInfo.teams[0].name}</p>
+              <p className="text-lg font-bold">{displayInfo.teams[0].score || '0'}</p>
+            </div>
+            <div className="text-xs text-muted-foreground">vs</div>
+            <div className="flex-1 text-center">
+              <p className="text-sm font-medium">{displayInfo.teams[1]?.name || 'Team 2'}</p>
+              <p className="text-lg font-bold">{displayInfo.teams[1]?.score || '0'}</p>
+            </div>
+          </div>
+        )}
+        
         {/* Match summary section */}
         <div className="space-y-4">
           {/* Match winner */}
