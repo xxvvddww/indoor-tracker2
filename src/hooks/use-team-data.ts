@@ -1,4 +1,3 @@
-
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTeams, fetchFixtures, fetchPlayerStats, DEFAULT_LEAGUE_ID, CURRENT_SEASON_ID } from '../services/cricketApi';
@@ -61,8 +60,7 @@ export function useTeamData() {
             draws++;
           } else if ((isHomeTeam && homeScore > awayScore) || (!isHomeTeam && awayScore > homeScore)) {
             wins++;
-            // Count skins if available
-            skinsWon += parseInt(isHomeTeam ? fixture.HomeTeamSkins || '0' : fixture.AwayTeamSkins || '0');
+            skinsWon++;
           } else {
             losses++;
           }
@@ -76,23 +74,13 @@ export function useTeamData() {
           player => player.TeamName === team.Name
         ).length : 0;
 
-        // Also incorporate any existing stats from the API
-        const existingWins = parseInt(team.Won || team.Wins || '0');
-        const existingLosses = parseInt(team.Lost || team.Losses || '0');
-        const existingDraws = parseInt(team.Drawn || team.Draws || '0');
-        
-        // Use API values if they exist and are greater than calculated values
-        const finalWins = Math.max(wins, existingWins);
-        const finalLosses = Math.max(losses, existingLosses);
-        const finalDraws = Math.max(draws, existingDraws);
-
         return {
           ...team,
           totalMatches,
           completedMatches,
-          wins: finalWins,
-          losses: finalLosses,
-          draws: finalDraws,
+          wins,
+          losses,
+          draws,
           winPercentage,
           skinsWon,
           playerCount: teamPlayers
@@ -103,9 +91,9 @@ export function useTeamData() {
           ...team,
           totalMatches: 0,
           completedMatches: 0,
-          wins: parseInt(team.Won || team.Wins || '0'),
-          losses: parseInt(team.Lost || team.Losses || '0'),
-          draws: parseInt(team.Drawn || team.Draws || '0'),
+          wins: 0,
+          losses: 0,
+          draws: 0,
           winPercentage: '0.0',
           skinsWon: 0,
           playerCount: 0
