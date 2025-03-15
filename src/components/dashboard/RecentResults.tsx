@@ -58,7 +58,7 @@ export const RecentResults = ({
     },
     {
       key: "vs",
-      header: "vs",
+      header: "",
       className: "vs-column",
       render: () => <span className="text-[0.6rem] text-muted-foreground">vs</span>,
     },
