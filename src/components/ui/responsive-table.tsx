@@ -54,7 +54,7 @@ export function ResponsiveTable({
     return rowClassName;
   };
 
-  let tableClassName = "w-full ";
+  let tableClassName = "w-full table-fixed ";
   if (compactMode) tableClassName += "text-xxs border-collapse ";
   if (ultraCompact) tableClassName += "ultra-compact-table ";
   if (resultsMode) tableClassName += "results-table ";
@@ -69,7 +69,6 @@ export function ResponsiveTable({
                 <TableHead 
                   key={column.key} 
                   className={`${compactMode ? "py-0 px-0.5" : ""} ${ultraCompact ? "py-0 px-0.5" : ""} ${resultsMode ? "py-0 px-0.5" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
-                  style={column.width ? { width: column.width } : {}}
                 >
                   {column.header}
                 </TableHead>
@@ -87,7 +86,6 @@ export function ResponsiveTable({
                 <TableCell 
                   key={`${getRowKey(row, rowIndex)}-${column.key}`} 
                   className={`${compactMode ? "py-0 px-0.5" : ""} ${ultraCompact ? "py-0 px-0.5" : ""} ${resultsMode ? "py-0 px-0.5" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
-                  style={column.width ? { width: column.width } : {}}
                 >
                   {column.render 
                     ? column.render(row[column.key], row) 
