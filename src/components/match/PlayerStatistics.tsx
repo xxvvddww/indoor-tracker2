@@ -37,12 +37,9 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     Object.values(displayInfo.playerStats).forEach(team => {
       team.players.forEach(player => {
         if (!player.Name.includes("No player statistics") && player.Name !== "Unknown Player") {
-          // Extract just the player name without team name
-          const playerNameOnly = player.Name.split(' - ').pop() || player.Name;
-          
           allPlayers.push({
             ...player,
-            Name: playerNameOnly // Remove team name from player display
+            TeamName: team.name
           });
         }
       });
@@ -61,7 +58,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { 
       key: "Name", 
       header: "Player", 
-      className: "font-medium player-column truncate",
+      className: "font-medium w-[80%] truncate",
       render: (value: string) => <div className="truncate">{value}</div>
     },
     { 
@@ -69,28 +66,28 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "R", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column"
+      className: "w-[4%]"
     },
     { 
       key: "RC", 
       header: "RA", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column"
+      className: "w-[4%]"
     },
     { 
       key: "Wkts", 
       header: "W", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column"
+      className: "w-[4%]"
     },
     { 
       key: "SR", 
       header: "SR", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column",
+      className: "w-[4%]",
       render: (value: string) => {
         const srValue = parseFloat(value || '0');
         return Math.round(srValue);
@@ -101,7 +98,56 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "C", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column"
+      className: "w-[4%]"
+    }
+  ];
+
+  // Define columns for the combined table (without team names)
+  const combinedColumns = [
+    { 
+      key: "Name", 
+      header: "Player", 
+      className: "font-medium w-[80%] truncate",
+      render: (value: string) => <div className="truncate">{value}</div>
+    },
+    { 
+      key: "RS", 
+      header: "R", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[4%]"
+    },
+    { 
+      key: "RC", 
+      header: "RA", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[4%]"
+    },
+    { 
+      key: "Wkts", 
+      header: "W", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[4%]"
+    },
+    { 
+      key: "SR", 
+      header: "SR", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[4%]",
+      render: (value: string) => {
+        const srValue = parseFloat(value || '0');
+        return Math.round(srValue);
+      }
+    },
+    { 
+      key: "C", 
+      header: "C", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[4%]"
     }
   ];
 
@@ -199,7 +245,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
             <div className="p-0">
               <ResponsiveTable 
                 data={combinedPlayers} 
-                columns={playerColumns}
+                columns={combinedColumns}
                 superCompact={true}
                 ultraCompact={false}
                 className="mt-0"
