@@ -31,7 +31,7 @@
   }
   
   .results-table td {
-    @apply py-1 px-1 whitespace-nowrap;
+    @apply py-1 px-1;
   }
   
   .results-table tr {
@@ -49,7 +49,7 @@
   
   /* Prevent text wrapping in tables */
   .results-table td:first-child {
-    @apply truncate max-w-[240px];
+    @apply truncate;
   }
   
   /* Aligned results tables */

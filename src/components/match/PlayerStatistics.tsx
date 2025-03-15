@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { AlertCircle } from "lucide-react";
@@ -13,8 +12,23 @@ interface PlayerStatisticsProps {
 
 export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo }) => {
   const isMobile = useIsMobile();
-  // Initialize all sections as closed by default
-  const [openTeams, setOpenTeams] = useState<Record<string, boolean>>({});
+  // Use sessionStorage to persist the open/closed state between tab switches
+  const [openTeams, setOpenTeams] = useState<Record<string, boolean>>(() => {
+    try {
+      // Initialize all sections as closed by default
+      if (displayInfo.teams) {
+        const initialOpenState: Record<string, boolean> = {};
+        displayInfo.teams.forEach(team => {
+          initialOpenState[team.id] = false;
+        });
+        return initialOpenState;
+      }
+      return {};
+    } catch {
+      return {}; // If storage fails
+    }
+  });
+  
   const [combinedSectionOpen, setCombinedSectionOpen] = useState<boolean>(false);
 
   // Get winning team to display at the top
@@ -53,12 +67,22 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     });
   }, [displayInfo.playerStats]);
 
+  // Save state to sessionStorage when it changes
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('cricket-team-collapsible-state', JSON.stringify(openTeams));
+      sessionStorage.setItem('cricket-combined-collapsible-state', JSON.stringify(combinedSectionOpen));
+    } catch (e) {
+      console.error('Error saving collapsible state to sessionStorage:', e);
+    }
+  }, [openTeams, combinedSectionOpen]);
+
   // Define player stat columns for the team tables
   const playerColumns = [
     { 
       key: "Name", 
       header: "Player", 
-      className: "font-medium w-[80%] truncate",
+      className: "font-medium w-[60%] truncate",
       render: (value: string) => <div className="truncate">{value}</div>
     },
     { 
@@ -66,28 +90,28 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "R", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]"
+      className: "w-[8%]"
     },
     { 
       key: "RC", 
       header: "RA", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]"
+      className: "w-[8%]"
     },
     { 
       key: "Wkts", 
       header: "W", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]"
+      className: "w-[8%]"
     },
     { 
       key: "SR", 
       header: "SR", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]",
+      className: "w-[8%]",
       render: (value: string) => {
         const srValue = parseFloat(value || '0');
         return Math.round(srValue);
@@ -98,45 +122,50 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "C", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]"
+      className: "w-[8%]"
     }
   ];
 
-  // Define columns for the combined table (without team names)
+  // Define columns for the combined table (keep player names)
   const combinedColumns = [
     { 
       key: "Name", 
       header: "Player", 
-      className: "font-medium w-[80%] truncate",
-      render: (value: string) => <div className="truncate">{value}</div>
+      className: "font-medium w-[60%] truncate",
+      render: (value: string, row: any) => (
+        <div className="truncate">
+          <span>{value}</span>
+          <span className="text-xs text-muted-foreground block truncate">{row.TeamName}</span>
+        </div>
+      )
     },
     { 
       key: "RS", 
       header: "R", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]"
+      className: "w-[8%]"
     },
     { 
       key: "RC", 
       header: "RA", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]"
+      className: "w-[8%]"
     },
     { 
       key: "Wkts", 
       header: "W", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]"
+      className: "w-[8%]"
     },
     { 
       key: "SR", 
       header: "SR", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]",
+      className: "w-[8%]",
       render: (value: string) => {
         const srValue = parseFloat(value || '0');
         return Math.round(srValue);
@@ -147,7 +176,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "C", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[4%]"
+      className: "w-[8%]"
     }
   ];
 
