@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
@@ -95,22 +96,6 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
     return displayInfo.result;
   };
 
-  // Extract player name from Player of the Match string
-  const getPlayerOfMatch = () => {
-    if (!displayInfo.manOfMatch) return '';
-    
-    // Remove any prefixes like "Player of the match:" 
-    let playerName = displayInfo.manOfMatch.replace(/^Player of the match:\s*/i, '');
-    
-    // If there's a team name in parentheses, extract just the player name
-    const nameMatch = playerName.match(/^([^(]+)/);
-    if (nameMatch && nameMatch[1]) {
-      playerName = nameMatch[1].trim();
-    }
-    
-    return playerName;
-  };
-
   // Back to fixtures link
   const BackToFixturesLink = () => (
     <Link to="/fixtures" className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors mb-2">
@@ -135,18 +120,20 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             <div className="p-4">
               <div className="flex items-center mb-1">
                 <div className="flex-1">
-                  <span className={displayInfo.teams[0].isWinner ? "text-green-400 font-medium" : "text-white font-medium"}>
-                    {displayInfo.teams[0].name}
-                  </span>
+                  <span className="text-green-400 font-medium">{displayInfo.teams[0].name}</span>
+                  {displayInfo.teams[0].isWinner && (
+                    <span className="ml-2 px-2 py-0.5 text-xs bg-green-900 text-green-400 rounded">Winner</span>
+                  )}
                 </div>
                 <div className="text-xl text-white font-bold">{displayInfo.teams[0].score || "0"}</div>
               </div>
               
               <div className="flex items-center">
                 <div className="flex-1">
-                  <span className={displayInfo.teams[1].isWinner ? "text-green-400 font-medium" : "text-white font-medium"}>
-                    {displayInfo.teams[1].name}
-                  </span>
+                  <span className="text-gray-300 font-medium">{displayInfo.teams[1].name}</span>
+                  {displayInfo.teams[1].isWinner && (
+                    <span className="ml-2 px-2 py-0.5 text-xs bg-green-900 text-green-400 rounded">Winner</span>
+                  )}
                 </div>
                 <div className="text-xl text-white font-bold">{displayInfo.teams[1].score || "0"}</div>
               </div>
@@ -166,7 +153,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
           {displayInfo.manOfMatch && (
             <div className="px-4 py-2 border-t border-slate-700">
               <p className="text-sm text-white">
-                <span className="text-gray-400">Player of the Match:</span> {getPlayerOfMatch()}
+                <span className="text-gray-400">Player of the Match:</span> {displayInfo.manOfMatch}
               </p>
             </div>
           )}
