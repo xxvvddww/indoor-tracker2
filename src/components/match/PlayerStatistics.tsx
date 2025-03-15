@@ -37,9 +37,12 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     Object.values(displayInfo.playerStats).forEach(team => {
       team.players.forEach(player => {
         if (!player.Name.includes("No player statistics") && player.Name !== "Unknown Player") {
+          // Extract just the player name without team name
+          const playerNameOnly = player.Name.split(' - ').pop() || player.Name;
+          
           allPlayers.push({
             ...player,
-            Name: player.Name // Remove team name from player display
+            Name: playerNameOnly // Remove team name from player display
           });
         }
       });
