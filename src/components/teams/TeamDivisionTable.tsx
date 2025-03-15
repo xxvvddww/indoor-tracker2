@@ -35,20 +35,17 @@ const TeamDivisionTable = ({
     setIsOpen(prev => !prev);
   }, []);
   
-  // Calculate team points with enhanced algorithm
+  // Calculate team points
   const teamsWithPoints = teams.map(team => {
     // Points calculation: 6 points for win, 2 points for draw, 1 point per skin
-    const wins = parseInt(team.Wins || '0');
-    const draws = parseInt(team.Draws || '0');
-    const skins = parseInt(team.skinsWon || '0');
+    const wins = team.Wins || 0;
+    const draws = team.Draws || 0;
+    const skins = team.skinsWon || 0;
     
     const points = (wins * 6) + (draws * 2) + skins;
     
     return {
       ...team,
-      Wins: team.Wins || '0',
-      Losses: team.Losses || '0',
-      Draws: team.Draws || '0',
       Points: points
     };
   });
