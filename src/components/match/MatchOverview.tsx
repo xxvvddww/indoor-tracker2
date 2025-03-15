@@ -71,6 +71,31 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
     );
   };
 
+  // Format the result to show the score difference more clearly
+  const getFormattedResult = () => {
+    if (!displayInfo.teams || displayInfo.teams.length < 2) {
+      return displayInfo.result;
+    }
+
+    // Find the winning team
+    const winningTeam = displayInfo.teams.find(team => team.isWinner);
+    const otherTeam = displayInfo.teams.find(team => !team.isWinner);
+    
+    if (!winningTeam || !otherTeam) {
+      return displayInfo.result;
+    }
+
+    const winningScore = parseInt(winningTeam.score || '0');
+    const losingScore = parseInt(otherTeam.score || '0');
+    
+    if (!isNaN(winningScore) && !isNaN(losingScore)) {
+      const difference = winningScore - losingScore;
+      return `${winningTeam.name} won by ${difference} runs`;
+    }
+    
+    return displayInfo.result;
+  };
+
   // Back to fixtures link
   const BackToFixturesLink = () => (
     <Link to="/fixtures" className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors mb-2">
@@ -119,22 +144,16 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
           {displayInfo.result && (
             <div className="px-4 py-2 border-t border-slate-700">
               <p className="text-sm text-white">
-                <span className="text-gray-400">Result:</span> {displayInfo.result}
+                <span className="text-gray-400">Result:</span> {getFormattedResult()}
               </p>
             </div>
           )}
           
-          {/* Man of the Match Section */}
+          {/* Man of the Match Section - Simplified */}
           {displayInfo.manOfMatch && (
             <div className="px-4 py-2 border-t border-slate-700">
               <p className="text-sm text-white">
                 <span className="text-gray-400">Player of the Match:</span> {displayInfo.manOfMatch}
-                {displayInfo.teams && displayInfo.teams.length > 0 && displayInfo.teams[0].isWinner && (
-                  <span className="text-xs text-gray-400 ml-1">({displayInfo.teams[0].name})</span>
-                )}
-                {displayInfo.teams && displayInfo.teams.length > 1 && displayInfo.teams[1].isWinner && (
-                  <span className="text-xs text-gray-400 ml-1">({displayInfo.teams[1].name})</span>
-                )}
               </p>
             </div>
           )}
