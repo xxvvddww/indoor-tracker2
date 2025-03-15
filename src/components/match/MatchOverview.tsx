@@ -5,7 +5,7 @@ import { MatchDetails } from '../../types/cricket';
 import PlayerStatistics from './PlayerStatistics';
 import DataExtractor from './DataExtractor';
 import { ResponsiveContainer } from '../ui/responsive-container';
-import { Trophy, ArrowLeft } from 'lucide-react';
+import { Trophy, ArrowLeft, User } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -88,50 +88,47 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       {/* This component extracts data from matchData and updates displayInfo */}
       <DataExtractor displayInfo={displayInfo} matchData={matchData} />
       
-      {/* Display summary information at the top */}
-      <div className="space-y-4 w-full">
-        {/* Team scores section */}
-        {displayInfo.teams && displayInfo.teams.length > 0 && (
-          <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
+      {/* Unified Match Summary Box */}
+      {displayInfo.teams && displayInfo.teams.length > 0 && (
+        <div className="w-full overflow-hidden rounded-xl bg-slate-900 shadow-lg">
+          {/* Match Score Section */}
+          <div className="flex items-center justify-between p-4 text-center">
             <div className="flex-1 text-center">
-              <p className="text-sm font-medium">{displayInfo.teams[0].name}</p>
-              <p className="text-lg font-bold">{displayInfo.teams[0].score || '0'}</p>
+              <p className="text-base sm:text-lg font-medium text-white">{displayInfo.teams[0].name}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{displayInfo.teams[0].score || '0'}</p>
             </div>
-            <div className="text-xs text-muted-foreground">vs</div>
+            <div className="mx-2 text-xs text-slate-400 font-semibold">VS</div>
             <div className="flex-1 text-center">
-              <p className="text-sm font-medium">{displayInfo.teams[1]?.name || 'Team 2'}</p>
-              <p className="text-lg font-bold">{displayInfo.teams[1]?.score || '0'}</p>
+              <p className="text-base sm:text-lg font-medium text-white">{displayInfo.teams[1]?.name || 'Team 2'}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{displayInfo.teams[1]?.score || '0'}</p>
             </div>
           </div>
-        )}
-        
-        {/* Match summary section */}
-        <div className="space-y-4">
-          {/* Match winner */}
-          {displayInfo.winner ? (
-            <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
-              <Trophy className="h-4 w-4 text-green-500" />
-              <p className="text-sm">
+          
+          {/* Winner Section */}
+          {displayInfo.winner && (
+            <div className="flex items-center gap-2 p-3 bg-green-500/20 border-t border-green-500/20">
+              <Trophy className="h-5 w-5 text-green-400 ml-2" />
+              <p className="text-sm sm:text-base text-white">
                 <span className="font-medium">Winner:</span> {displayInfo.winner}
               </p>
             </div>
-          ) : null}
+          )}
           
-          {/* Man of the match - formatted as MoM: Name (Team) */}
+          {/* Man of the Match Section */}
           {displayInfo.manOfMatch && (
-            <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md border border-green-500/20">
-              <Trophy className="h-4 w-4 text-green-500" />
-              <p className="text-sm">
-                <span className="font-medium">MoM:</span> {displayInfo.manOfMatch}
+            <div className="flex items-center gap-2 p-3 bg-blue-500/20 border-t border-blue-500/20">
+              <User className="h-5 w-5 text-blue-400 ml-2" />
+              <p className="text-sm sm:text-base text-white">
+                <span className="font-medium">Player of the match:</span> {displayInfo.manOfMatch}
               </p>
             </div>
           )}
         </div>
-        
-        {/* Player statistics - removed the outer Card and header */}
-        <div>
-          <PlayerStatistics displayInfo={displayInfo} />
-        </div>
+      )}
+      
+      {/* Player statistics */}
+      <div>
+        <PlayerStatistics displayInfo={displayInfo} />
       </div>
     </ResponsiveContainer>
   );
