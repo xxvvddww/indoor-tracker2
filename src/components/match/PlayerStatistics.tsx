@@ -61,29 +61,33 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { 
       key: "Name", 
       header: "Player", 
-      className: "player-column truncate",
-      render: (value: string) => <div className="truncate">{value}</div>
+      className: "player-column",
+      width: "60%",
+      render: (value: string) => <div className="break-words whitespace-normal">{value}</div>
     },
     { 
       key: "RS", 
       header: "R", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column"
+      className: "stat-column",
+      width: "8%"
     },
     { 
       key: "RC", 
       header: "RA", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column"
+      className: "stat-column",
+      width: "8%"
     },
     { 
       key: "Wkts", 
       header: "W", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column"
+      className: "stat-column",
+      width: "8%"
     },
     { 
       key: "SR", 
@@ -91,6 +95,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       hideOnMobile: false,
       align: "right" as const,
       className: "stat-column",
+      width: "8%",
       render: (value: string) => {
         const srValue = parseFloat(value || '0');
         return Math.round(srValue);
@@ -101,7 +106,8 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "C", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "stat-column"
+      className: "stat-column",
+      width: "8%"
     }
   ];
 
