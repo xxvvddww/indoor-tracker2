@@ -15,7 +15,6 @@ export type DisplayableMatchInfo = {
     id: string;
     name: string;
     isWinner?: boolean;
-    score?: string;
   }[];
   winner?: string;
   winnerId?: string;

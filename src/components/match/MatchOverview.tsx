@@ -23,19 +23,6 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
     console.log("MatchOverview has matchData:", !!matchData);
     if (matchData) {
       console.log("MatchData keys:", Object.keys(matchData));
-      
-      // Extract scores if available and add to teams
-      if (displayInfo.teams && displayInfo.teams.length > 0) {
-        // Add score to home team
-        if (matchData.HomeTeamScore !== undefined) {
-          displayInfo.teams[0].score = matchData.HomeTeamScore;
-        }
-        
-        // Add score to away team if available
-        if (displayInfo.teams.length > 1 && matchData.AwayTeamScore !== undefined) {
-          displayInfo.teams[1].score = matchData.AwayTeamScore;
-        }
-      }
     }
   }, [displayInfo, matchData]);
 

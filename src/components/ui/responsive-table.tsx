@@ -10,7 +10,6 @@ interface Column {
   render?: (value: any, row: any) => React.ReactNode;
   className?: string;
   align?: "left" | "right" | "center";
-  width?: string;
 }
 
 interface ResponsiveTableProps {
@@ -54,7 +53,7 @@ export function ResponsiveTable({
     return rowClassName;
   };
 
-  let tableClassName = "w-full table-fixed ";
+  let tableClassName = "w-full ";
   if (compactMode) tableClassName += "text-xxs border-collapse ";
   if (ultraCompact) tableClassName += "ultra-compact-table ";
   if (resultsMode) tableClassName += "results-table ";
@@ -69,7 +68,6 @@ export function ResponsiveTable({
                 <TableHead 
                   key={column.key} 
                   className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-0 px-2 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
-                  style={{ width: column.width || 'auto' }}
                 >
                   {column.header}
                 </TableHead>
@@ -87,7 +85,6 @@ export function ResponsiveTable({
                 <TableCell 
                   key={`${getRowKey(row, rowIndex)}-${column.key}`} 
                   className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1 px-2 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
-                  style={{ width: column.width || 'auto' }}
                 >
                   {column.render 
                     ? column.render(row[column.key], row) 
