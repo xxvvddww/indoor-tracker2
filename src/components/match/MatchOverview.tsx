@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { DisplayableMatchInfo } from './types';
 import { MatchDetails } from '../../types/cricket';
@@ -135,20 +136,20 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             <div className="p-4">
               <div className="flex items-center mb-1">
                 <div className="flex-1">
-                  <span className={displayInfo.teams[0].isWinner ? "text-green-400 font-medium" : "text-white font-medium"}>
+                  <span className={displayInfo.teams[0].isWinner ? "text-green-400 text-sm font-medium" : "text-white text-sm font-medium"}>
                     {displayInfo.teams[0].name}
                   </span>
                 </div>
-                <div className="text-xl text-white font-bold">{displayInfo.teams[0].score || "0"}</div>
+                <div className="text-sm text-white font-bold">{displayInfo.teams[0].score || "0"}</div>
               </div>
               
               <div className="flex items-center">
                 <div className="flex-1">
-                  <span className={displayInfo.teams[1].isWinner ? "text-green-400 font-medium" : "text-white font-medium"}>
+                  <span className={displayInfo.teams[1].isWinner ? "text-green-400 text-sm font-medium" : "text-white text-sm font-medium"}>
                     {displayInfo.teams[1].name}
                   </span>
                 </div>
-                <div className="text-xl text-white font-bold">{displayInfo.teams[1].score || "0"}</div>
+                <div className="text-sm text-white font-bold">{displayInfo.teams[1].score || "0"}</div>
               </div>
             </div>
           )}
