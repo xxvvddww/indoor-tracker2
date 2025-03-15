@@ -238,13 +238,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                     )}
                   </h3>
                 </div>
-                <div>
-                  {isOpen ? (
-                    <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  )}
-                </div>
               </CollapsibleTrigger>
               
               <CollapsibleContent>
@@ -277,11 +270,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-medium">Combined Player Statistics</h3>
             </div>
-            {combinedSectionOpen ? (
-              <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-            )}
           </CollapsibleTrigger>
           
           <CollapsibleContent>
