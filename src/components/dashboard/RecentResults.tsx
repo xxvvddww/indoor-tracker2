@@ -46,6 +46,7 @@ export const RecentResults = ({
     {
       key: "HomeTeam",
       header: "Match",
+      className: "home-column",
       render: (value: string, row: Fixture) => (
         <span className={cn(
           "text-[0.6rem] font-medium",
@@ -58,12 +59,13 @@ export const RecentResults = ({
     {
       key: "vs",
       header: "vs",
-      className: "w-6 text-center",
+      className: "vs-column",
       render: () => <span className="text-[0.6rem] text-muted-foreground">vs</span>,
     },
     {
       key: "AwayTeam",
       header: "Away",
+      className: "away-column",
       render: (value: string, row: Fixture) => (
         <span className={cn(
           "text-[0.6rem] font-medium",
@@ -76,7 +78,7 @@ export const RecentResults = ({
     {
       key: "ScoreDescription",
       header: "Result",
-      className: "w-16 text-right",
+      className: "result-column",
       render: (value: string, row: Fixture) => (
         <div className="flex items-center justify-end gap-0.5">
           <span className="text-[0.6rem]">{value || `${row.HomeTeamScore}-${row.AwayTeamScore}`}</span>
@@ -112,18 +114,20 @@ export const RecentResults = ({
           <div className="space-y-1">
             {orderedDivisions.map(division => (
               <div key={division} className="space-y-0.5">
-                <h3 className="text-[0.65rem] font-semibold px-2 py-0.5 bg-muted/10">
+                <h3 className="division-header">
                   {division}
                 </h3>
-                <ResponsiveTable
-                  data={fixturesByDivision[division]}
-                  columns={recentResultsColumns}
-                  keyField="Id"
-                  superCompact={true}
-                  ultraCompact={true}
-                  darkMode={true}
-                  className="px-1"
-                />
+                <div className="px-1">
+                  <ResponsiveTable
+                    data={fixturesByDivision[division]}
+                    columns={recentResultsColumns}
+                    keyField="Id"
+                    superCompact={true}
+                    ultraCompact={true}
+                    darkMode={true}
+                    className="aligned-results-table"
+                  />
+                </div>
               </div>
             ))}
             <div className="text-center mt-1">

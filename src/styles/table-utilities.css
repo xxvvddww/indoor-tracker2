@@ -46,4 +46,38 @@
   .results-table td:not(:first-child) {
     @apply text-right;
   }
+  
+  /* New classes for aligned results tables */
+  .aligned-results-table {
+    @apply w-full border-collapse;
+  }
+  
+  .aligned-results-table th, 
+  .aligned-results-table td {
+    @apply py-1 px-2;
+  }
+  
+  .aligned-results-table th.vs-column,
+  .aligned-results-table td.vs-column {
+    @apply w-8 text-center;
+  }
+  
+  .aligned-results-table th.home-column,
+  .aligned-results-table td.home-column {
+    @apply text-left w-[40%];
+  }
+  
+  .aligned-results-table th.away-column,
+  .aligned-results-table td.away-column {
+    @apply text-left w-[40%];
+  }
+  
+  .aligned-results-table th.result-column,
+  .aligned-results-table td.result-column {
+    @apply text-right w-[20%];
+  }
+  
+  .division-header {
+    @apply text-[0.65rem] font-semibold px-2 py-0.5 bg-muted/10 text-purple-400;
+  }
 }
