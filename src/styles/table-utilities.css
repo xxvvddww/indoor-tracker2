@@ -27,11 +27,11 @@
   }
   
   .results-table th {
-    @apply py-0 px-2 font-normal text-muted-foreground;
+    @apply py-0 px-1 font-normal text-muted-foreground;
   }
   
   .results-table td {
-    @apply py-1 px-2;
+    @apply py-1 px-1;
   }
   
   .results-table tr {
@@ -45,6 +45,11 @@
   .results-table th:not(:first-child),
   .results-table td:not(:first-child) {
     @apply text-right;
+  }
+  
+  /* Prevent text wrapping in tables */
+  .results-table td:first-child {
+    @apply truncate;
   }
   
   /* Aligned results tables */

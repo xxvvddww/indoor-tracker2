@@ -68,7 +68,7 @@ export function ResponsiveTable({
               {visibleColumns.map((column) => (
                 <TableHead 
                   key={column.key} 
-                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-0 px-2 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-0 px-1 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                   style={{ width: column.width || 'auto' }}
                 >
                   {column.header}
@@ -86,7 +86,7 @@ export function ResponsiveTable({
               {visibleColumns.map((column) => (
                 <TableCell 
                   key={`${getRowKey(row, rowIndex)}-${column.key}`} 
-                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1 px-2 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
+                  className={`${compactMode ? "py-0.5 px-1 text-xs" : ""} ${ultraCompact ? "py-0 px-0.5 text-[0.6rem]" : ""} ${resultsMode ? "py-1 px-1 text-[0.65rem]" : ""} ${column.className || ""} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                   style={{ width: column.width || 'auto' }}
                 >
                   {column.render 

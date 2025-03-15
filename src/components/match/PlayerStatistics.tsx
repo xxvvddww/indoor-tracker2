@@ -82,38 +82,37 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { 
       key: "Name", 
       header: "Player", 
-      className: "font-medium w-[40%]",
-      render: (value: string) => <span>{value}</span>
+      className: "font-medium w-[60%] truncate",
+      render: (value: string) => <div className="truncate">{value}</div>
     },
     { 
       key: "RS", 
       header: "R", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]"
+      className: "w-[8%]"
     },
     { 
       key: "RC", 
       header: "RA", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]"
+      className: "w-[8%]"
     },
     { 
       key: "Wkts", 
       header: "W", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]"
+      className: "w-[8%]"
     },
     { 
       key: "SR", 
       header: "SR", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]",
+      className: "w-[8%]",
       render: (value: string) => {
-        // Remove decimal places
         const srValue = parseFloat(value || '0');
         return Math.round(srValue);
       }
@@ -123,7 +122,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "C", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]"
+      className: "w-[8%]"
     }
   ];
 
@@ -132,11 +131,11 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     { 
       key: "Name", 
       header: "Player", 
-      className: "font-medium w-[40%]",
+      className: "font-medium w-[60%] truncate",
       render: (value: string, row: any) => (
-        <div className="flex flex-col">
+        <div className="truncate">
           <span>{value}</span>
-          <span className="text-xs text-muted-foreground">{row.TeamName}</span>
+          <span className="text-xs text-muted-foreground block truncate">{row.TeamName}</span>
         </div>
       )
     },
@@ -145,30 +144,29 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "R", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]"
+      className: "w-[8%]"
     },
     { 
       key: "RC", 
       header: "RA", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]"
+      className: "w-[8%]"
     },
     { 
       key: "Wkts", 
       header: "W", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]"
+      className: "w-[8%]"
     },
     { 
       key: "SR", 
       header: "SR", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]",
+      className: "w-[8%]",
       render: (value: string) => {
-        // Remove decimal places
         const srValue = parseFloat(value || '0');
         return Math.round(srValue);
       }
@@ -178,7 +176,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       header: "C", 
       hideOnMobile: false,
       align: "right" as const,
-      className: "w-[12%]"
+      className: "w-[8%]"
     }
   ];
 
@@ -229,7 +227,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
             <Collapsible key={team.id} open={isOpen} onOpenChange={() => toggleTeam(team.id)} className="border rounded-md overflow-hidden mb-4 bg-muted/10">
               <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-medium">
+                  <h3 className="text-sm font-medium truncate">
                     {team.name}
                     {displayInfo.winnerId === team.id && (
                       <Badge variant="outline" className="ml-2 bg-green-500/20 text-green-600 border-green-500">
@@ -268,7 +266,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         <Collapsible open={combinedSectionOpen} onOpenChange={toggleCombined} className="border rounded-md overflow-hidden mb-4 bg-muted/10">
           <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium">Combined Player Statistics</h3>
+              <h3 className="text-sm font-medium truncate">Combined Player Statistics</h3>
             </div>
           </CollapsibleTrigger>
           
