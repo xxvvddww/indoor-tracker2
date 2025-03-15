@@ -46,7 +46,7 @@ export const RecentResults = ({
     {
       key: "HomeTeam",
       header: "Match",
-      className: "home-column",
+      width: "40%",
       render: (value: string, row: Fixture) => (
         <span className={cn(
           "text-[0.6rem] font-medium",
@@ -59,13 +59,14 @@ export const RecentResults = ({
     {
       key: "vs",
       header: "",
-      className: "vs-column",
+      width: "8%",
+      align: "center" as const,
       render: () => <span className="text-[0.6rem] text-muted-foreground">vs</span>,
     },
     {
       key: "AwayTeam",
       header: "Away",
-      className: "away-column",
+      width: "40%",
       render: (value: string, row: Fixture) => (
         <span className={cn(
           "text-[0.6rem] font-medium",
@@ -78,7 +79,8 @@ export const RecentResults = ({
     {
       key: "ScoreDescription",
       header: "Result",
-      className: "result-column",
+      width: "12%",
+      align: "right" as const,
       render: (value: string, row: Fixture) => (
         <div className="flex items-center justify-end gap-0.5">
           <span className="text-[0.6rem]">{value || `${row.HomeTeamScore}-${row.AwayTeamScore}`}</span>
@@ -111,10 +113,10 @@ export const RecentResults = ({
       </CollapsibleTrigger>
       <CollapsibleContent className="px-0 pb-2">
         {orderedDivisions.length > 0 ? (
-          <div className="space-y-1">
+          <div className="space-y-3">
             {orderedDivisions.map(division => (
-              <div key={division} className="space-y-0.5">
-                <h3 className="division-header text-purple-400 text-xs font-medium px-2 py-1">
+              <div key={division} className="space-y-1 border-b border-gray-800 last:border-b-0 pb-2 last:pb-0">
+                <h3 className="division-header text-purple-400 text-xs font-medium px-2 py-1 mb-1 bg-gray-900/40">
                   {division}
                 </h3>
                 <div className="px-1">
@@ -125,7 +127,7 @@ export const RecentResults = ({
                     superCompact={true}
                     ultraCompact={true}
                     darkMode={true}
-                    className="aligned-results-table"
+                    className="results-table"
                   />
                 </div>
               </div>

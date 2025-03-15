@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
@@ -84,10 +83,60 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       key: "Name", 
       header: "Player", 
       className: "font-medium w-[40%]",
+      render: (value: string) => <span>{value}</span>
+    },
+    { 
+      key: "RS", 
+      header: "R", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[12%]"
+    },
+    { 
+      key: "RC", 
+      header: "RA", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[12%]"
+    },
+    { 
+      key: "Wkts", 
+      header: "W", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[12%]"
+    },
+    { 
+      key: "SR", 
+      header: "SR", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[12%]",
+      render: (value: string) => {
+        // Remove decimal places
+        const srValue = parseFloat(value || '0');
+        return Math.round(srValue);
+      }
+    },
+    { 
+      key: "C", 
+      header: "C", 
+      hideOnMobile: false,
+      align: "right" as const,
+      className: "w-[12%]"
+    }
+  ];
+
+  // Define columns for the combined table (keep player names)
+  const combinedColumns = [
+    { 
+      key: "Name", 
+      header: "Player", 
+      className: "font-medium w-[40%]",
       render: (value: string, row: any) => (
         <div className="flex flex-col">
           <span>{value}</span>
-          {row.TeamName && <span className="text-xs text-muted-foreground">{row.TeamName}</span>}
+          <span className="text-xs text-muted-foreground">{row.TeamName}</span>
         </div>
       )
     },
@@ -95,28 +144,28 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       key: "RS", 
       header: "R", 
       hideOnMobile: false,
-      align: "right",
+      align: "right" as const,
       className: "w-[12%]"
     },
     { 
       key: "RC", 
       header: "RA", 
       hideOnMobile: false,
-      align: "right",
+      align: "right" as const,
       className: "w-[12%]"
     },
     { 
       key: "Wkts", 
       header: "W", 
       hideOnMobile: false,
-      align: "right",
+      align: "right" as const,
       className: "w-[12%]"
     },
     { 
       key: "SR", 
       header: "SR", 
       hideOnMobile: false,
-      align: "right",
+      align: "right" as const,
       className: "w-[12%]",
       render: (value: string) => {
         // Remove decimal places
@@ -128,56 +177,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       key: "C", 
       header: "C", 
       hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    }
-  ];
-
-  // Define columns for the combined table (no player names)
-  const combinedColumns = [
-    { 
-      key: "TeamName", 
-      header: "Team", 
-      className: "font-medium w-[40%]"
-    },
-    { 
-      key: "RS", 
-      header: "R", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
-    { 
-      key: "RC", 
-      header: "RA", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
-    { 
-      key: "Wkts", 
-      header: "W", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]"
-    },
-    { 
-      key: "SR", 
-      header: "SR", 
-      hideOnMobile: false,
-      align: "right",
-      className: "w-[12%]",
-      render: (value: string) => {
-        // Remove decimal places
-        const srValue = parseFloat(value || '0');
-        return Math.round(srValue);
-      }
-    },
-    { 
-      key: "C", 
-      header: "C", 
-      hideOnMobile: false,
-      align: "right",
+      align: "right" as const,
       className: "w-[12%]"
     }
   ];
@@ -212,6 +212,24 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
 
   return (
     <div className="space-y-4">
+      {/* Match score display */}
+      {displayInfo.teams && displayInfo.teams.length >= 2 && (
+        <div className="p-3 bg-muted/10 rounded-md border border-muted/20 mb-4">
+          <h3 className="text-sm font-medium mb-2">Match Score</h3>
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col">
+              <span className="font-medium">{displayInfo.teams[0].name}</span>
+              <span className="text-2xl font-bold">{displayInfo.teams[0].score || "?"}</span>
+            </div>
+            <div className="text-muted-foreground">vs</div>
+            <div className="flex flex-col items-end">
+              <span className="font-medium">{displayInfo.teams[1].name}</span>
+              <span className="text-2xl font-bold">{displayInfo.teams[1].score || "?"}</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Show teams with player stats */}
       {(!displayInfo.teams || displayInfo.teams.length === 0) ? (
         <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
@@ -238,11 +256,14 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                     )}
                   </h3>
                 </div>
-                {isOpen ? (
-                  <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-                )}
+                <div className="flex items-center gap-2">
+                  {team.score && <span className="text-sm font-medium mr-2">{team.score}</span>}
+                  {isOpen ? (
+                    <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  )}
+                </div>
               </CollapsibleTrigger>
               
               <CollapsibleContent>

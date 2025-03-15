@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Shield } from 'lucide-react';
+import { Shield, ChevronDown, ChevronUp } from 'lucide-react';
 import { Team } from '@/types/cricket';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -34,6 +34,21 @@ const TeamDivisionTable = ({
   const handleToggle = useCallback(() => {
     setIsOpen(prev => !prev);
   }, []);
+  
+  // Calculate team points
+  const teamsWithPoints = teams.map(team => {
+    // Points calculation: 6 points for win, 2 points for draw, 1 point per skin
+    const wins = team.Wins || 0;
+    const draws = team.Draws || 0;
+    const skins = team.skinsWon || 0;
+    
+    const points = (wins * 6) + (draws * 2) + skins;
+    
+    return {
+      ...team,
+      Points: points
+    };
+  });
 
   return (
     <Collapsible 
@@ -49,6 +64,10 @@ const TeamDivisionTable = ({
           <span>{divisionName}</span>
           <Badge variant="outline" className={compactMode ? 'text-[0.6rem] py-0 px-1 h-4' : ''}>{teams.length} Teams</Badge>
         </div>
+        {isOpen ? 
+          <ChevronUp className="h-4 w-4 text-muted-foreground" /> : 
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        }
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="overflow-x-auto px-1">
@@ -71,12 +90,15 @@ const TeamDivisionTable = ({
                   D
                 </TableHead>
                 <TableHead className="text-center w-[25px] py-0.5 px-0.5">
+                  Pts
+                </TableHead>
+                <TableHead className="text-center w-[25px] py-0.5 px-0.5">
                   %
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {teams.map((team) => (
+              {teamsWithPoints.map((team) => (
                 <TableRow key={team.Id} className={compactMode ? 'h-5' : ''}>
                   <TableCell className="font-medium truncate py-0.5 px-0.5">
                     {team.Name}
@@ -92,6 +114,9 @@ const TeamDivisionTable = ({
                   </TableCell>
                   <TableCell className="text-center py-0.5 px-0.5">
                     {team.Draws || 0}
+                  </TableCell>
+                  <TableCell className="text-center py-0.5 px-0.5 font-bold">
+                    {team.Points || 0}
                   </TableCell>
                   <TableCell className="text-center py-0.5 px-0.5">
                     {team.WinPercentage 
