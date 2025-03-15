@@ -207,7 +207,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         <Collapsible open={combinedSectionOpen} onOpenChange={toggleCombined} className="border rounded-md overflow-hidden mb-4 bg-muted/10">
           <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium truncate">Combined</h3>
+              <h3 className="text-sm font-medium truncate">Combined Player Statistics</h3>
             </div>
           </CollapsibleTrigger>
           
