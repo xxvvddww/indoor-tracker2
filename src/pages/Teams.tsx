@@ -7,6 +7,7 @@ import TeamDivisionList from '../components/teams/TeamDivisionList';
 import TeamErrorCard from '../components/teams/TeamErrorCard';
 import TeamEmptyState from '../components/teams/TeamEmptyState';
 import LoadingCard from '../components/teams/LoadingCard';
+import TeamStats from '../components/teams/TeamStats';
 
 const Teams = () => {
   const { 
@@ -17,7 +18,8 @@ const Teams = () => {
     displayTeams, 
     totalTeams, 
     uniqueDivisions,
-    teamsByDivision
+    teamsByDivision,
+    teamStats
   } = useTeamData();
   
   const isMobile = useIsMobile();
@@ -30,6 +32,16 @@ const Teams = () => {
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-xl font-bold tracking-tight">Teams</h1>
           </div>
+        )}
+        
+        {/* Team stats overview */}
+        {!isLoading && !teamsError && Object.keys(teamsByDivision).length > 0 && (
+          <TeamStats
+            isLoading={isLoading}
+            totalTeams={totalTeams}
+            uniqueDivisions={uniqueDivisions}
+            displayTeams={teamStats}
+          />
         )}
         
         {isLoading && <LoadingCard />}
