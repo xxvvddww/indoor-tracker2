@@ -90,12 +90,28 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       
       {/* Unified Match Summary Box */}
       {displayInfo.teams && displayInfo.teams.length > 0 && (
-        <div className="w-full overflow-hidden rounded-xl bg-slate-900 shadow-lg">
-          {/* Removed Match Score Section */}
+        <div className="w-full overflow-hidden rounded-lg bg-slate-900 shadow-lg mb-4">
+          {/* Match Score Section */}
+          {displayInfo.teams.length >= 2 && (
+            <div className="p-4">
+              <h3 className="text-sm font-medium text-slate-400 mb-2">Match Score</h3>
+              <div className="flex justify-between items-center">
+                <div className="flex flex-col">
+                  <span className="font-medium text-white">{displayInfo.teams[0].name}</span>
+                  <span className="text-2xl font-bold text-white">{displayInfo.teams[0].score || "0"}</span>
+                </div>
+                <div className="text-slate-400">vs</div>
+                <div className="flex flex-col items-end">
+                  <span className="font-medium text-white">{displayInfo.teams[1].name}</span>
+                  <span className="text-2xl font-bold text-white">{displayInfo.teams[1].score || "0"}</span>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Winner Section */}
           {displayInfo.winner && (
-            <div className="flex items-center gap-2 p-3 bg-green-500/20 border-t border-green-500/20">
+            <div className="flex items-center gap-2 p-3 bg-green-900/30 border-t border-green-700/30">
               <Trophy className="h-5 w-5 text-green-400 ml-2" />
               <p className="text-sm sm:text-base text-white">
                 <span className="font-medium">Winner:</span> {displayInfo.winner}
@@ -105,7 +121,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
           
           {/* Man of the Match Section */}
           {displayInfo.manOfMatch && (
-            <div className="flex items-center gap-2 p-3 bg-blue-500/20 border-t border-blue-500/20">
+            <div className="flex items-center gap-2 p-3 bg-blue-900/30 border-t border-blue-700/30">
               <User className="h-5 w-5 text-blue-400 ml-2" />
               <p className="text-sm sm:text-base text-white">
                 <span className="font-medium">Player of the match:</span> {displayInfo.manOfMatch}
