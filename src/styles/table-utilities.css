@@ -47,9 +47,9 @@
     @apply text-right;
   }
   
-  /* New classes for aligned results tables */
+  /* Aligned results tables */
   .aligned-results-table {
-    @apply w-full border-collapse;
+    @apply w-full border-collapse table-fixed;
   }
   
   .aligned-results-table th, 
@@ -59,17 +59,17 @@
   
   .aligned-results-table th.vs-column,
   .aligned-results-table td.vs-column {
-    @apply w-8 text-center;
+    @apply w-10 text-center px-0;
   }
   
   .aligned-results-table th.home-column,
   .aligned-results-table td.home-column {
-    @apply text-left w-[40%];
+    @apply text-left w-[38%];
   }
   
   .aligned-results-table th.away-column,
   .aligned-results-table td.away-column {
-    @apply text-left w-[40%];
+    @apply text-left w-[38%];
   }
   
   .aligned-results-table th.result-column,
