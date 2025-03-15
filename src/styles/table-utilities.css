@@ -47,13 +47,13 @@
     @apply text-right;
   }
   
-  /* Stats columns width - narrower columns for numeric values */
+  /* Stats columns width - even narrower columns for numeric values */
   .results-table th.stat-column,
   .results-table td.stat-column {
-    @apply w-[2.5%] max-w-[24px] text-right px-0 truncate;
+    @apply w-[2%] max-w-[16px] text-right px-0 truncate;
   }
   
-  /* Player name column - more room for names */
+  /* Player name column - give much more room for names */
   .results-table th.player-column,
   .results-table td.player-column {
     @apply w-[90%] truncate px-1;
