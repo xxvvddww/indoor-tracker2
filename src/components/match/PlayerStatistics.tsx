@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ResponsiveTable } from "@/components/ui/responsive-table";
-import { AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DisplayableMatchInfo } from './types';
 import { useIsMobile } from "@/hooks/use-mobile";
