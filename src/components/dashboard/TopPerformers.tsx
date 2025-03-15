@@ -1,6 +1,6 @@
 
 import { Player } from "@/types/cricket";
-import { BarChart3, Trophy, ArrowUpRight, ChevronDown } from "lucide-react";
+import { BarChart3, Trophy, ArrowUpRight } from "lucide-react";
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Link } from "react-router-dom";
@@ -61,7 +61,6 @@ export const TopPerformers = ({
             <BarChart3 className="h-5 w-5 text-indigo-400 mr-2" />
             <span className="font-semibold">Top Performers</span>
           </div>
-          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="px-4 pb-4">

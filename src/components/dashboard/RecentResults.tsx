@@ -1,7 +1,7 @@
 
 import { Fixture } from "@/types/cricket";
 import { formatDate } from "@/utils/dateFormatters";
-import { Calendar, ArrowUpRight, ChevronDown } from "lucide-react";
+import { Calendar, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -107,7 +107,6 @@ export const RecentResults = ({
               </span>
             )}
           </div>
-          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="px-0 pb-2">
