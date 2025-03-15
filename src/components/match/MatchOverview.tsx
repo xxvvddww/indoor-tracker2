@@ -91,7 +91,18 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
       {/* Unified Match Summary Box */}
       {displayInfo.teams && displayInfo.teams.length > 0 && (
         <div className="w-full overflow-hidden rounded-xl bg-slate-900 shadow-lg">
-          {/* Removed Match Score Section */}
+          {/* Match Score Section */}
+          <div className="flex items-center justify-between p-4 text-center">
+            <div className="flex-1 text-center">
+              <p className="text-base sm:text-lg font-medium text-white">{displayInfo.teams[0].name}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{displayInfo.teams[0].score || '0'}</p>
+            </div>
+            <div className="mx-2 text-xs text-slate-400 font-semibold">VS</div>
+            <div className="flex-1 text-center">
+              <p className="text-base sm:text-lg font-medium text-white">{displayInfo.teams[1]?.name || 'Team 2'}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{displayInfo.teams[1]?.score || '0'}</p>
+            </div>
+          </div>
           
           {/* Winner Section */}
           {displayInfo.winner && (
