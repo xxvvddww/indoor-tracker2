@@ -1,7 +1,7 @@
 
 import { Fixture } from "@/types/cricket";
 import { formatDate } from "@/utils/dateFormatters";
-import { Calendar, ArrowUpRight, ChevronDown } from "lucide-react";
+import { Calendar, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -107,7 +107,6 @@ export const RecentResults = ({
               </span>
             )}
           </div>
-          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="px-0 pb-2">
@@ -115,7 +114,7 @@ export const RecentResults = ({
           <div className="space-y-1">
             {orderedDivisions.map(division => (
               <div key={division} className="space-y-0.5">
-                <h3 className="division-header">
+                <h3 className="division-header text-purple-400 text-xs font-medium px-2 py-1">
                   {division}
                 </h3>
                 <div className="px-1">

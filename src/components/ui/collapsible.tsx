@@ -24,6 +24,9 @@ const CollapsibleTrigger = React.forwardRef<
     {...props}
   >
     {children}
+    {showArrow && (
+      customIcon || <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+    )}
   </CollapsiblePrimitive.Trigger>
 ))
 CollapsibleTrigger.displayName = CollapsiblePrimitive.Trigger.displayName

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import MainLayout from "../components/layout/MainLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -140,7 +139,6 @@ const Fixtures = () => {
   }, [paginatedDates]);
 
   useEffect(() => {
-    // Initialize all division sections to collapsed state
     const initialDivisionState: Record<string, boolean> = {};
     
     paginatedDates.forEach(date => {
@@ -304,7 +302,7 @@ const Fixtures = () => {
                                     >
                                       <CollapsibleTrigger className="w-full flex justify-between items-center p-1 bg-gray-900/40 hover:bg-gray-900/60">
                                         <div className="flex items-center">
-                                          <span className="font-medium text-[0.7rem]">{division}</span>
+                                          <span className="font-medium text-[0.7rem] text-purple-400">{division}</span>
                                         </div>
                                       </CollapsibleTrigger>
                                       <CollapsibleContent>

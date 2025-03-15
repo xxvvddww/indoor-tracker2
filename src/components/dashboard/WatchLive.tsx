@@ -1,5 +1,5 @@
 
-import { ExternalLink, PlayCircle, ChevronDown } from "lucide-react";
+import { ExternalLink, PlayCircle } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ResponsiveCard } from "@/components/ui/responsive-card";
@@ -25,7 +25,6 @@ export const WatchLive = ({ expandedSection, toggleSection }: WatchLiveProps) =>
             <PlayCircle className="h-5 w-5 text-red-500 mr-2" />
             <span className="font-semibold">Watch Live</span>
           </div>
-          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="px-4 pb-4">

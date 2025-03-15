@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Shield, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { Team } from '@/types/cricket';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -43,16 +43,12 @@ const TeamDivisionTable = ({
     >
       <CollapsibleTrigger 
         className={`flex items-center justify-between w-full ${compactMode ? 'p-1.5' : 'p-3'} bg-muted/10 hover:bg-muted/20 transition-colors h-14`}
-        showArrow={false}
       >
         <div className="flex items-center gap-2 font-medium text-xs">
           <Shield className={`${compactMode ? 'h-3 w-3' : 'h-5 w-5'} text-primary`} />
           <span>{divisionName}</span>
           <Badge variant="outline" className={compactMode ? 'text-[0.6rem] py-0 px-1 h-4' : ''}>{teams.length} Teams</Badge>
         </div>
-        {isOpen ? 
-          <ChevronUp className={`${compactMode ? 'h-3 w-3' : 'h-5 w-5'}`} /> : 
-          <ChevronDown className={`${compactMode ? 'h-3 w-3' : 'h-5 w-5'}`} />}
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="overflow-x-auto px-1">
