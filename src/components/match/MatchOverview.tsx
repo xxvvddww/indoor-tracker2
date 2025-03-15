@@ -5,9 +5,8 @@ import { MatchDetails } from '../../types/cricket';
 import PlayerStatistics from './PlayerStatistics';
 import DataExtractor from './DataExtractor';
 import { ResponsiveContainer } from '../ui/responsive-container';
-import { Trophy, ArrowLeft, User } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { useIsMobile } from "@/hooks/use-mobile";
-import { AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface MatchOverviewProps {
@@ -94,37 +93,48 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
           {/* Match Score Section */}
           {displayInfo.teams.length >= 2 && (
             <div className="p-4">
-              <h3 className="text-sm font-medium text-slate-400 mb-2">Match Score</h3>
-              <div className="flex justify-between items-center">
-                <div className="flex flex-col">
-                  <span className="font-medium text-white">{displayInfo.teams[0].name}</span>
-                  <span className="text-2xl font-bold text-white">{displayInfo.teams[0].score || "0"}</span>
+              <div className="flex items-center mb-1">
+                <div className="flex-1">
+                  <span className="text-green-400 font-medium">{displayInfo.teams[0].name}</span>
+                  {displayInfo.teams[0].isWinner && (
+                    <span className="ml-2 px-2 py-0.5 text-xs bg-green-900 text-green-400 rounded">Winner</span>
+                  )}
                 </div>
-                <div className="text-slate-400">vs</div>
-                <div className="flex flex-col items-end">
-                  <span className="font-medium text-white">{displayInfo.teams[1].name}</span>
-                  <span className="text-2xl font-bold text-white">{displayInfo.teams[1].score || "0"}</span>
+                <div className="text-xl text-white font-bold">{displayInfo.teams[0].score || "0"}</div>
+              </div>
+              
+              <div className="flex items-center">
+                <div className="flex-1">
+                  <span className="text-gray-300 font-medium">{displayInfo.teams[1].name}</span>
+                  {displayInfo.teams[1].isWinner && (
+                    <span className="ml-2 px-2 py-0.5 text-xs bg-green-900 text-green-400 rounded">Winner</span>
+                  )}
                 </div>
+                <div className="text-xl text-white font-bold">{displayInfo.teams[1].score || "0"}</div>
               </div>
             </div>
           )}
           
-          {/* Winner Section */}
-          {displayInfo.winner && (
-            <div className="flex items-center gap-2 p-3 bg-green-900/30 border-t border-green-700/30">
-              <Trophy className="h-5 w-5 text-green-400 ml-2" />
-              <p className="text-sm sm:text-base text-white">
-                <span className="font-medium">Winner:</span> {displayInfo.winner}
+          {/* Result Section */}
+          {displayInfo.result && (
+            <div className="px-4 py-2 border-t border-slate-700">
+              <p className="text-sm text-white">
+                <span className="text-gray-400">Result:</span> {displayInfo.result}
               </p>
             </div>
           )}
           
           {/* Man of the Match Section */}
           {displayInfo.manOfMatch && (
-            <div className="flex items-center gap-2 p-3 bg-blue-900/30 border-t border-blue-700/30">
-              <User className="h-5 w-5 text-blue-400 ml-2" />
-              <p className="text-sm sm:text-base text-white">
-                <span className="font-medium">Player of the match:</span> {displayInfo.manOfMatch}
+            <div className="px-4 py-2 border-t border-slate-700">
+              <p className="text-sm text-white">
+                <span className="text-gray-400">Player of the Match:</span> {displayInfo.manOfMatch}
+                {displayInfo.teams && displayInfo.teams.length > 0 && displayInfo.teams[0].isWinner && (
+                  <span className="text-xs text-gray-400 ml-1">({displayInfo.teams[0].name})</span>
+                )}
+                {displayInfo.teams && displayInfo.teams.length > 1 && displayInfo.teams[1].isWinner && (
+                  <span className="text-xs text-gray-400 ml-1">({displayInfo.teams[1].name})</span>
+                )}
               </p>
             </div>
           )}
