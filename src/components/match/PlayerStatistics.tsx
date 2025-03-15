@@ -8,9 +8,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 
 interface PlayerStatisticsProps {
   displayInfo: DisplayableMatchInfo;
+  hideMatchScoreBox?: boolean;
+  hideTeamStats?: boolean;
 }
 
-export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo }) => {
+export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ 
+  displayInfo, 
+  hideMatchScoreBox = false,
+  hideTeamStats = false
+}) => {
   const isMobile = useIsMobile();
   // Use sessionStorage to persist the open/closed state between tab switches
   const [openTeams, setOpenTeams] = useState<Record<string, boolean>>(() => {
@@ -212,14 +218,32 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
 
   return (
     <div className="space-y-4">
-      {/* Show teams with player stats */}
-      {(!displayInfo.teams || displayInfo.teams.length === 0) ? (
+      {/* Match score display - only show if not hidden */}
+      {!hideMatchScoreBox && displayInfo.teams && displayInfo.teams.length >= 2 && (
+        <div className="p-3 bg-muted/10 rounded-md border border-muted/20 mb-4">
+          <h3 className="text-sm font-medium mb-2">Match Score</h3>
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col">
+              <span className="font-medium">{displayInfo.teams[0].name}</span>
+              <span className="text-2xl font-bold">{displayInfo.teams[0].score || "?"}</span>
+            </div>
+            <div className="text-muted-foreground">vs</div>
+            <div className="flex flex-col items-end">
+              <span className="font-medium">{displayInfo.teams[1].name}</span>
+              <span className="text-2xl font-bold">{displayInfo.teams[1].score || "?"}</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Show teams with player stats - only if not hidden */}
+      {!hideTeamStats && (!displayInfo.teams || displayInfo.teams.length === 0) ? (
         <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center">
           <AlertCircle className="h-4 w-4 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No team information available for this match</p>
         </div>
       ) : (
-        sortedTeams.map((team) => {
+        !hideTeamStats && sortedTeams.map((team) => {
           const teamStats = displayInfo.playerStats && displayInfo.playerStats[team.id];
           const hasTeamPlayers = teamStats && teamStats.players && teamStats.players.length > 0;
           const hasActualPlayers = hasRealPlayerData(team.id);
@@ -237,6 +261,14 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                       </Badge>
                     )}
                   </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  {team.score && <span className="text-sm font-medium mr-2">{team.score}</span>}
+                  {isOpen ? (
+                    <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  )}
                 </div>
               </CollapsibleTrigger>
               
@@ -263,13 +295,18 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         })
       )}
       
-      {/* Combined player stats section */}
-      {combinedPlayers.length > 0 && (
+      {/* Combined player stats section - only if not hidden */}
+      {!hideTeamStats && combinedPlayers.length > 0 && (
         <Collapsible open={combinedSectionOpen} onOpenChange={toggleCombined} className="border rounded-md overflow-hidden mb-4 bg-muted/10">
           <CollapsibleTrigger className="w-full px-4 py-2 flex items-center justify-between bg-muted/30 hover:bg-muted/50">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-medium">Combined Player Statistics</h3>
             </div>
+            {combinedSectionOpen ? (
+              <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+            )}
           </CollapsibleTrigger>
           
           <CollapsibleContent>
@@ -287,8 +324,8 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
         </Collapsible>
       )}
       
-      {/* Show message if no player stats */}
-      {displayInfo.teams && displayInfo.teams.length > 0 && !hasPlayerStats && (
+      {/* Show message if no player stats - but only if team stats aren't hidden */}
+      {!hideTeamStats && displayInfo.teams && displayInfo.teams.length > 0 && !hasPlayerStats && (
         <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-md text-center justify-center mt-4">
           <AlertCircle className="h-4 w-4 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No player statistics available for this match</p>

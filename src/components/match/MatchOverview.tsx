@@ -174,9 +174,9 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
         </div>
       )}
       
-      {/* Player statistics with hideScoreBox prop */}
+      {/* Player statistics - passing hideMatchScoreBox as true to remove the duplicate score box */}
       <div>
-        <PlayerStatistics displayInfo={displayInfo} />
+        <PlayerStatistics displayInfo={displayInfo} hideMatchScoreBox={true} hideTeamStats={true} />
       </div>
     </ResponsiveContainer>
   );
