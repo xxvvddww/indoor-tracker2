@@ -163,7 +163,7 @@ export const MatchOverview: React.FC<MatchOverviewProps> = ({ displayInfo, match
             </div>
           )}
           
-          {/* Man of the Match Section - Simplified */}
+          {/* Man of the Match Section */}
           {displayInfo.manOfMatch && (
             <div className="px-4 py-2 border-t border-slate-700">
               <p className="text-sm text-white">
