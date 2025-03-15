@@ -35,10 +35,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     const allPlayers: any[] = [];
     
     Object.values(displayInfo.playerStats).forEach(team => {
-      // Find the team object to determine if this is the winning team
-      const teamObj = displayInfo.teams?.find(t => t.name === team.name);
-      const isWinningTeam = teamObj?.id === displayInfo.winnerId;
-      
       team.players.forEach(player => {
         if (!player.Name.includes("No player statistics") && player.Name !== "Unknown Player") {
           // Extract just the player name without team name
@@ -46,8 +42,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
           
           allPlayers.push({
             ...player,
-            Name: playerNameOnly, // Remove team name from player display
-            _isWinningTeam: isWinningTeam // Add custom property to track winning team
+            Name: playerNameOnly // Remove team name from player display
           });
         }
       });
@@ -59,7 +54,7 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
       const bContrib = parseFloat(b.C || '0');
       return bContrib - aContrib;
     });
-  }, [displayInfo.playerStats, displayInfo.teams, displayInfo.winnerId]);
+  }, [displayInfo.playerStats]);
 
   // Define player stat columns for the team tables - match the example image
   const playerColumns = [
@@ -144,11 +139,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     setCombinedSectionOpen(prev => !prev);
   };
 
-  // Get row className based on whether player is from winning team
-  const getCombinedRowClassName = (row: any) => {
-    return row._isWinningTeam ? "bg-green-500/10" : "";
-  };
-
   return (
     <div className="space-y-4">
       {/* Show teams with player stats */}
@@ -220,7 +210,6 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
                 ultraCompact={false}
                 className="mt-0"
                 resultsMode
-                rowClassName={getCombinedRowClassName}
               />
             </div>
           </CollapsibleContent>
