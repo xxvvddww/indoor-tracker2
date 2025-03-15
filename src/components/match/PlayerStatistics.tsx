@@ -56,12 +56,12 @@ export const PlayerStatistics: React.FC<PlayerStatisticsProps> = ({ displayInfo 
     });
   }, [displayInfo.playerStats]);
 
-  // Define player stat columns for the team tables - match the example image
+  // Define player stat columns for the team tables
   const playerColumns = [
     { 
       key: "Name", 
       header: "Player", 
-      className: "player-column truncate",
+      className: "font-medium player-column truncate",
       render: (value: string) => <div className="truncate">{value}</div>
     },
     { 
