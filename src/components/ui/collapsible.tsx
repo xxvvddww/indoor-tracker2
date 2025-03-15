@@ -24,7 +24,6 @@ const CollapsibleTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    {/* Removed the automatic arrow display - child components will provide their own arrow icons */}
   </CollapsiblePrimitive.Trigger>
 ))
 CollapsibleTrigger.displayName = CollapsiblePrimitive.Trigger.displayName
